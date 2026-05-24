@@ -1,0 +1,56 @@
+    
+     {% load static %}
+    <div class="ep-why-choose-us-section mt-120 py-120 position-relative z-1">
+      {% comment %} <div class="shape-one position-absolute start-0 bottom-0">
+        <img src="{% static 'mainWebsite/img/why-choose-us/shape.svg ' %}" alt="why-choose-us">
+      </div> {% endcomment %}
+      <div class="shape-two position-absolute end-0 top-0">
+        <img src="{% static 'mainWebsite/img/why-choose-us/shape02.svg ' %}" alt="why-choose-us">
+      </div>
+      <div class="container">
+        <div class="row g-4">
+          <div class="col-lg-6">
+            <div class="contact-img h-100 rounded-20 overflow-hidden">
+                <video class="img-fluid w-100 rounded-20" autoplay muted loop playsinline>
+                      <source src="{% static 'mainWebsite/video/truck_move.mp4' %}" type="video/mp4">
+                </video>
+              </div>
+          </div>
+          <div class="col-lg-6">
+            <div class="section-title text-start pb-30">
+              <h2 class="heading-three text-light split-text right">
+                The TDSSUK Advantage
+              </h2>
+            </div>
+            <p>
+              TDSSUK is committed to delivering reliable, end-to-end logistics solutions 
+              that ensure your cargo moves safely, efficiently, and on time—every time.
+              <br/>We combine experience and precision to keep your supply chain running without interruption.
+            </p>
+            <div class="custom-progressbar pt-40">
+              <div class="progress-item">
+                <label class="text-white pb-2">Shipping</label>
+                <div class="progress" role="progressbar" aria-label="Example with label" aria-valuenow="25"
+                  aria-valuemin="0" aria-valuemax="100">
+                  <div class="progress-bar" style="width: 90%"><span class="num">95%</span></div>
+                </div>
+              </div>
+              <div class="progress-item">
+                <label class="text-white pb-2">Management</label>
+                <div class="progress" role="progressbar" aria-label="Example with label" aria-valuenow="25"
+                  aria-valuemin="0" aria-valuemax="100">
+                  <div class="progress-bar" style="width: 80%"><span class="num">98%</span></div>
+                </div>
+              </div>
+              <div class="progress-item">
+                <label class="text-white pb-2">Successful Delivery</label>
+                <div class="progress" role="progressbar" aria-label="Example with label" aria-valuenow="25"
+                  aria-valuemin="0" aria-valuemax="100">
+                  <div class="progress-bar" style="width: 75%"><span class="num">99.99%</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>

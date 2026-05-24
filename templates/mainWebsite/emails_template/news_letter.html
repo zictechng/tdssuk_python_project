@@ -1,0 +1,245 @@
+<!doctype html>
+<html lang="und" dir="auto" xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
+  <head>
+    <title>{{ title }}</title>
+
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <style type="text/css">
+      #outlook a { padding:0; }
+      body { margin:0;padding:0;-webkit-text-size-adjust:100%;-ms-text-size-adjust:100%; }
+      table, td { border-collapse:collapse;mso-table-lspace:0pt;mso-table-rspace:0pt; }
+      img { border:0;height:auto;line-height:100%; outline:none;text-decoration:none;-ms-interpolation-mode:bicubic; }
+      p { display:block;margin:13px 0; }
+      a { color: #30e3ca; }
+    </style>
+  </head>
+
+  <body style="word-spacing:normal;background-color:#f1f1f1;">
+
+    <div aria-label="{{ title }}" role="article" style="background-color:#f1f1f1;">
+
+      <!-- HEADER -->
+      <div style="background:#ffffff;margin:0 auto;max-width:600px;">
+        <table width="100%" style="background:#ffffff;">
+          <tr>
+            <td align="center" style="padding:30px 0 10px 0;">
+              <div style="font-family:Lato, Arial, sans-serif;font-size:22px;font-weight:700;text-transform:uppercase;">
+                <img
+                    alt="TDSS UK"
+                    src="{{ image_url }}"
+                    style="width:300px;display:block;border:0;"
+                  />
+              </div>
+            </td>
+          </tr>
+        </table>
+      </div>
+
+      <!-- IMAGE -->
+      {% comment %} <div style="background:#ffffff;margin:0 auto;max-width:600px;">
+        <table width="100%">
+          <tr>
+            <td align="center" style="padding:40px 0 20px 0;">
+
+              <img
+                alt="Email Image"
+                src="{{ image_url }}"
+                style="width:300px;display:block;border:0;"
+              />
+            </td>
+          </tr>
+        </table>
+      </div> {% endcomment %}
+
+      <!-- CONTENT -->
+      <div style="background:#ffffff;margin:0 auto;max-width:600px;">
+        <table width="100%">
+          <tr>
+            <td style="padding:20px 40px 60px 40px;">
+            <h3 style="
+                font-family:Lato, Arial, sans-serif;
+                font-size:20px;
+                color:#222222;
+                margin-bottom:25px;
+                text-align:center;
+              ">
+              {{ title }}
+            </h3>
+
+            <div style="
+                font-family:Lato, Arial, sans-serif;
+                font-size:14px;
+                line-height:1.8;
+                color:#666666;
+                text-align:left;
+              ">
+              {{ message|linebreaksbr }}
+
+              <br><br>
+
+              <p style="color:#333333;">
+                Kind Regards,
+                <br>
+                TDSS UK Team
+              </p>
+            </div>
+
+            {% if button_url %}
+            <div style="text-align:center; margin-top:30px;">
+              <a href="{{ button_url }}"
+                style="
+                    display:inline-block;
+                    background:#E10006;
+                    color:#ffffff;
+                    padding:12px 30px;
+                    border-radius:30px;
+                    text-decoration:none;
+                    font-weight:600;
+                ">
+                {{ button_text }}
+              </a>
+            </div>
+            {% endif %}
+
+          </td>
+          </tr>
+        </table>
+      </div>
+
+      <!-- FOOTER -->
+        <div  style="background:#fafafa;background-color:#fafafa;margin:0px auto;max-width:600px;">
+                
+          <table
+              align="center" border="0" cellpadding="0" cellspacing="0" role="presentation" style="background:#fafafa;background-color:#fafafa;width:100%;"
+          >
+            <tbody>
+              <tr>
+                <td
+                    style="direction:ltr;font-size:0px;padding:40px 30px 20px 30px;text-align:center;"
+                >
+
+          <div  style="margin:0px auto;max-width:540px;">
+            
+            <table
+                align="center" border="0" cellpadding="0" cellspacing="0" role="presentation" style="width:100%;"
+            >
+              <tbody>
+                <tr>
+
+                  <!-- ABOUT -->
+                  <td class="mj-column-per-33-33" style="vertical-align:top;width:33.33%;">
+                    <table width="100%">
+                      <tr>
+                        <td align="left" style="font-size:18px;font-weight:300;color:#000;">
+                          {{ about_title|default:"About" }}
+                        </td>
+                      </tr>
+                      <tr>
+                        <td align="left" style="font-size:13px;color:#808080;">
+                          {{ about_text|default:"A small river named Duden flows by their place and supplies it with the necessary regelialia." }}
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+
+                  <!-- CONTACT -->
+                  <td class="mj-column-per-33-33" style="vertical-align:top;width:33.33%;">
+                    <table width="100%">
+                      <tr>
+                        <td align="left" style="font-size:18px;font-weight:300;color:#000;">
+                          {{ contact_title|default:"Contact Info" }}
+                        </td>
+                      </tr>
+                      <tr>
+                        <td align="left" style="font-size:13px;color:#808080;">
+                          {{ company_address|default:"203 Fake St. Mountain View, USA" }}
+                        </td>
+                      </tr>
+                      <tr>
+                        <td align="left" style="font-size:13px;color:#808080;">
+                          {{ company_phone|default:"+44 741 535 5361" }}
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+
+                  <!-- LINKS -->
+                  <td class="mj-column-per-33-33" style="vertical-align:top;width:33.33%;">
+                    <table width="100%">
+                      <tr>
+                        <td align="left" style="font-size:18px;font-weight:300;color:#000;">
+                          {{ links_title|default:"Useful Links" }}
+                        </td>
+                      </tr>
+
+                      <tr>
+                        <td align="left" style="font-size:13px;">
+                          <a href="{{ contact_url|default:'#' }}" style="color:#000;text-decoration:none;">
+                            {{ contact_text|default:"Contact" }}
+                          </a>
+                        </td>
+                      </tr>
+
+                      <tr>
+                        <td align="left" style="font-size:13px;">
+                          <a href="{{ about_url|default:'#' }}" style="color:#000;text-decoration:none;">
+                            {{ about_link_text|default:"About" }}
+                          </a>
+                        </td>
+                      </tr>
+
+                      <tr>
+                        <td align="left" style="font-size:13px;">
+                          <a href="{{ services_url|default:'#' }}" style="color:#000;text-decoration:none;">
+                            {{ services_text|default:"Services" }}
+                          </a>
+                        </td>
+                      </tr>
+
+                      <tr>
+                        <td align="left" style="font-size:13px;">
+                          <a href="{{ quote_url|default:'#' }}" style="color:#000;text-decoration:none;">
+                            {{ quote_text|default:"Get Quote" }}
+                          </a>
+                        </td>
+                      </tr>
+
+                    </table>
+                  </td>
+
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          </div>
+
+
+          <!-- FOOTER (UNCHANGED STRUCTURE, ONLY SAFE VARIABLE) -->
+          <div  style="background:#f1f1f1;background-color:#f1f1f1;margin:0px auto;max-width:600px;">
+            <br/><br/>
+          <table align="center" width="100%">
+            <tr>
+              <td align="center" style="font-size:13px;color:#808080;">
+                {{ unsubscribe_text|default:"No longer want to receive marketing notification emails?" }}
+                <a href="{{ unsubscribe_url|default:'#' }}" style="color:#000;">
+                  {{ unsubscribe_link_text|default:"unsubscribe here" }}
+                </a>
+              </td>
+            </tr>
+          </table>
+          <br/>
+
+          </div>
+
+    </div>
+
+  </body>
+</html>

@@ -1,0 +1,66 @@
+    
+     {% load static %}
+    <section class="ep-about-section pt-120">
+      <div class="container">
+        <div class="row g-4">
+          <div class="col-xl-6 col-lg-9 mx-auto">
+            <div class="about-img position-relative">
+              <div class="img reveal zoom-out rounded-20 overlay-shape overflow-hidden">
+                <img src="{% static 'mainWebsite/img/about/about01.jpg' %}" class="rounded-20 img-fluid w-100" alt="about01">
+              </div>
+              <div class="shape position-absolute">
+                <img src="{% static 'mainWebsite/img/about/shape01.svg ' %}" alt="shape01">
+                <h5 class="heading-five experiance text-white position-absolute">
+                  3+ Years Of Experience
+                </h5>
+              </div>
+              {% comment %} <div class="video-part overlay-shape rounded-20 z-3 overflow-hidden position-absolute bg-control"
+                data-background="{% static 'mainWebsite/img/about/video.jpg' %}">
+                <div class="overlay rounded-20 overflow-hidden h-100 d-flex justify-content-center align-items-center">
+                  <a class="play-btn ripple rounded-pill d-flex align-items-center text-center justify-content-center vidplay"
+                    href="http://www.youtube.com/watch?v=0O2aH4XLbto">
+                    <i class="fa-solid fa-play"></i>
+                  </a>
+                </div>
+              </div> {% endcomment %}
+            </div>
+          </div>
+          <div class="col-xl-6 col-lg-9 mx-auto">
+            <div class="about-content pt-4 pt-xl-0">
+              <div class="section-title pb-30">
+                
+                <h2 class="heading-two title split-text right">
+                  Smooth, Secure Shipping Solutions Since 2024.
+                </h2>
+              </div>
+              <p class="about-text ps-3">
+                Finding the right help when looking for a company to ship your goods to West Africa is not always easy, but by choosing us, you can rest assured for an outstanding job and give you the results you seek.
+
+                TDSSUK Global Services Ltd. was established to meet up to customer expectations for an efficient, quality and satisfactory service.
+              </p>
+              <div class="tracking-info pb-30 mb-40">
+                <div class="row pt-40 gy-3">
+                  <div class="col-xl-6 col-md-5 col-md-6 tracking d-flex align-items-center gap-3">
+                    <div class="icon rounded-pill d-flex justify-content-center align-items-center flex-shrink-0">
+                      <img src="{% static 'mainWebsite/img/about/realtime.svg ' %}" alt="real time">
+                    </div>
+                    <h4 class="heading-four title">Tracking Order</h4>
+                  </div>
+                  <div
+                    class="col-xl-6 col-md-5 col-md-6 support position-relative d-flex justify-content-md-end align-items-center gap-3">
+                    <div class="icon rounded-pill d-flex justify-content-center align-items-center flex-shrink-0">
+                      <img src="{% static 'mainWebsite/img/about/support.svg ' %}" alt="real time">
+                    </div>
+                    <h4 class="heading-four title">24/7 Support</h4>
+                  </div>
+                </div>
+              </div>
+              <div class="d-flex gap-5 align-items-center flex-wrap">
+                <a href="{% url 'about'%}" class="theme-btn style2 rounded-pill">Know More</a>
+                
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>

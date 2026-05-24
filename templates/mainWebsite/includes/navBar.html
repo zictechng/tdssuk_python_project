@@ -1,0 +1,90 @@
+    {% load static %}
+    <nav class="navbar p-0 navbar-expand-xl d-none d-xl-flex">
+      <a class="navbar-brand position-absolute p-0" href="{% url 'index' %}">
+        <svg class="shape" xmlns="http://www.w3.org/2000/svg" width="359" height="160" viewBox="0 0 359 160"
+          fill="none">
+          <path d="M0 0H359L315 60V160H227.056H0V0Z" fill="currentColor" />
+        </svg>
+        <img src="{% static 'mainWebsite/img/logo/tdssuk_logo_white.png'%}" width="220px" class="position-absolute logo" alt="logo">
+      </a>
+      <div class="container">
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
+          aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+          <ul class="navbar-nav me-auto mb-lg-0">
+            <li class="nav-item">
+              <a class="nav-link {% if request.resolver_match.url_name == 'index' %}active{% endif %}" aria-current="page" href="{% url 'index' %}">
+                Home 
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link {% if request.resolver_match.url_name == 'about' %}active{% endif %}" href="{% url 'about' %}"> About Us </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link {% if request.resolver_match.url_name in 'container airCargo vehicleCargo' %}active{% endif %}" href="#">
+                Services <i class="fas fa-chevron-down"></i>
+              </a>
+              <ul class="sub-menu list-unstyled">
+                <li>
+                  <a class="{% if request.resolver_match.url_name == 'container' %}active{% endif %}" href="{% url 'container' %}">Container Shipment</a>
+                </li>
+                <li>
+                  <a class="{% if request.resolver_match.url_name == 'airCargo' %}active{% endif %}" href="{% url 'airCargo' %}">Air Freight</a>
+                </li>
+                <li>
+                  <a class="{% if request.resolver_match.url_name == 'vehicleCargo' %}active{% endif %}" href="{% url 'vehicleCargo' %}">Vehicle Shipping</a>
+                </li>
+              </ul>
+            </li>
+            
+            <li class="nav-item">
+              <a class="nav-link {% if request.resolver_match.url_name in 'pricing reviews faq getQuote' %}active{% endif %}" href="#">
+                Info <i class="fas fa-chevron-down"></i>
+              </a>
+              <ul class="sub-menu list-unstyled">
+                
+                <li>
+                  <a class="{% if request.resolver_match.url_name == 'pricing' %}active{% endif %}" href="{% url 'pricing' %}">Shipment Pricing</a>
+                </li>
+                <li>
+                  <a class="{% if request.resolver_match.url_name == 'reviews' %}active{% endif %}" href="{% url 'reviews' %}">Shipment Reviews</a>
+                </li>
+                <li>
+                  <a class="{% if request.resolver_match.url_name == 'faq' %}active{% endif %}" href="{% url 'faq'%}">FAQ</a>
+                </li>
+                <li>
+                  <a class="{% if request.resolver_match.url_name == 'getQuote' %}active{% endif %}" href="{% url 'getQuote'%}">Get Quote</a>
+                </li>
+              </ul>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link {% if request.resolver_match.url_name in 'photoGallery videoGallery' %}active{% endif %}" href="#">
+                Gallery <i class="fas fa-chevron-down"></i>
+              </a>
+              <ul class="sub-menu list-unstyled">
+                <li>
+                  <a class="{% if request.resolver_match.url_name == 'photoGallery' %}active{% endif %}" href="{% url 'photoGallery'%}">Shipment Photos</a>
+                </li>
+                <li>
+                  <a class="{% if request.resolver_match.url_name == 'videoGallery' %}active{% endif %}" href="{% url 'videoGallery' %}">Shipment Videos</a>
+                </li>
+              </ul>
+            </li>
+            
+            <li class="nav-item">
+              <a class="nav-link {% if request.resolver_match.url_name == 'contact' %}active{% endif %}" href="{% url 'contact'%}"> Contact </a>
+            </li>
+          </ul>
+          <div class="header-action d-flex justify-content-end align-items-center">
+            
+            <a href="{% url 'trackShipment'%}"
+              class="theme-btn style2 d-inline-flex align-items-center gap-2 justify-content-center rounded-pill hover-effect-btn">
+              Track Parcel
+            </a>
+          </div>
+        </div>
+      </div>
+    </nav>

@@ -1,0 +1,137 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- Required meta tags -->
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <!-- title -->
+  <title>Track Shipment - TDSSUK GLOBAL SERVICES LTD</title>
+  <meta name="description" content="TDSSUK GLOBAL SERVICES LTD">
+  <meta name="viewport"
+    content="width=device-width, initial-scale=1.0, maximum-scale=5.0, minimum-scale=1.0, user-scalable=yes">
+  {% include "mainWebsite/includes/cssFiles.html" %}
+</head>
+
+<body>
+  <!-- Preloader start -->
+ 
+  <!-- Preloader end -->
+  <!-- Header section start -->
+  <div id="header-fixed-height"></div>
+  <header class="ep-header-section" id="sticky-header">
+    <!-- Top header section start -->
+    {% include "mainWebsite/includes/topBar.html"%}
+    <!-- Top header section end -->
+
+    <!-- Nav-->
+    {% include "mainWebsite/includes/navBar.html"%}
+    <!-- header search part end -->
+    {% include "mainWebsite/includes/mobileSideBar.html" %}
+    <!-- offcanvas menu part end -->
+
+    <!-- mobile navbar part start -->
+    {% include "mainWebsite/includes/mobileMenu.html" %}
+    <!-- mobile navbar part end -->
+  </header>
+  <!-- Header section end -->
+  <!-- Main area start -->
+  <main>
+    <!-- Page header section start -->
+    <section class="ep-page-header-section bg-control" data-background="{% static 'mainWebsite/img/images/page-header.jpg'%}">
+      <div class="overlay bg-control" data-background="{% static 'mainWebsite/img/bg/page-header-overlay-bg.png' %}">
+        <div class="container">
+          <div class="text text-center">
+            <h1 class="page-title text-white pb-20">Tracking</h1>
+            <ul class="list-unstyled bread-crumb d-flex justify-content-center">
+              <li><a href="{% url 'index' %}">Home</a></li>
+              <li>Track Shipment</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+    <!-- Page header section end -->
+
+    <section class="ep-contact-section mb-30">
+      <div class="container">
+        <div class="contact-info-main pt-120">
+          <div class="section-title text-center mb-60">
+            <h2 class="title heading-three split-text right mb-4">
+              Track Parcel
+            </h2>
+             <div class="section-title text-center mb-60">
+            <div class="accordion-body">
+            <p>
+              Enter your tracking number below to get real-time updates on your shipment 
+              status and delivery progress.
+            </p>
+              <div class="row justify-content-center track-form">
+                  <div class="col-xl-5 col-lg-6 col-md-8 col-sm-10 mx-auto mt-4">
+
+                      <aside class="blog-sidebar">
+                          <div class="sidebar-widget rounded-20">
+                            <form hx-post="{% url 'trackParcel' %}"
+                                hx-target="#quote-response"
+                                hx-swap="innerHTML"
+                                hx-indicator="#loader"
+                                hx-disabled-elt="#action-btn"
+                                id="form_id">
+
+                                {% csrf_token %}
+                              <div class="input-group black position-relative">
+                                  <input type="text" name="track_number" class="form-control shadow-none rounded-pill"
+                                      placeholder="Enter Tracking Number">
+
+                                  <button type="submit" id="action-btn" class="border-0 rounded-pill position-absolute top-50 translate-middle-y">
+                                      <i class="fa-solid fa-magnifying-glass"></i>
+                                  </button>
+                              </div>
+                            </form>
+                          </div>
+                      </aside>
+                  </div>
+                    <span id="loader" class="htmx-indicator">
+                      <i class="fas fa-spinner fa-spin"></i>
+                    </span>
+              </div>
+            </div>
+           </div>
+          </div>
+          <div class="mt-2" id="quote-response"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- cta section start -->
+    <!-- cta section start -->
+    <section class="ep-cta-section-two">
+      <div class="container mb-60">
+        <div class="cta-main d-flex align-items-center rounded-20">
+          <div class="text">
+            <h4 class="title text-white mb-2 split-text right">We Guarantee Safe, Secure and Timely Delivery</h4>
+            <p class="text-white">From collection to final destination, we ensure your cargo is 
+              handled with care and delivered safely, securely, and on schedule.</p>
+          </div>
+          
+            <div class="img-two">
+              <img src="{% static 'mainWebsite/img/images/cta_img_2.jpg' %}" alt="cta-img-2" class="img-fluid w-100">
+            </div>
+          </div>
+      </div>
+    </section>
+  </main>
+  <!-- Main area end -->
+    {% include "mainWebsite/includes/floatButton.html" %}
+  <!-- Back to top button end -->
+  <!-- Footer section start -->
+    <footer class="ep-footer-section">
+
+      {% include "mainWebsite/includes/footer.html" %}
+  <!-- Footer section end -->
+    </footer>
+
+   {% include "mainWebsite/includes/javaScript.html" %}
+  <!-- JS end here -->
+</body>
+</html>

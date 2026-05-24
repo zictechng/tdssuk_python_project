@@ -1,0 +1,136 @@
+    
+    {% load static %}
+    <div class="mobile-menu-area d-block d-xl-none overflow-hidden">
+      <div class="container">
+        <div class="mobile-topbar">
+          <div class="d-flex justify-content-between align-items-center">
+            <div class="logo">
+              <a href="{% url 'index'%}">
+                <svg class="shape" xmlns="http://www.w3.org/2000/svg" width="359" height="160" viewBox="0 0 359 160"
+                  fill="none">
+                  <path d="M0 0H359L315 60V160H227.056H0V0Z" fill="currentColor" />
+                </svg>
+                <img src="{% static 'mainWebsite/img/logo/tdssuk_logo_white.png ' %}" width="170px" alt="logo" width="160">
+              </a>
+            </div>
+            <div class="bars">
+              <i class="fas fa-bars"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="mobile-menu-overlay"></div>
+      <div class="mobile-menu-main">
+        <div class="logo">
+          <a href="/">
+            <svg class="shape" xmlns="http://www.w3.org/2000/svg" width="359" height="160" viewBox="0 0 359 160"
+              fill="none">
+              <path d="M0 0H359L315 60V160H227.056H0V0Z" fill="currentColor" />
+            </svg>
+            <img src="{% static 'mainWebsite/img/logo/tdssuk_logo_white.png ' %}" width="150px" alt="logo" width="160">
+          </a>
+        </div>
+        <div class="close-mobile-menu"><i class="fas fa-times"></i></div>
+        <div class="menu-body">
+          <div class="menu-list">
+            <ul class="list-unstyled">
+              <li class="sub-mobile-menu">
+                <a href="{% url 'index'%}">Home</a>
+              </li>
+              <li class="sub-mobile-menu">
+                <a href="{% url 'about' %}">About Us</a>
+              </li>
+              <li class="sub-mobile-menu">
+                <a href="#">Services <i class="fas fa-chevron-down float-end"></i></a>
+                <ul class="list-unstyled">
+                  <li>
+                    <a href="{% url 'container' %}">Container Shipment</a>
+                  </li>
+                  <li>
+                    <a href="{% url 'airCargo' %}">Air Freight</a>
+                  </li>
+                   <li>
+                    <a href="{% url 'vehicleCargo' %}">Vehicle Shipping</a>
+                  </li>
+                </ul>
+              </li>
+              
+              <li class="sub-mobile-menu">
+                <a href="#">Shipping Info <i class="fas fa-chevron-down float-end"></i></a>
+                <ul class="sub-menu list-unstyled">
+                  <li>
+                     <a href="{% url 'pricing' %}">Shipment Pricing</a>
+                  </li>
+                  <li>
+                    <a href="{% url 'reviews' %}">Shipment Reviews</a>
+                  </li>
+                  <li>
+                    <a href="{% url 'faq'%}">FAQ</a>
+                  </li>
+                  <li>
+                    <a href="{% url 'getQuote'%}">Get Quote</a>
+                  </li>
+                  
+                </ul>
+              </li>
+              
+              <li class="sub-mobile-menu">
+                <a href="#">Gallery <i class="fas fa-chevron-down float-end"></i></a>
+                <ul class="list-unstyled">
+                  <li>
+                    <a href="{% url 'photoGallery'%}">Shipment Photos</a>
+                  </li>
+                  <li>
+                    <a href="{% url 'videoGallery' %}">Shipment Video</a>
+                  </li>
+                </ul>
+              </li>
+
+              <li class="sub-mobile-menu">
+                <a href="{% url 'contact'%}">Contact</a>
+              </li>
+
+              <li class="sub-mobile-menu">
+                <a href=""></a>
+              </li>
+              
+            </ul>
+          </div>
+        </div>
+        
+        <div class="contact-info pt-4 px-3 pb-5">
+            <a href="{% url 'trackShipment'%}"><button class="btn btn-outline-danger rounded-pill">
+              Track Parcel <i class="fa-solid fa-magnifying-glass me-2"></i>
+            </button>
+            </a>
+            <br/><br/>
+          <h4 class="contact-title heading-four">Contact Info</h4>
+          <ul class="list-unstyled">
+            <li class="d-flex align-items-center gap-3">
+              <div class="icon-box d-flex align-items-center justify-content-center rounded-pill flex-shrink-0">
+                <i class="fa-solid fa-phone"></i>
+              </div>
+              <div class="info">
+                <a href="tel:+44 741 535 5361" class="info-text">+44 741 535 5361</a>
+              </div>
+            </li>
+            <li class="d-flex align-items-center gap-3">
+              <div class="icon-box d-flex align-items-center justify-content-center rounded-pill flex-shrink-0">
+                <i class="fa-solid fa-envelope"></i>
+              </div>
+              <div class="info">
+                <a href="mailto:support@tdssuk.co.uk" class="info-text">support@tdssuk.co.uk</a>
+              </div>
+            </li>
+            <li class="d-flex align-items-center gap-3">
+              <div class="icon-box d-flex align-items-center justify-content-center rounded-pill flex-shrink-0">
+                <i class="fa-solid fa-location-dot"></i>
+              </div>
+              <div class="info">
+                <a href="#" class="info-text">Tank Hill Road Purfleet, <br/>Essex, RM19 1SX <br/>United Kingdom</a>
+              </div>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>

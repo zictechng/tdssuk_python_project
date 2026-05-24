@@ -1,0 +1,94 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- Required meta tags -->
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <!-- title -->
+  <title>FAQ - TDSSUK GLOBAL SERVICES LTD</title>
+  <meta name="description" content="TDSSUK GLOBAL SERVICES LTD">
+  <meta name="viewport"
+    content="width=device-width, initial-scale=1.0, maximum-scale=5.0, minimum-scale=1.0, user-scalable=yes">
+  {% include "mainWebsite/includes/cssFiles.html" %}
+</head>
+
+<body>
+  <!-- Preloader start -->
+ {% include "mainWebsite/includes/preloader.html" %}
+  <!-- Preloader end -->
+  <!-- Header section start -->
+  <div id="header-fixed-height"></div>
+  <header class="ep-header-section" id="sticky-header">
+    <!-- Top header section start -->
+    {% include "mainWebsite/includes/topBar.html"%}
+    <!-- Top header section end -->
+
+    <!-- Nav-->
+    {% include "mainWebsite/includes/navBar.html"%}
+    <!-- header search part end -->
+    {% include "mainWebsite/includes/mobileSideBar.html" %}
+    <!-- offcanvas menu part end -->
+
+    <!-- mobile navbar part start -->
+    {% include "mainWebsite/includes/mobileMenu.html" %}
+    <!-- mobile navbar part end -->
+  </header>
+  <!-- Header section end -->
+  <!-- Main area start -->
+  <main>
+    <!-- Page header section start -->
+    <section class="ep-page-header-section bg-control" data-background="{% static 'mainWebsite/img/images/page-header.jpg'%}">
+      <div class="overlay bg-control" data-background="{% static 'mainWebsite/img/bg/page-header-overlay-bg.png' %}">
+        <div class="container">
+          <div class="text text-center">
+            <h1 class="page-title text-white pb-20">FAQ</h1>
+            <ul class="list-unstyled bread-crumb d-flex justify-content-center">
+              <li><a href="{% url 'index' %}">Home</a></li>
+              <li>FAQ</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+    <!-- Page header section end -->
+
+    <!-- About section start -->
+      {% include "mainWebsite/faq/faq_section.html" %}
+
+      <section class="ep-faq-section pt-120">
+      <div class="container">
+        <div class="section-title text-center mb-60">
+            <div class="accordion-body">
+            <p>
+              If you have any questions or need further clarification, our support team is 
+              always available to assist you. <br/>Feel free to contact us for more details.
+            </p>
+            </div>
+            <a href="{% url 'contact'%}" class="d-inline-block mt-4">
+              <h6 class="subtitle style2 d-inline-flex rounded-pill border-0 align-items-center">
+                  Contact Us
+              </h6>
+            </a>
+          </div>
+        
+      </div>
+    </section>
+
+    <!-- cta section start -->
+    {% include "mainWebsite/components/ourLocationSection.html" %}
+  </main>
+  <!-- Main area end -->
+    {% include "mainWebsite/includes/floatButton.html" %}
+  <!-- Back to top button end -->
+  <!-- Footer section start -->
+    <footer class="ep-footer-section">
+
+      {% include "mainWebsite/includes/footer.html" %}
+  <!-- Footer section end -->
+    </footer>
+
+   {% include "mainWebsite/includes/javaScript.html" %}
+  <!-- JS end here -->
+</body>
+</html>

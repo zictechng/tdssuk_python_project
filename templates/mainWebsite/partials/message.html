@@ -1,0 +1,27 @@
+<!-- TOP MESSAGE (OOB) -->
+        <div id="top_alert"
+            hx-swap-oob="true"
+            class="alert alert-{{ alert_type }} alert-dismissible fade show"
+            role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+
+            {% if clear_input %}
+            <script>
+                document.querySelector('#quote-form').reset();
+            </script>
+            {% endif %}
+
+            {% if clear_input %}
+            <script>
+                document.querySelector('#form_id').reset();
+            </script>
+            {% endif %}
+
+        <!-- BOTTOM MESSAGE (main target) -->
+        <div class="alert alert-{{ alert_type }} alert-dismissible fade show mb-0"
+            role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>

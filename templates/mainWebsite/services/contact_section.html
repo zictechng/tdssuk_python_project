@@ -1,0 +1,178 @@
+{% load static %}
+
+  <section class="ep-contact-section pt-120">
+      <div class="container">
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}{{ message.tags }}{% endif %}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+
+        <div class="contact-info">
+          <div class="row g-4">
+            <div class="col-md-6 col-xl-4">
+              <div class="info-item rounded-30 d-flex align-items-center gap-3">
+                <div class="icon flex-shrink-0 d-flex align-items-center justify-content-center">
+                  <i class="fa-solid fa-location-dot"></i>
+                </div>
+                <div class="text">
+                  <h4 class="heading-six mb-1">UK Delivery & Loading</h4>
+                  <p>Tank Hill Road Purfleet, Essex. <br> RM19 1SX</p>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6 col-xl-4">
+              <div class="info-item rounded-30 d-flex align-items-center gap-3">
+                <div class="icon flex-shrink-0 d-flex align-items-center justify-content-center">
+                  <i class="fa-solid fa-location-dot"></i>
+                </div>
+                <div class="text">
+                  <h4 class="heading-six mb-1">UK Office</h4>
+                  <p>11 Town Quay Wharf, Abbey Road, Barking Essex <br> 1G11 7BZ</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-md-6 col-xl-4">
+              <div class="info-item rounded-30 d-flex align-items-center gap-3">
+                <div class="icon flex-shrink-0 d-flex align-items-center justify-content-center">
+                  <i class="fa-solid fa-location-dot"></i>
+                </div>
+                <div class="text">
+                  <h4 class="heading-six mb-1">Lagos Nig. Warehouse</h4>
+                  <p>Divine Favour Warehouse, Plot 232, Opp. GT Bank, Papa/Oshodi Express Way.</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-md-6 col-xl-4">
+              <div class="info-item rounded-30 d-flex align-items-center gap-3">
+                <div class="icon flex-shrink-0 d-flex align-items-center justify-content-center">
+                  <i class="fa-solid fa-location-dot"></i>
+                </div>
+                <div class="text">
+                  <h4 class="heading-six mb-1">Imo State, Owerri</h4>
+                  <p>27 Onumonu Street By Cherubim Junction, Owerri Municipal.</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-md-6 col-xl-4">
+              <div class="info-item rounded-30 d-flex align-items-center gap-3">
+                <div class="icon flex-shrink-0 d-flex align-items-center justify-content-center">
+                  <i class="fa-solid fa-address-book"></i>
+                </div>
+                <div class="text">
+                  <h4 class="heading-six mb-1">Contact Number (UK)</h4>
+                  <p>Phone: <a href="tel:+447415355361">+447415355361</a></p>
+                  <p>Phone: <a href="tel:+447956888414">+447956888414</a></p>
+                  <p>Email: <a href="mailto:">info@tdssuk.co.uk</a></p>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-md-6 col-xl-4">
+              <div class="info-item rounded-30 d-flex align-items-center gap-3">
+                <div class="icon flex-shrink-0 d-flex align-items-center justify-content-center">
+                  <i class="fa-solid fa-address-book"></i>
+                </div>
+                <div class="text">
+                  <h4 class="heading-six mb-1">Contact Number (NG)</h4>
+                  <p>Phone: <a href="tel:+2349129550203">+2349129550203</a></p>
+                  <p>Phone: <a href="tel:+2347075459862">+2347075459862</a></p>
+                  <p>Email: <a href="mailto:">lagos@tdssuk.co.uk</a></p>
+                </div>
+              </div>
+            </div>
+
+            
+          </div>
+        </div>
+        <div class="contact-info-main pt-120">
+          <div class="section-title text-center mb-60">
+            <h2 class="title heading-three split-text right mb-4">
+              You wish to write us, drop a message!
+            </h2>
+            <p>
+            Have questions about our shipping, cargo, or logistics services? <br/>
+            Our friendly support team is ready to assist you with expert guidance and 
+            prompt responses whenever you need help.
+            </p>
+          </div>
+          <div class="row g-0">
+            <div class="col-lg-6">
+              <div class="tranzit-contact-form style3 rounded-20 me-0">
+                <form action="{% url 'contact'%}" method="POST">
+                  {% csrf_token %}
+                  <div class="row g-4">
+                    <div class="col-lg-12">
+                      <div class="input-group black">
+                        <input name="contact_name" type="text" class="form-control shadow-none rounded-pill"
+                          placeholder="Your Name">
+                        <span class="icon position-absolute top-50 translate-middle-y"><i
+                            class="fa-solid fa-user"></i></span>
+                      </div>
+                    </div>
+                    <div class="col-lg-6">
+                      <div class="input-group">
+                        <input name="contact_email" type="email" class="form-control shadow-none rounded-pill"
+                          placeholder="Your Email">
+                        <span class="icon position-absolute top-50 translate-middle-y"><i
+                            class="fa-solid fa-envelope"></i></span>
+                      </div>
+                    </div>
+                    <div class="col-lg-6">
+                      <div class="input-group">
+                        <input name="contact_phone" type="text" class="form-control shadow-none rounded-pill"
+                          placeholder="Phone No:">
+                        <span class="icon position-absolute top-50 translate-middle-y"><i
+                            class="fa-solid fa-phone"></i></span>
+                      </div>
+                    </div>
+                    <div class="col-lg-12">
+                      <div class="input-group">
+                        <select name="contact_subject" class="form-select primary shadow-none rounded-pill">
+                          <option value="" selected disabled>Subject</option>
+                          <option value="Quote">Quote</option>
+                          <option value="Item Pickup">Item Pickup</option>
+                          <option value="Shipping">Shipping</option>
+                          <option value="Clearance">Clearance</option>
+                          <option value="Delivery">Delivery</option>
+                          <option value="Payment">Payment</option>
+                          <option value="Request">Request</option>
+                          <option value="Others">Others</option>
+                        </select>
+                      </div>
+                    </div>
+                     <div class="col-lg-12">
+                      <div class="input-group">
+                        <textarea name="contact_message" placeholder="Message"
+                          class="form-control textarea-control shadow-none rounded-pill"></textarea>
+                        <span class="icon icon-textarea position-absolute">
+                          <i class="fa-solid fa-pen"></i>
+                        </span>
+                      </div>
+                    </div>
+                    <div class="col-lg-12">
+                      <button type="submit"
+                        class="theme-btn hover-effect-btn style2 text-uppercase w-100 border-0 rounded-pill d-flex align-items-center gap-2 text-center justify-content-center">
+                        Submit
+                      </button>
+                    </div>
+                  </div>
+                </form>
+                <p class="ajax-response mb-0"></p>
+              </div>
+            </div>
+            <div class="col-lg-6">
+              <div class="contact-img h-100 rounded-20 overflow-hidden">
+                <img src="{% static 'mainWebsite/img/images/contact_support.jpeg' %}" alt="contact-img"
+                  class="h-100 object-fit-cover img-fluid w-100">
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>

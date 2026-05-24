@@ -1,0 +1,127 @@
+    
+{% load static %}
+    
+    <section class="ep-banner-section style1 position-relative overflow-hidden bg-control"
+      data-background="{% static 'mainWebsite/img/banner/banner.jpg' %}">
+      <div class="overlay">
+        <div class="banner-bg-shape w-100 h-100 position-relative bg-control"
+          data-background="{% static 'mainWebsite/img/banner/shapes.svg ' %}">
+          
+          <div class="swiper banner-slider">
+            <div class="swiper-wrapper">
+              <div class="swiper-slide">
+                <div class="row">
+                  <div class="col-lg-7">
+                    <div class="banner-text">
+                      <div class="section-title">
+                        
+                        <h1 class="heading-two split-text right text-white">
+                          Trusted shipping services from UK to West African countries
+                        </h1>
+                      </div>
+                      <p class="detais pt-4">
+                       We provide reliable and secure shipping solutions from the United Kingdom 
+                       to West African countries, ensuring smooth and timely cargo delivery.
+                      </p>
+                      <div class="banner-btn-wrapper d-flex column-gap-4 row-gap-2 pt-40">
+                        <a href="{% url 'getQuote'%}"
+                          class="theme-btn banner-btn style2 d-inline-flex align-items-center gap-2 justify-content-center rounded-pill hover-effect-btn">
+                          Free Quote
+                        </a>
+                        <a href="{% url 'contact'%}"
+                          class="theme-btn banner-btn theme-btn-border style2 d-inline-flex align-items-center gap-2 justify-content-center rounded-pill hover-effect-btn">
+                          Contact
+                         </a>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-lg-5">
+                    <div class="banner-image image position-absolute bottom-0 end-0">
+                      <div class="reveal down">
+                        <img src="{% static 'mainWebsite/img/banner/ocean_truck.png' %}" class="img-fluid w-100" alt="truck">
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="swiper-slide">
+                <div class="row">
+                  <div class="col-lg-7">
+                    <div class="banner-text">
+                      <div class="section-title">
+                        
+                        <h1 class="heading-two text-white">
+                          Experienced Vehicles Cargo, Clearing and Forwarding
+                        </h1>
+                      </div>
+                      <p class="detais pt-4">
+                         We specialize in secure vehicle cargo handling, efficient clearing 
+                         services, and reliable freight forwarding solutions for seamless 
+                         international shipping.
+                      </p>
+                      <div class="banner-btn-wrapper d-flex column-gap-4 row-gap-2 pt-40">
+                        <a href="{% url 'getQuote'%}"
+                          class="theme-btn banner-btn style2 d-inline-flex align-items-center gap-2 justify-content-center rounded-pill hover-effect-btn">
+                          Free Quote
+                        </a>
+                        <a href="{% url 'contact'%}"
+                          class="theme-btn banner-btn theme-btn-border style2 d-inline-flex align-items-center gap-2 justify-content-center rounded-pill hover-effect-btn">
+                          Book Shipment
+                        </a>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-lg-5">
+                    <div class="banner-image image position-absolute bottom-0 end-0">
+                      <div class="reveal down">
+                        <img src="{% static 'mainWebsite/img/banner/cars_truck.png' %}" class="img-fluid w-100" alt="truck">
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="swiper-slide">
+                <div class="row">
+                  <div class="col-lg-7">
+                    <div class="banner-text">
+                      <div class="section-title">
+                        
+                        <h1 class="heading-two text-white">
+                          Swift and Efficient International Air Cargo Logistics Services.
+                        </h1>
+                      </div>
+                      <p class="detais pt-4">
+                        We deliver fast, secure, and dependable international air cargo 
+                        solutions designed for timely global shipping and efficient 
+                        logistics operations.
+                      </p>
+                      <div class="banner-btn-wrapper d-flex column-gap-4 row-gap-2 pt-40">
+                        <a href="{% url 'getQuote'%}"
+                          class="theme-btn banner-btn style2 d-inline-flex align-items-center gap-2 justify-content-center rounded-pill hover-effect-btn">
+                          Free Quote
+                        </a>
+                        <a href="{% url 'contact'%}"
+                          class="theme-btn banner-btn theme-btn-border style2 d-inline-flex align-items-center gap-2 justify-content-center rounded-pill hover-effect-btn">
+                          Contact
+                          </a>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-lg-5">
+                    <div class="banner-image image position-absolute bottom-0 end-0">
+                      <div class="reveal down">
+                        <img src="{% static 'mainWebsite/img/banner/air_trucks.png' %}" class="img-fluid w-100" alt="truck">
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <!-- Pagination -->
+            <div class="swiper-pagination"></div>
+          </div>
+        </div>
+      </div>
+    </section>

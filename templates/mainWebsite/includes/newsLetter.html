@@ -1,0 +1,38 @@
+    
+    
+    <div class="footer-top">
+      <div class="container">
+        <div class="row g-4">
+          <div class="col-lg-4 col-md-6">
+            <h2 class="heading-three text-light text-center text-md-start">
+              Stay Connected for Exclusive Shipping Updates & Offers
+            </h2>
+          </div>
+          <div class="col-lg-5 col-md-6 ms-auto align-self-center">
+            <form hx-post="{% url 'newsletter_subscribe' %}"
+              hx-target="#newsletter-message"
+              hx-swap="innerHTML"
+              hx-indicator="#newsletter-loader"
+              hx-disabled-elt="#subscribe-btn, input[name='news_letterEmail']"
+              hx-on::after-request="if(event.detail.successful) this.reset()">
+
+              {% csrf_token %}
+
+              <div class="input-group position-relative mx-auto ms-lg-auto me-lg-0">
+                <input type="text" name="news_letterEmail" class="form-control shadow-none rounded-pill text-white" placeholder="Email Address">
+                  <button class="theme-btn border-0 rounded-pill position-absolute top-0 end-0"
+                      type="submit" id="subscribe-btn">
+                      Subscribe
+                      <span id="newsletter-loader" class="htmx-indicator">
+                          <i class="fas fa-spinner fa-spin"></i>
+                      </span>
+                  </button>
+              </div>
+            </form>
+          </div>
+
+          <div id="newsletter-message"></div>
+          
+        </div>
+      </div>
+    </div>

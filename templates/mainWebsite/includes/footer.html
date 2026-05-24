@@ -1,0 +1,122 @@
+ 
+ {% load static %}
+    
+    <div class="container">
+      <div class="footer-main">
+        <div class="row g-4">
+          <div class="col-xxl-3 col-xl-3 col-lg-4 col-sm-6">
+            <div class="footer-widget">
+              <div class="logo pb-4">
+                <img src="{% static 'mainWebsite/img/logo/tdssuk_logo_white2.png ' %}" width="150px" alt="logo">
+              </div>
+              <p>
+                We are a registered company in the United Kingdom, providing specialized 
+                logistics services designed to meet the needs of business professionals, 
+                exporters, and importers engaged in trade with West African countries.<br/>
+                We are committed to delivering reliable, efficient, and secure shipping 
+                solutions tailored to international trade requirements.
+                </p>
+              <p>
+              <span style="color: #dc3545; font-weight: 700;">
+                Reg No: 466314291
+              </span>
+            </p>
+            </div>
+          </div>
+          <div class="col-xxl-2 col-xl-2 col-lg-2 col-sm-6 ms-auto">
+            <div class="footer-widget">
+              <h4 class="footer-widget-title heading-four text-white pb-30">Links</h4>
+              <ul class="list-unstyled important-link">
+                <li><a href="{% url 'about'%}">About Us</a></li>
+                <li><a href="{% url 'pricing'%}">Shipment Pricing</a></li>
+                <li><a href="{% url 'reviews'%}">Shipment Reviews</a></li>
+                <li><a href="{% url 'faq'%}">FAQ</a> </li>
+                <li><a href="{% url 'getQuote'%}">Get a Quote</a></li>
+              </ul>
+            </div>
+          </div>
+          <div class="col-xxl-2 col-xl-3 col-lg-3 col-sm-6 ms-auto">
+            <div class="footer-widget ps-lg-4 ps-xl-0">
+              <h4 class="footer-widget-title heading-four text-white pb-30">Services</h4>
+              <ul class="list-unstyled important-link">
+                <li><a href="{% url 'airCargo'%}">Air Freight</a></li>
+                <li><a href="{% url 'container'%}">Container Shipment</a></li>
+                <li><a href="{% url 'vehicleCargo'%}">Vehicle Shipment</a></li>
+                
+              </ul>
+            </div>
+          </div>
+          <div class="col-xxl-3 col-xl-3 col-lg-3 col-sm-6">
+            <div class="footer-widget ps-xxl-5">
+              <h4 class="footer-widget-title heading-four text-white pb-30">Contact Us</h4>
+              <ul class="list-unstyled contact-info">
+                <li>
+                  <div class="icon">
+                    <i class="fa-solid fa-location-dot"></i>
+                  </div>
+                  <a href="#">Tank Hill Road Purfleet, <br/>Essex, RM19 1SX <br/>United Kingdom</a>
+                </li>
+                <li>
+                  <div class="icon">
+                    <i class="fa-solid fa-envelope"></i>
+                  </div>
+                  <a href="mailto:support@tdssuk.co.uk">Email: support@tdssuk.co.uk</a>
+                </li>
+                <li>
+                  <div class="icon">
+                    <i class="fa-solid fa-phone"></i>
+                  </div>
+                  <a href="tel:+447415355361">Phone: +44 741 535 5361</a>
+                </li>
+              </ul>
+              <div class="social-icon pt-40">
+                <ul class="d-flex list-unstyled gap-2">
+                  <li>
+                    <a href="https://www.facebook.com/share/1B94Fc5FVA/?mibextid=wwXIfr" target="_blank" class="rounded-pill d-flex align-items-center justify-content-center">
+                      <i class="fa-brands fa-facebook-f"></i>
+                    </a>
+                  </li>
+                  {% comment %} <li>
+                    <a href="#" class="rounded-pill d-flex align-items-center justify-content-center">
+                      <i class="fa-brands fa-twitter"></i>
+                    </a>
+                  </li>
+                  <li>
+                    <a href="#" class="rounded-pill d-flex align-items-center justify-content-center">
+                      <i class="fab fa-instagram"></i>
+                    </a>
+                  </li>
+                  <li>
+                    <a href="#" class="rounded-pill d-flex align-items-center justify-content-center">
+                      <i class="fab fa-youtube"></i>
+                    </a>
+                  </li> {% endcomment %}
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <div class="container">
+        <div class="row g-2">
+          <div class="col-md-6">
+            <div class="footer-copyright text-center text-lg-start">
+              <p>
+                Copyright © {% now "Y" %} <span>TDSSUK GLOBAL SERVICES LTD.</span> All Rights Reserved
+              </p>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="footer-menu">
+              <ul
+                class="list-unstyled d-flex flex-wrap justify-content-center justify-content-lg-end align-items-center">
+                <li><a href="{% url 'termsAndCondition'%}">Terms & Condition</a></li>
+                <li><a href="{% url 'privacyPolicy'%}">Privacy Policy</a></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>

@@ -1,0 +1,100 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- Required meta tags -->
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <!-- title -->
+  <title>Air Cargo Shipment - TDSSUK GLOBAL SERVICES LTD</title>
+  <meta name="description" content="TDSSUK GLOBAL SERVICES LTD">
+  <meta name="viewport"
+    content="width=device-width, initial-scale=1.0, maximum-scale=5.0, minimum-scale=1.0, user-scalable=yes">
+  {% include "mainWebsite/includes/cssFiles.html" %}
+</head>
+
+<body>
+  <!-- Preloader start -->
+ {% include "mainWebsite/includes/preloader.html" %}
+  <!-- Preloader end -->
+  <!-- Header section start -->
+  <div id="header-fixed-height"></div>
+  <header class="ep-header-section" id="sticky-header">
+    <!-- Top header section start -->
+    {% include "mainWebsite/includes/topBar.html"%}
+    <!-- Top header section end -->
+
+    <!-- Nav-->
+    {% include "mainWebsite/includes/navBar.html"%}
+    <!-- header search part end -->
+    {% include "mainWebsite/includes/mobileSideBar.html" %}
+    <!-- offcanvas menu part end -->
+
+    <!-- mobile navbar part start -->
+    {% include "mainWebsite/includes/mobileMenu.html" %}
+    <!-- mobile navbar part end -->
+  </header>
+  <!-- Header section end -->
+  <!-- Main area start -->
+  <main>
+    <!-- Page header section start -->
+    <section class="ep-page-header-section bg-control" data-background="{% static 'mainWebsite/img/images/page-header.jpg'%}">
+      <div class="overlay bg-control" data-background="{% static 'mainWebsite/img/bg/page-header-overlay-bg.png' %}">
+        <div class="container">
+          <div class="text text-center">
+            <h1 class="page-title text-white pb-20">Air Cargo Shipment</h1>
+            <ul class="list-unstyled bread-crumb d-flex justify-content-center">
+              <li><a href="{% url 'index' %}">Home</a></li>
+              <li>Air Shipment</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+    <!-- Page header section end -->
+
+    <!-- About section start -->
+      {% include "mainWebsite/services/vehicle_container_section.html" %}
+
+      <!-- Contact us section start -->
+       
+    <!-- Client section end -->
+    <!-- cta section start -->
+    <section class="ep-cta-section-two">
+      <div class="container">
+        <div class="cta-main d-flex align-items-center rounded-20">
+          <div class="text">
+            <h4 class="title text-white mb-2 split-text right">We Guarantee Safe, Secure and Timely Delivery</h4>
+            <p class="text-white">From collection to final destination, we ensure your cargo is 
+              handled with care and delivered safely, securely, and on schedule.</p>
+          </div>
+          <div class="img">
+            <img src="{% static 'mainWebsite/img/images/cta_img2.png' %}" alt="cta-img-1">
+          </div>
+          <div class="img-two">
+            <img src="{% static 'mainWebsite/img/images/cta_img_2.jpg' %}" alt="cta-img-2" class="img-fluid w-100">
+          </div>
+          {% comment %} <a class="play-btn ripple top-50 translate-middle-y rounded-pill d-flex align-items-center text-center justify-content-center vidplay"
+            href="http://www.youtube.com/watch?v=0O2aH4XLbto">
+            <i class="fa-solid fa-play"></i>
+          </a> {% endcomment %}
+        </div>
+      </div>
+    </section>
+    
+  </main>
+  <!-- Main area end -->
+    {% include "mainWebsite/includes/floatButton.html" %}
+  <!-- Back to top button end -->
+    <br/><br/>
+  <!-- Footer section start -->
+    <footer class="ep-footer-section">
+
+      {% include "mainWebsite/includes/footer.html" %}
+  <!-- Footer section end -->
+    </footer>
+
+   {% include "mainWebsite/includes/javaScript.html" %}
+  <!-- JS end here -->
+</body>
+</html>

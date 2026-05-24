@@ -1,0 +1,128 @@
+
+    {% load static %}
+    <section class="ep-service-section pt-120">
+      <div class="container position-relative">
+        <div class="row">
+          <div class="section-title text-center pb-60">
+            <h6 class="subtitle d-inline-flex align-items-center">Our Services
+              <span class="icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="17" viewBox="0 0 20 17" fill="none">
+                  <path fill-rule="evenodd" clip-rule="evenodd"
+                    d="M11.3171 1.10946e-05L19.3136 8.18934L11.3171 16.3787L3.32062 16.3787L11.3171 8.18934L3.32062 1.14441e-05L11.3171 1.10946e-05Z"
+                    fill="currentColor" />
+                  <path fill-rule="evenodd" clip-rule="evenodd"
+                    d="M0.686401 16.3787L0.686401 8.18934L0.686401 1.14441e-05L4.68376 4.09467L8.68199 8.18934L4.68376 12.284L0.686401 16.3787Z"
+                    fill="currentColor" />
+                </svg>
+              </span>
+            </h6>
+            <h2 class="title heading-two split-text right">TDSSUK GLOBAL SERVICES LTD </h2>
+            <p class="pb-30">SOLUTIONS BEYOND EXPECTATIONS</p>
+          </div>
+        </div>
+        <div class="position-relative">
+          <div class="swiper service-slider">
+            <div class="swiper-wrapper">
+              <div class="swiper-slide">
+                <div class="service-item hover-effect bg-one rounded-10">
+                  <a href="{% url 'airCargo'%}" class="d-block w-100">
+                    <div class="img overlay-shape rounded-10 overflow-hidden">
+                      <img src="{% static 'mainWebsite/img/service/service01.jpg' %}" class="card-img-top" alt="service01">
+                    </div>
+                  </a>
+                  <div class="text">
+                    <h3 class="heading-four service-title pb-20">
+                      <a href="{% url 'airCargo'%}">
+                        Global Freight Services
+                      </a>
+                    </h3>
+                    <p class="pb-30">
+                     Global Freight Services Built for Speed, Reliability, and Seamless Worldwide Delivery.
+                    </p>
+                    <a href="{% url 'airCargo'%}" class="theme-btn rounded-pill d-inline-flex align-items-center">Read
+                      More<i class="fas fa-chevron-right"></i></a>
+                  </div>
+                </div>
+              </div>
+              <div class="swiper-slide">
+                <div class="service-item hover-effect bg-one rounded-10">
+                  <a href="{% url 'container'%}" class="d-block w-100">
+                    <div class="img overlay-shape rounded-10 overflow-hidden">
+                      <img src="{% static 'mainWebsite/img/service/service02.jpg' %}" class="card-img-top" alt="service02">
+                    </div>
+                  </a>
+                  <div class="text">
+                    <h3 class="heading-four service-title pb-20">
+                      <a href="{% url 'container'%}">
+                        Shipping Services
+                      </a>
+                    </h3>
+                    <p class="pb-30">
+                      Reliable Shipping Services Designed for Fast, Secure, and Hassle-Free Deliveries Worldwide.
+                    </p>
+                    <a href="{% url 'container'%}" class="theme-btn rounded-pill d-inline-flex align-items-center">Read
+                      More<i class="fas fa-chevron-right"></i></a>
+                  </div>
+                </div>
+              </div>
+              <div class="swiper-slide">
+                <div class="service-item hover-effect bg-one rounded-10">
+                  <a href="{% url 'contact'%}" class="d-block w-100">
+                    <div class="img overlay-shape rounded-10 overflow-hidden">
+                      <img src="{% static 'mainWebsite/img/service/service031.jpg' %}" class="card-img-top" alt="service03">
+                    </div>
+                  </a>
+                  <div class="text">
+                    <h3 class="heading-four service-title pb-20">
+                      <a href="{% url 'contact'%}">
+                        Warehousing Solutions
+                      </a>
+                    </h3>
+                    <p class="pb-30">
+                      Smart Warehouse Solutions for Secure Storage, Efficient Handling, and Seamless Distribution.
+                    </p>
+                    <a href="{% url 'contact'%}" class="theme-btn rounded-pill d-inline-flex align-items-center">Read
+                      More<i class="fas fa-chevron-right"></i></a>
+                  </div>
+                </div>
+              </div>
+
+              <div class="swiper-slide">
+                <div class="service-item hover-effect bg-one rounded-10">
+                  <a href="{% url 'vehicleCargo'%}" class="d-block w-100">
+                    <div class="img overlay-shape rounded-10 overflow-hidden">
+                      <img src="{% static 'mainWebsite/img/service/service_vehicle.jpg' %}" class="card-img-top" alt="service03">
+                    </div>
+                  </a>
+                  <div class="text">
+                    <h3 class="heading-four service-title pb-20">
+                      <a href="{% url 'vehicleCargo'%}">
+                        Vehicle Shipment
+                      </a>
+                    </h3>
+                    <p class="pb-30">
+                     Secure Vehicle Shipping Solutions with Reliable Transport, Real-Time Tracking, and On-Time Delivery.
+                    </p>
+                    <a href="{% url 'vehicleCargo'%}" class="theme-btn rounded-pill d-inline-flex align-items-center">Read
+                      More<i class="fas fa-chevron-right"></i></a>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+          <div class="service-nav">
+            <div
+              class="next position-absolute hover-effect-btn-2 rounded-pill top-50 translate-middle-y d-flex align-items-center justify-content-center">
+              <i class="fa-solid fa-chevron-right"></i>
+              <i class="fa-solid fa-chevron-right"></i>
+            </div>
+            <div
+              class="prev position-absolute hover-effect-btn-2 left rounded-pill top-50 translate-middle-y d-flex align-items-center justify-content-center">
+              <i class="fa-solid fa-chevron-left"></i>
+              <i class="fa-solid fa-chevron-left"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
