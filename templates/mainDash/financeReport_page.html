@@ -1,0 +1,452 @@
+
+{% extends "mainDash/layouts/baseDash.html" %}
+{% load static %}
+{% load humanize %}
+
+{% block title %}Finance — Financial Reports{% endblock %}
+
+{% block content %}
+
+<div class="page-header d-print-none" aria-label="Page header">
+    <div class="container-xl">
+        <div class="row g-2 align-items-center">
+            <div class="col">
+                <h2 class="page-title">Financial Reports</h2>
+                <div class="page-pretitle">Overview of revenue, payments, and outstanding balances</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="page-body">
+    <div class="container-xl">
+        <div class="row row-deck row-cards">
+
+            {# --- Revenue Summary --- #}
+            <div class="col-sm-6 col-lg-3">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="subheader">Total Invoiced</div>
+                        <div class="h1 mb-1">
+                            £{{ total_invoiced|floatformat:2|intcomma }}
+                        </div>
+                        <div class="text-muted small">All invoices raised</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-sm-6 col-lg-3">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="subheader">Total Collected</div>
+                        <div class="h1 mb-1 text-green">
+                            £{{ total_collected|floatformat:2|intcomma }}
+                        </div>
+                        <div class="text-muted small">Payments received</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-sm-6 col-lg-3">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="subheader">Outstanding</div>
+                        <div class="h1 mb-1 text-red">
+                            £{{ outstanding|floatformat:2|intcomma }}
+                        </div>
+                        <div class="text-muted small">Balance due</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-sm-6 col-lg-3">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="subheader">Overdue Invoices</div>
+                        <div class="h1 mb-1 {% if overdue_invoices > 0 %}text-red{% else %}text-green{% endif %}">
+                            {{ overdue_invoices }}
+                        </div>
+                        <div class="text-muted small">Requires immediate attention</div>
+                    </div>
+                </div>
+            </div>
+
+            {# --- Invoice Status Breakdown --- #}
+            <div class="col-md-6">
+                <div class="card h-100">
+                    <div class="card-header">
+                        <h3 class="card-title">Invoice Status Breakdown</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-vcenter">
+                                <thead>
+                                    <tr>
+                                        <th>Status</th>
+                                        <th class="text-end">Count</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for status, count in invoice_by_status.items %}
+                                    <tr>
+                                        <td>
+                                            <span class="badge bg-{% if status == 'paid' %}green{% elif status == 'overdue' %}red{% elif status == 'partially_paid' %}yellow text-dark{% elif status == 'sent' %}blue{% elif status == 'cancelled' or status == 'rejected' %}red{% else %}secondary{% endif %}-lt">
+                                                {{ status|title|cut:"_" }}
+                                            </span>
+                                        </td>
+                                        <td class="text-end"><strong>{{ count }}</strong></td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="card-footer text-end">
+                        <a href="{% url 'invoice_list' %}">
+                            <span class="btn btn-sm small btn-ghost-secondary"> View all invoices →</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            {# --- Other Liabilities --- #}
+            <div class="col-md-6">
+                <div class="card h-100">
+                    <div class="card-header">
+                        <h3 class="card-title">Pending Liabilities</h3>
+                    </div>
+                    <div class="card-body">
+                        <dl class="row">
+                            <dt class="col-7 text-muted">Expenses (last 30 days)</dt>
+                            <dd class="col-5 text-end">
+                                <strong>£{{ expenses_30d|floatformat:2|intcomma }}</strong>
+                            </dd>
+
+                            <dt class="col-7 text-muted">Customs Duties (pending/processing)</dt>
+                            <dd class="col-5 text-end">
+                                <strong>{{ duties_pending|floatformat:2|intcomma }}</strong>
+                                <small class="text-muted d-block">Mixed currencies</small>
+                            </dd>
+
+                            <dt class="col-7 text-muted">Agent Commissions (unpaid)</dt>
+                            <dd class="col-5 text-end">
+                                <strong>{{ commissions_pending|floatformat:2|intcomma }}</strong>
+                                <small class="text-muted d-block">Mixed currencies</small>
+                            </dd>
+                        </dl>
+                    </div>
+                    <div class="card-footer d-flex gap-2 justify-content-end">
+                        <a href="{% url 'customs_duty_list' %}">
+                            <span class="btn btn-sm small btn-ghost-secondary">View customs → </span>
+                        </a>
+                        <a href="{% url 'agent_commission_list' %}" class="text-muted small">
+                             <span class="btn btn-sm btn-ghost-secondary">View commissions →</span>
+                        </a>
+                        
+                    </div>
+                </div>
+            </div>
+
+            {# --- Latest Exchange Rates --- #}
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Latest Exchange Rates</h3>
+                    </div>
+                    <div class="card-body p-0">
+                        {% if latest_rates %}
+                        <div class="table-responsive">
+                            <table class="table card-table table-vcenter mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>Pair</th>
+                                        <th>Rate</th>
+                                        <th>Date</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for rate in latest_rates %}
+                                    <tr>
+                                        <td>
+                                            <span class="badge bg-blue-lt me-1">
+                                                {{ rate.base_currency }}
+                                            </span>
+                                            →
+                                            <span class="badge bg-green-lt ms-1">
+                                                {{ rate.target_currency }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <strong>{{ rate.rate|floatformat:4 }}</strong>
+                                        </td>
+                                        <td class="text-secondary">
+                                            {{ rate.effective_date|date:"d/m/Y" }}
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        {% else %}
+                        <div class="text-center py-4 text-secondary">
+                            <small>No exchange rates recorded yet.</small>
+                        </div>
+                        {% endif %}
+                    </div>
+                    <div class="card-footer text-end">
+                        <a href="{% url 'exchange_rate_list' %}" class="text-muted small">
+                            <span class="btn btn-sm btn-ghost-secondary"> Manage rates →</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            {# --- Recent Payments --- #}
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Recent Payments</h3>
+                    </div>
+                    <div class="card-body p-0">
+                        {% if recent_payments %}
+                        <div class="table-responsive">
+                            <table class="table card-table table-vcenter mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>Invoice</th>
+                                        <th>Amount</th>
+                                        <th>Method</th>
+                                        <th>Date</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for payment in recent_payments %}
+                                    <tr>
+                                        <td>
+                                            <a href="{% url 'invoice_detail' payment.invoice.uuid %}">
+                                                {{ payment.invoice.invoice_number }}
+                                            </a>
+                                            <div class="text-muted small">
+                                                {{ payment.invoice.customer_name }}
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <strong>
+                                                {{ payment.invoice.currency }}
+                                                {{ payment.amount|floatformat:2|intcomma }}
+                                            </strong>
+                                        </td>
+                                        <td class="text-secondary">
+                                            {{ payment.get_method_display }}
+                                        </td>
+                                        <td class="text-secondary">
+                                            {{ payment.paid_on|date:"d/m/Y" }}
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        {% else %}
+                        <div class="text-center py-4 text-secondary">
+                            <small>No payments recorded yet.</small>
+                        </div>
+                        {% endif %}
+                    </div>
+                    <div class="card-footer text-end">
+                        <a href="{% url 'payment_list' %}" class="text-muted small">
+                            <span class="btn btn-sm btn-ghost-secondary">View all payments →</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+    {# --- Invoice Aging Report --- #}
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">Invoice Aging Report</h3>
+                <div class="card-options">
+                    <small class="text-muted">Unpaid &amp; partially paid invoices by overdue period</small>
+                </div>
+            </div>
+            <div class="card-body">
+
+                {# --- Aging Summary Buckets --- #}
+                <div class="row g-3 mb-4">
+
+                    <div class="col-sm-6 col-lg-3">
+                        <div class="card card-sm {% if aging_current.count > 0 %}border-success{% endif %}">
+                            <div class="card-body">
+                                <div class="d-flex align-items-center mb-2">
+                                    <span class="badge bg-green-lt me-2">Current</span>
+                                    <span class="text-muted small">Not yet due</span>
+                                </div>
+                                <div class="h2 mb-1">
+                                    £{{ aging_current_total|floatformat:2|intcomma }}
+                                </div>
+                                <div class="text-muted small">
+                                    {{ aging_current.count }}
+                                    invoice{{ aging_current.count|pluralize }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-sm-6 col-lg-3">
+                        <div class="card card-sm {% if aging_0_30.count > 0 %}border-warning{% endif %}">
+                            <div class="card-body">
+                                <div class="d-flex align-items-center mb-2">
+                                    <span class="badge bg-yellow-lt text-dark me-2">1–30 days</span>
+                                    <span class="text-muted small">Overdue</span>
+                                </div>
+                                <div class="h2 mb-1">
+                                    £{{ aging_0_30_total|floatformat:2|intcomma }}
+                                </div>
+                                <div class="text-muted small">
+                                    {{ aging_0_30.count }}
+                                    invoice{{ aging_0_30.count|pluralize }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-sm-6 col-lg-3">
+                        <div class="card card-sm {% if aging_31_60.count > 0 %}border-orange{% endif %}">
+                            <div class="card-body">
+                                <div class="d-flex align-items-center mb-2">
+                                    <span class="badge bg-orange-lt me-2">31–60 days</span>
+                                    <span class="text-muted small">Overdue</span>
+                                </div>
+                                <div class="h2 mb-1">
+                                    £{{ aging_31_60_total|floatformat:2|intcomma }}
+                                </div>
+                                <div class="text-muted small">
+                                    {{ aging_31_60.count }}
+                                    invoice{{ aging_31_60.count|pluralize }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-sm-6 col-lg-3">
+                        <div class="card card-sm {% if aging_60_plus.count > 0 %}border-danger{% endif %}">
+                            <div class="card-body">
+                                <div class="d-flex align-items-center mb-2">
+                                    <span class="badge bg-red-lt me-2">60+ days</span>
+                                    <span class="text-muted small">Critical</span>
+                                </div>
+                                <div class="h2 mb-1 {% if aging_60_plus.count > 0 %}text-red{% endif %}">
+                                    £{{ aging_60_plus_total|floatformat:2|intcomma }}
+                                </div>
+                                <div class="text-muted small">
+                                    {{ aging_60_plus.count }}
+                                    invoice{{ aging_60_plus.count|pluralize }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                {# --- Critical invoices detail (60+ days only — actionable) --- #}
+                {% if aging_60_plus.count > 0 %}
+                <div class="mt-2">
+                    <div class="d-flex align-items-center mb-2">
+                        <h4 class="mb-0 me-2">Critical — 60+ Days Overdue</h4>
+                        <span class="badge bg-red">{{ aging_60_plus_count }}</span>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-vcenter text-nowrap">
+                            <thead>
+                                <tr>
+                                    <th>Invoice</th>
+                                    <th>Customer</th>
+                                    <th>Destination</th>
+                                    <th>Total</th>
+                                    <th>Paid</th>
+                                    <th>Balance Due</th>
+                                    <th>Due Date</th>
+                                    <th>Days Overdue</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for invoice in aging_60_plus %}
+                                <tr>
+                                    <td>
+                                        <strong>{{ invoice.invoice_number }}</strong>
+                                    </td>
+                                    <td>
+                                        {{ invoice.customer_name }}
+                                        {% if invoice.customer_phone %}
+                                        <div class="text-muted small">
+                                            {{ invoice.customer_phone }}
+                                        </div>
+                                        {% endif %}
+                                    </td>
+                                    <td class="text-secondary">
+                                        {{ invoice.destination_country }}
+                                    </td>
+                                    <td>
+                                        {{ invoice.currency }}
+                                        {{ invoice.total_amount|floatformat:2|intcomma }}
+                                    </td>
+                                    <td class="text-green">
+                                        {{ invoice.currency }}
+                                        {{ invoice.amount_paid|floatformat:2|intcomma }}
+                                    </td>
+                                    <td class="text-red">
+                                        <strong>
+                                            {{ invoice.currency }}
+                                            {{ invoice.balance_due|floatformat:2|intcomma }}
+                                        </strong>
+                                    </td>
+                                    <td class="text-secondary">
+                                        {{ invoice.due_date|date:"d/m/Y" }}
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-red">
+                                            {{ invoice.due_date|timesince|truncatewords:2 }}
+                                        </span>
+                                    </td>
+                                    <td class="text-end">
+                                        <a href="{% url 'invoice_detail' invoice.uuid %}"
+                                        class="badge bg-secondary text-orange-fg">
+                                            View
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                {% else %}
+                <div class="text-center py-3 text-success">
+                    <i class="bi bi-check-circle fs-3 d-block mb-2"></i>
+                    <strong>No critical overdue invoices.</strong>
+                    <div class="text-muted small mt-1">
+                        All invoices are within acceptable payment periods.
+                    </div>
+                </div>
+                {% endif %}
+
+            </div>
+            <div class="card-footer text-end">
+                <a href="{% url 'invoice_list' %}?status=overdue"
+                class="text-muted small me-3">
+                    <span class="btn btn-sm btn-ghost-secondary"> View all overdue →</span>
+                </a>
+                <a href="{% url 'invoice_list' %}"
+                class="text-muted small">
+                    <span class="btn btn-sm btn-ghost-secondary">View all invoices →</span>
+                </a>
+            </div>
+        </div>
+    </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

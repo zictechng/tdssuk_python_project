@@ -1,0 +1,499 @@
+        
+         {% load static %}
+
+<div class="col-11 mt-3">
+    <form class="card" id="order-edit-form"
+        hx-post="{% url 'order_edit' order.uuid %}"
+        hx-target="#toast-container"
+        hx-swap="innerHTML">
+        
+        {% csrf_token %}
+        <div class="accordion" id="accordion-default">
+
+            <div class="accordion-item">
+            <div class="accordion-header">
+              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-5-default" aria-expanded="false">
+                <h3>Product Images</h3>
+                <div class="accordion-button-toggle">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-1">
+                    <path d="M6 9l6 6l6 -6"></path>
+                  </svg>
+                </div>
+              </button>
+            </div>
+            <div id="collapse-5-default" class="accordion-collapse collapse" data-bs-parent="#accordion-default">
+              <div class="accordion-body">
+
+                {# --- Drop zone / file picker --- #}
+                <div id="image-dropzone" class="image-dropzone">
+                  <input type="file" id="image-input" accept="image/*" multiple hidden>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon mb-2 text-muted">
+                    <path d="M9 13h6l-3 -3v6"></path>
+                    <path d="M5 12v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-6"></path>
+                    <path d="M5 8l4 -4l4 4"></path>
+                    <path d="M9 4v9"></path>
+                  </svg>
+                  <div class="fw-medium">Drop images here or click to browse</div>
+                  <small class="text-muted">PNG or JPG, up to 8MB each</small>
+                </div>
+
+                {# --- Queued preview (selected, not yet uploaded) --- #}
+                <div id="image-preview-row" class="row row-cards mt-3"></div>
+
+                {# --- Upload action bar (only visible once files are queued) --- #}
+                <div id="upload-action-bar" class="d-flex align-items-center justify-content-end gap-2 mt-3" style="display:none">
+                  <button type="button" id="clear-queue-btn" class="btn btn-link link-secondary btn-sm">
+                    Clear
+                  </button>
+                  <button type="button" id="upload-submit-btn" class="btn btn-primary btn-sm">
+                    <span id="upload-submit-spinner" class="spinner-border spinner-border-sm me-1" style="display:none" role="status"></span>
+                    <span id="upload-submit-label">Upload Images</span>
+                  </button>
+                </div>
+
+                {# --- Already-uploaded gallery --- #}
+                <div class="mt-3">
+                  <div class="text-muted small mb-2" id="gallery-label" style="{% if not order.images.all %}display:none{% endif %}">
+                    Uploaded images
+                  </div>
+                  <div class="row row-cards" id="image-gallery">
+                    {% for img in order.images.all %}
+                    <div class="col-6 col-md-3" id="image-card-{{ img.id }}">
+                      <div class="card image-card">
+                        <a href="{{ img.image.url }}" target="_blank">
+                          <img src="{{ img.image.url }}" class="card-img-top image-thumb" alt="Order image">
+                        </a>
+                        <button type="button" class="btn btn-icon btn-sm image-remove-btn" data-image-id="{{ img.id }}" title="Remove image">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon">
+                            <path d="M18 6l-12 12"></path>
+                            <path d="M6 6l12 12"></path>
+                          </svg>
+                        </button>
+                      </div>
+                    </div>
+                    {% endfor %}
+                  </div>
+                </div>
+
+              </div>
+            </div>
+          </div>
+
+          {# --- Status (edit-only section, create form doesn't have this) --- #}
+          <div class="accordion-item">
+            <div class="accordion-header">
+              <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-0-edit" aria-expanded="true">
+                <h3>Order Status</h3>
+                <div class="accordion-button-toggle">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-1">
+                    <path d="M6 9l6 6l6 -6"></path>
+                  </svg>
+                </div>
+              </button>
+            </div>
+            <div id="collapse-0-edit" class="accordion-collapse collapse show" data-bs-parent="#accordion-default">
+              <div class="accordion-body">
+                <div class="row row-cards">
+                  <div class="col-md-4">
+                    <div class="mb-3">
+                      <label class="form-label">Status</label>
+                      <select name="status" class="form-select">
+                        {% for value, label in order.STATUS_CHOICES %}
+                          <option value="{{ value }}" {% if order.status == value %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                      </select>
+                    </div>
+                  </div>
+                  <div class="col-md-4">
+                    <div class="mb-3">
+                      <label class="form-label">Tracking Number</label>
+                      <input type="text" name="tracking_number" class="form-control" value="{{ order.tracking_number|default:'' }}" placeholder="Tracking Number">
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="accordion-item">
+            <div class="accordion-header">
+              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-1-default" aria-expanded="false">
+                <h3>Customer Details</h3>
+                <div class="accordion-button-toggle">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-1">
+                    <path d="M6 9l6 6l6 -6"></path>
+                  </svg>
+                </div>
+              </button>
+            </div>
+            <div id="collapse-1-default" class="accordion-collapse collapse" data-bs-parent="#accordion-default">
+              <div class="accordion-body">
+                <div class="row row-cards">
+                  <div class="col-md-5">
+                    <div class="mb-3">
+                      <label class="form-label">Customer Name</label>
+                      <input type="text" name="customer_name" class="form-control" value="{{ order.customer_name|default:'' }}" placeholder="Customer Name" required>
+                    </div>
+                  </div>
+                  <div class="col-sm-6 col-md-3">
+                    <div class="mb-3">
+                      <label class="form-label">Customer Phone</label>
+                      <input type="text" name="customer_phone" class="form-control" value="{{ order.customer_phone|default:'' }}" placeholder="Customer Phone" required>
+                    </div>
+                  </div>
+                  <div class="col-sm-6 col-md-4">
+                    <div class="mb-3">
+                      <label class="form-label">Email address</label>
+                      <input type="email" name="customer_email" class="form-control" value="{{ order.customer_email|default:'' }}" placeholder="Customer Email">
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="accordion-item">
+            <div class="accordion-header">
+              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-2-default" aria-expanded="false">
+                <h3>Sender Details <span class="text-muted fs-4">(Pickup)</span></h3>
+                <div class="accordion-button-toggle">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-1">
+                    <path d="M6 9l6 6l6 -6"></path>
+                  </svg>
+                </div>
+              </button>
+            </div>
+            <div id="collapse-2-default" class="accordion-collapse collapse" data-bs-parent="#accordion-default">
+              <div class="accordion-body">
+                <div class="row row-cards">
+                  <div class="col-md-5">
+                    <div class="mb-3">
+                      <label class="form-label">Sender Name</label>
+                      <input type="text" name="sender_name" class="form-control" value="{{ order.sender_name|default:'' }}" placeholder="Sender Name">
+                    </div>
+                  </div>
+                  <div class="col-sm-6 col-md-3">
+                    <div class="mb-3">
+                      <label class="form-label">Sender Phone</label>
+                      <input type="text" name="sender_phone" class="form-control" value="{{ order.sender_phone|default:'' }}" placeholder="Sender Phone">
+                    </div>
+                  </div>
+                  <div class="col-sm-6 col-md-4">
+                    <div class="mb-3">
+                      <label class="form-label">Sender Email address</label>
+                      <input type="email" name="sender_email" class="form-control" value="{{ order.sender_email|default:'' }}" placeholder="Sender Email">
+                    </div>
+                  </div>
+                  <div class="col-sm-6 col-md-6">
+                    <div class="mb-3">
+                      <label class="form-label">Sender City</label>
+                      <input type="text" name="sender_city" class="form-control" value="{{ order.sender_city|default:'' }}" placeholder="Sender City">
+                    </div>
+                  </div>
+                  <div class="col-sm-6 col-md-6">
+                    <div class="mb-3">
+                      <label class="form-label">Sender Country</label>
+                      <select name="sender_country" class="form-select" data-search="on">
+                        <option value="">Select country</option>
+                        {% for code, name in countries %}
+                          <option value="{{ name }}" {% if order.sender_country == name %}selected{% endif %}>{{ name }}</option>
+                        {% endfor %}
+                      </select>
+                    </div>
+                  </div>
+                  <div class="col-md-12">
+                    <div class="mb-3">
+                      <label class="form-label">Sender Address</label>
+                      <input type="text" name="sender_address" class="form-control" value="{{ order.sender_address|default:'' }}" placeholder="Sender Address">
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="accordion-item">
+            <div class="accordion-header">
+              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-3-default" aria-expanded="false">
+                <h3>Receiver Details <span class="text-muted fs-4">(Delivery Destination)</span></h3>
+                <div class="accordion-button-toggle">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-1">
+                    <path d="M6 9l6 6l6 -6"></path>
+                  </svg>
+                </div>
+              </button>
+            </div>
+            <div id="collapse-3-default" class="accordion-collapse collapse" data-bs-parent="#accordion-default">
+              <div class="accordion-body">
+                <div class="row row-cards">
+                  <div class="col-md-5">
+                    <div class="mb-3">
+                      <label class="form-label">Receiver Name</label>
+                      <input type="text" name="receiver_name" class="form-control" value="{{ order.receiver_name|default:'' }}" placeholder="Receiver Name">
+                    </div>
+                  </div>
+                  <div class="col-sm-6 col-md-3">
+                    <div class="mb-3">
+                      <label class="form-label">Receiver Phone</label>
+                      <input type="text" name="receiver_phone" class="form-control" value="{{ order.receiver_phone|default:'' }}" placeholder="Receiver Phone">
+                    </div>
+                  </div>
+                  <div class="col-sm-6 col-md-4">
+                    <div class="mb-3">
+                      <label class="form-label">Receiver Email address</label>
+                      <input type="email" name="receiver_email" class="form-control" value="{{ order.receiver_email|default:'' }}" placeholder="Receiver Email">
+                    </div>
+                  </div>
+                  <div class="col-sm-6 col-md-6">
+                    <div class="mb-3">
+                      <label class="form-label">Receiver City</label>
+                      <input type="text" name="receiver_city" class="form-control" value="{{ order.receiver_city|default:'' }}" placeholder="Receiver City">
+                    </div>
+                  </div>
+                  <div class="col-sm-6 col-md-6">
+                    <div class="mb-3">
+                      <label class="form-label">Receiver Country</label>
+                      <select name="receiver_country" class="form-select" data-search="on">
+                        <option value="">Select country</option>
+                        {% for code, name in countries %}
+                          <option value="{{ name }}" {% if order.receiver_country == name %}selected{% endif %}>{{ name }}</option>
+                        {% endfor %}
+                      </select>
+                    </div>
+                  </div>
+                  <div class="col-md-12">
+                    <div class="mb-3">
+                      <label class="form-label">Address</label>
+                      <input type="text" name="receiver_address" class="form-control" value="{{ order.receiver_address|default:'' }}" placeholder="Receiver Address">
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="accordion-item">
+            <div class="accordion-header">
+              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-4-default" aria-expanded="false">
+                <h3>Order Details</h3>
+                <div class="accordion-button-toggle">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-1">
+                    <path d="M6 9l6 6l6 -6"></path>
+                  </svg>
+                </div>
+              </button>
+            </div>
+            <div id="collapse-4-default" class="accordion-collapse collapse" data-bs-parent="#accordion-default">
+              <div class="accordion-body">
+                <div class="row row-cards">
+                  <div class="col-md-3">
+                    <div class="mb-3">
+                      <label class="form-label">Order Type</label>
+                      <select name="order_type" class="form-select" data-search="on">
+                        <option value="">Select Type</option>
+                        {% for type in ship_type %}
+                          <option value="{{ type.id }}" {% if order.order_type_id == type.id %}selected{% endif %}>{{ type.name }}</option>
+                        {% endfor %}
+                      </select>
+                    </div>
+                  </div>
+                  <div class="col-sm-6 col-md-3">
+                    <div class="mb-3">
+                      <label class="form-label">Order Category</label>
+                      <select name="order_category" class="form-select" data-search="on">
+                        <option value="">Select Category</option>
+                        {% for category in ship_category %}
+                          <option value="{{ category.id }}" {% if order.category_id == category.id %}selected{% endif %}>{{ category.name }}</option>
+                        {% endfor %}
+                      </select>
+                    </div>
+                  </div>
+                  <div class="col-sm-6 col-md-3">
+                    <div class="mb-3">
+                      <label class="form-label">Order Quantity</label>
+                      <input type="number" name="order_qty" class="form-control" value="{{ order.quantity }}" placeholder="Order Quantity">
+                    </div>
+                  </div>
+                  <div class="col-sm-6 col-md-3">
+                    <div class="mb-3">
+                      <label class="form-label">Expected Delivery Date</label>
+                      <input name="expected_delivery_date" class="form-control mb-2 datepicker"
+                        value="{{ order.expected_delivery_date|date:'Y-m-d' }}"
+                        data-min-date="today"
+                        placeholder="Select a date">
+                    </div>
+                  </div>
+                  <div class="col-sm-3 col-md-3">
+                    <div class="mb-3">
+                      <label class="form-label">Order Weight</label>
+                      <input type="text" name="order_weight" class="form-control" value="{{ order.weight }}" placeholder="Order Weight">
+                    </div>
+                  </div>
+                  <div class="col-sm-3 col-md-3">
+                    <div class="mb-3">
+                      <label class="form-label">Order Origin Country</label>
+                      <select name="order_origin_country" class="form-select" data-search="on">
+                        <option value="">Select country</option>
+                        {% for code, name in countries %}
+                          <option value="{{ name }}" {% if order.order_origin_country == name %}selected{% endif %}>{{ name }}</option>
+                        {% endfor %}
+                      </select>
+                    </div>
+                  </div>
+                  <div class="col-sm-3 col-md-3">
+                    <div class="mb-3">
+                      <label class="form-label">Order Destination Country</label>
+                      <select name="order_destination_country" class="form-select" data-search="on">
+                        <option value="">Select country</option>
+                        {% for code, name in countries %}
+                          <option value="{{ name }}" {% if order.order_destination_country == name %}selected{% endif %}>{{ name }}</option>
+                        {% endfor %}
+                      </select>
+                    </div>
+                  </div>
+                  <div class="col-sm-3 col-md-3">
+                    <div class="mb-3">
+                      <label class="form-label">Order Reference No</label>
+                      <input type="text" name="order_ref_number" class="form-control" value="{{ order.reference_number|default:'' }}" placeholder="Order Reference Number">
+                      <small class="form-hint">This order reference No. is optional.</small>
+                    </div>
+                  </div>
+                  <div class="col-sm-6 col-md-4">
+                    <div class="mb-3">
+                      <label class="form-label">Order Shipping Cost</label>
+                      <input type="number" name="order_ship_cost" class="form-control" value="{{ order.shipping_cost }}" placeholder="Shipping Cost" min="0.01" step="0.01" required>
+                    </div>
+                  </div>
+                  <div class="col-sm-6 col-md-3">
+                    <div class="mb-3">
+                      <label class="form-label">Order Total Amount</label>
+                      <input type="number" name="order_amt" class="form-control" value="{{ order.total_amount }}" placeholder="Total Amount" min="0.01" step="0.01" required>
+                    </div>
+                  </div>
+
+                  <div class="col-md-12">
+                    <div class="mb-3 mb-0">
+                      <label class="form-label">Additional Note</label>
+                      <textarea name="order_note" rows="5" class="form-control" placeholder="Additional information to serve you better here...">{{ order.notes|default:'' }}</textarea>
+                      <small class="form-hint">This additional note is optional.</small>
+                    </div>
+                  </div>
+
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="accordion-item">
+            <div class="accordion-header">
+              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-6-default" aria-expanded="false">
+                    <h3>Promo Code</h3>
+                <div class="accordion-button-toggle">
+                  <!-- Download SVG icon from http://tabler.io/icons/icon/chevron-down -->
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-1">
+                    <path d="M6 9l6 6l6 -6"></path>
+                  </svg>
+                </div>
+              </button>
+            </div>
+            <div id="collapse-6-default" class="accordion-collapse collapse show" data-bs-parent="#accordion-default">
+              <div class="accordion-body">
+                    <div class="row row-cards">
+                <div class="col-12">
+                <hr class="my-1">
+                <label class="form-label">Promo / Discount Code</label>
+                <div class="input-group">
+                    <input type="text"
+                        id="promo-code-input"
+                        name="promo_code_input"
+                        class="form-control text-uppercase"
+                        placeholder="Enter promo code e.g. SUMMER25"
+                        value="{% if order.promo_code %}{{ order.promo_code.code }}{% endif %}"
+                        autocomplete="off"
+                        style="max-width:260px;" />
+                    <button type="button"
+                            class="btn btn-outline-secondary"
+                            id="apply-promo-btn">
+                    Apply
+                    </button>
+                    <button type="button"
+                            class="btn btn-outline-danger"
+                            id="clear-promo-btn"
+                            style="display:{% if order.promo_code %}inline-block{% else %}none{% endif %};">
+                    <i class="bi bi-x"></i>
+                    </button>
+                </div>
+                <div id="promo-feedback" class="mt-1">
+                    {% if order.promo_code %}
+                    <span class="text-success small">
+                        <i class="bi bi-check-circle me-1"></i>
+                        Code <strong>{{ order.promo_code.code }}</strong> applied —
+                        saving <strong>£{{ order.discount_amount }}</strong>.
+                    </span>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Cost Summary -->
+            <div class="col-12">
+            <div class="card bg-light border-0 p-3">
+                <div class="d-flex justify-content-between mb-1">
+                <span class="text-secondary">Shipping Cost</span>
+                <span id="summary-shipping">£{{ order.shipping_cost|default:"0.00" }}</span>
+                </div>
+                <div class="d-flex justify-content-between mb-1">
+                <span class="text-secondary">Discount</span>
+                <span id="summary-discount" class="text-success">
+                    - £{{ order.discount_amount|default:"0.00" }}
+                </span>
+                </div>
+                <hr class="my-1">
+                <div class="d-flex justify-content-between fw-bold">
+                <span>Total Amount</span>
+                <span id="summary-total">£{{ order.total_amount|default:"0.00" }}</span>
+                </div>
+            </div>
+            </div>
+            </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+        <div class="card-footer text-end">
+          <a href="{% url 'viewOrderDetail' order.uuid %}" class="btn btn-link link-secondary">Cancel</a>
+          <button type="button" class="btn btn-primary btn-sm js-htmx-action" data-bs-toggle="modal" data-bs-target="#confirm-edit-modal">
+            Save Changes
+          </button>
+        </div>
+    </form>
+
+    <div class="modal modal-blur fade" id="confirm-edit-modal" tabindex="-1" role="dialog" aria-hidden="true">
+      <div class="modal-dialog modal-sm modal-dialog-centered" role="document">
+        <div class="modal-content">
+          <div class="modal-body">
+            <div class="modal-title">Are you sure?</div>
+            <div class="text-muted mt-1">You want to save these changes to the order?</div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-link link-secondary me-auto" data-bs-dismiss="modal">
+              Cancel
+            </button>
+            <button type="button" class="btn btn-primary" id="confirm-edit-btn" data-bs-dismiss="modal">
+              Yes, Save
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+</div>
+
+
+{% include "mainDash/includes/image_upload_script.html" %}
+{% include "mainDash/includes/updateOrder_details_script.html" %}
+
+            
+
+
+                
+      

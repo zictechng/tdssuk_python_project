@@ -1,0 +1,325 @@
+
+{% extends "mainDash/layouts/baseDash.html" %}
+{% load static %}
+{% block title %}Ticket {{ ticket.ticket_number }}{% endblock %}
+{% block content %}
+
+<div class="page-header d-print-none">
+  <div class="container-xl">
+    <div class="row g-2 align-items-center">
+      <div class="col">
+        <div class="page-pretitle">
+          <a href="{% url 'ticket_list' %}" class="text-secondary">
+            <i class="bi bi-arrow-left me-1"></i> Back to Tickets
+          </a>
+        </div>
+        <h2 class="page-title">{{ ticket.ticket_number }} — {{ ticket.subject }}</h2>
+      </div>
+      <div class="col-auto ms-auto">
+        <span class="badge text-white
+          {% if ticket.status == 'open' %}bg-blue
+          {% elif ticket.status == 'in_progress' %}bg-yellow
+          {% elif ticket.status == 'resolved' %}bg-success
+          {% else %}bg-secondary{% endif %} me-2" style="font-size:.85rem;">
+          {{ ticket.get_status_display }}
+        </span>
+        
+      </div>
+      <div class="col-auto ms-auto d-print-none">
+        <div class="btn-list">
+            <a href="{% url 'ticket_list' %}"
+                class="btn btn-secondary btn-sm d-none d-sm-inline-block">
+                <i class="bi bi-arrow-left me-1"></i> Back
+            </a>
+            <a href="{% url 'ticket_list' %}"
+                class="btn btn-secondary d-sm-none btn-icon">
+                <i class="bi bi-arrow-left"></i>
+            </a>
+            
+        </div>
+    </div>
+    </div>
+  </div>
+</div>
+
+<div class="page-body">
+  <div class="container-xl">
+    <div class="row row-deck row-cards mt-3">
+
+      <!-- LEFT — Conversation -->
+      <div class="col-lg-8 d-flex flex-column gap-3">
+
+        <!-- Original ticket -->
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title">Original Request</h3>
+            <div class="card-options">
+              <small class="text-muted">{{ ticket.created_at|date:"d M Y, H:i" }}</small>
+            </div>
+          </div>
+          <div class="card-body">
+            <p class="mb-0">{{ ticket.description|linebreaksbr }}</p>
+          </div>
+        </div>
+
+        <!-- Replies -->
+        {% for reply in ticket.replies.all %}
+        <div class="card {% if reply.author.is_staff %}border-primary{% endif %}">
+          <div class="card-header">
+            <div class="d-flex align-items-center gap-2">
+              <span class="avatar avatar-xs rounded-circle
+                {% if reply.author.is_staff %}bg-primary text-white{% else %}bg-secondary-lt{% endif %}">
+                {% if reply.author %}{{ reply.author.first_name|first|upper }}{% else %}?{% endif %}
+              </span>
+              <span class="fw-medium">
+                {% if reply.author %}
+                  {{ reply.author.get_full_name|default:reply.author.username }}
+                  {% if reply.author.is_staff %}
+                    <span class="badge bg-primary-lt text-primary ms-1">Staff</span>
+                  {% endif %}
+                {% else %}
+                  <span class="text-muted">Deleted User</span>
+                {% endif %}
+              </span>
+            </div>
+            <div class="card-options">
+              <small class="text-muted">{{ reply.created_at|date:"d M Y, H:i" }}</small>
+            </div>
+          </div>
+          <div class="card-body">
+            <p class="mb-0">{{ reply.message|linebreaksbr }}</p>
+          </div>
+        </div>
+        {% endfor %}
+
+        <!-- Reply Form -->
+        {% if ticket.status != 'closed' %}
+        <form class="card" id="reply-form"
+              hx-post="{% url 'ticket_detail' token %}"
+              hx-target="#toast-container"
+              hx-swap="innerHTML">
+          {% csrf_token %}
+          <input type="hidden" name="action" value="reply">
+          <div class="card-header">
+            <h3 class="card-title">Add Reply</h3>
+          </div>
+          <div class="card-body">
+            {{ reply_form.message }}
+            <div id="error-message"></div>
+          </div>
+          <div class="card-footer text-end">
+            <button type="button"
+                    class="btn btn-primary btn-sm"
+                    data-bs-toggle="modal"
+                    data-bs-target="#confirm-reply-modal">
+              <i class="bi bi-send me-1"></i> Post Reply
+            </button>
+          </div>
+        </form>
+        {% endif %}
+
+      </div>
+
+      <!-- RIGHT — Ticket Info + Status -->
+      <div class="col-lg-4 d-flex flex-column gap-3">
+
+        <!-- Info Card -->
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title">Ticket Info</h3>
+          </div>
+          <div class="list-group list-group-flush">
+            <div class="list-group-item">
+              <div class="row">
+                <div class="col text-secondary">Ticket #</div>
+                <div class="col-auto fw-medium">{{ ticket.ticket_number }}</div>
+              </div>
+            </div>
+            <div class="list-group-item">
+              <div class="row">
+                <div class="col text-secondary">Priority</div>
+                <div class="col-auto">
+                  <span class="badge text-white
+                    {% if ticket.priority == 'urgent' %}bg-danger
+                    {% elif ticket.priority == 'high' %}bg-orange
+                    {% elif ticket.priority == 'medium' %}bg-warning
+                    {% else %}bg-secondary{% endif %}">
+                    {{ ticket.get_priority_display }}
+                  </span>
+                </div>
+              </div>
+            </div>
+            <div class="list-group-item">
+              <div class="row">
+                <div class="col text-secondary">Submitted By</div>
+                <div class="col-auto fw-medium">
+                  {% if ticket.submitted_by %}
+                    {{ ticket.submitted_by.get_full_name|default:ticket.submitted_by.username }}
+                  {% else %}—{% endif %}
+                </div>
+              </div>
+            </div>
+            <div class="list-group-item">
+              <div class="row">
+                <div class="col text-secondary">Sender Name</div>
+                <div class="col-auto fw-medium">
+                  {% if ticket.submitter_name %}
+                    {{ ticket.submitter_name|default:ticket.submitter_name }}
+                  {% else %}—{% endif %}
+                </div>
+              </div>
+            </div>
+            <div class="list-group-item">
+              <div class="row">
+                <div class="col text-secondary">Created</div>
+                <div class="col-auto text-secondary">{{ ticket.created_at|date:"d M Y" }}</div>
+              </div>
+            </div>
+            {% if ticket.resolved_at %}
+            <div class="list-group-item">
+              <div class="row">
+                <div class="col text-secondary">Resolved</div>
+                <div class="col-auto text-secondary">{{ ticket.resolved_at|date:"d M Y" }}</div>
+              </div>
+            </div>
+            {% endif %}
+          </div>
+        </div>
+
+        <!-- Status Update (staff only) -->
+        {% if request.user.is_staff %}
+        <form class="card" id="status-form"
+              hx-post="{% url 'ticket_detail' token %}"
+              hx-target="#toast-container"
+              hx-swap="innerHTML">
+          {% csrf_token %}
+          <input type="hidden" name="action" value="update_status">
+          <div class="card-header">
+            <h3 class="card-title">Update Status</h3>
+          </div>
+          <div class="card-body">
+            <select name="status" class="form-select mb-3">
+              {% for val, label in ticket.STATUS %}
+              <option value="{{ val }}" {% if ticket.status == val %}selected{% endif %}>
+                {{ label }}
+              </option>
+              {% endfor %}
+            </select>
+            <button type="button"
+                    class="btn btn-secondary btn-sm w-100"
+                    data-bs-toggle="modal"
+                    data-bs-target="#confirm-status-modal">
+              <i class="bi bi-arrow-repeat me-1"></i> Update Status
+            </button>
+          </div>
+        </form>
+        {% endif %}
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Confirm Reply Modal -->
+<div class="modal modal-blur fade" id="confirm-reply-modal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-sm modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-body">
+        <div class="modal-title">Post this reply?</div>
+        <div class="text-muted mt-1">Your reply will be visible to all parties.</div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-link link-secondary me-auto"
+                data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-primary" id="confirm-reply-btn">
+          <span id="confirm-reply-label">Yes, Post</span>
+          <span id="confirm-reply-spinner" class="spinner-border spinner-border-sm ms-2"
+                style="display:none;"></span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Confirm Status Modal -->
+<div class="modal modal-blur fade" id="confirm-status-modal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-sm modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-body">
+        <div class="modal-title">Update ticket status?</div>
+        <div class="text-muted mt-1">The ticket owner will be notified.</div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-link link-secondary me-auto"
+                data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-secondary" id="confirm-status-btn">
+          <span id="confirm-status-label">Yes, Update</span>
+          <span id="confirm-status-spinner" class="spinner-border spinner-border-sm ms-2"
+                style="display:none;"></span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+
+  function confirmSubmit(formId, modalId, btnId, labelId, spinnerId, savingText, defaultText) {
+    var btn = document.getElementById(btnId);
+    if (!btn) return;
+    btn.addEventListener('click', function () {
+      var label   = document.getElementById(labelId);
+      var spinner = document.getElementById(spinnerId);
+
+      btn.disabled          = true;
+      label.textContent     = savingText;
+      spinner.style.display = 'inline-block';
+
+      var form     = document.getElementById(formId);
+      var formData = new FormData(form);
+
+      fetch(form.getAttribute('hx-post'), {
+        method: 'POST', body: formData,
+        headers: { 'HX-Request': 'true' }
+      })
+      .then(function (res) { return res.text(); })
+      .then(function (html) {
+        var doc = new DOMParser().parseFromString(html, 'text/html');
+        doc.querySelectorAll('[hx-swap-oob]').forEach(function (oobEl) {
+          var target = document.getElementById(oobEl.id);
+          if (target) target.outerHTML = oobEl.outerHTML;
+        });
+        var toastEl = doc.querySelector('.toast');
+        if (toastEl) {
+          var redirectUrl = toastEl.getAttribute('data-redirect-url');
+          document.querySelector('#' + modalId + ' [data-bs-dismiss="modal"]').click();
+          document.getElementById('toast-container').innerHTML = toastEl.outerHTML;
+          tabler.Toast.getOrCreateInstance(document.querySelector('#toast-container .toast')).show();
+          if (redirectUrl) setTimeout(function () { window.location.href = redirectUrl; }, 1000);
+        }
+      })
+      .catch(function (err) { console.error(err); })
+      .finally(function () {
+        btn.disabled          = false;
+        label.textContent     = defaultText;
+        spinner.style.display = 'none';
+      });
+    });
+  }
+
+  confirmSubmit('reply-form',  'confirm-reply-modal',  'confirm-reply-btn',  'confirm-reply-label',  'confirm-reply-spinner',  'Posting...', 'Yes, Post');
+  confirmSubmit('status-form', 'confirm-status-modal', 'confirm-status-btn', 'confirm-status-label', 'confirm-status-spinner', 'Updating...', 'Yes, Update');
+
+  var msgTextarea = document.querySelector('#reply-form textarea');
+  if (msgTextarea) {
+    msgTextarea.addEventListener('input', function () {
+      var err = document.getElementById('error-message');
+      if (err) err.innerHTML = '';
+    });
+  }
+
+});
+</script>
+
+{% endblock %}

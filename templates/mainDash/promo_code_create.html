@@ -1,0 +1,245 @@
+
+{% extends "mainDash/layouts/baseDash.html" %}
+{% load static %}
+{% block title %}Create Promo Code{% endblock %}
+{% block content %}
+
+<div class="page-header d-print-none">
+  <div class="container-xl">
+    <div class="row g-2 align-items-center">
+      <div class="col">
+        <div class="page-pretitle">
+          <a href="{% url 'promo_code_list' %}" class="text-secondary">
+            <i class="bi bi-arrow-left me-1"></i> Back to Promo Codes
+          </a>
+        </div>
+        <h2 class="page-title">Create Promo Code</h2>
+      </div>
+      <div class="col-auto ms-auto">
+        <a href="{% url 'promo_code_list' %}"
+           class="btn btn-secondary btn-sm d-none d-sm-inline-block">
+          <i class="bi bi-arrow-left me-1"></i> Back
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="page-body">
+  <div class="container-xl">
+    <div class="row row-cards mt-3">
+
+      <div class="col-lg-8">
+        <form class="card" id="promo-create-form"
+              hx-post="{% url 'promo_code_create' %}"
+              hx-target="#toast-container"
+              hx-swap="innerHTML">
+          {% csrf_token %}
+          <div class="card-header">
+            <h3 class="card-title">
+              <i class="bi bi-tag me-2 text-muted"></i> Promo Code Details
+            </h3>
+          </div>
+          <div class="card-body">
+            <div class="row g-3">
+
+              <div class="col-md-6">
+                <label class="form-label required">Promo Code</label>
+                {{ form.code }}
+                <small class="text-muted d-block mt-1">Will be auto-uppercased.</small>
+                <div id="error-code"></div>
+              </div>
+
+              <div class="col-md-6">
+                <label class="form-label required">Status</label>
+                {{ form.status }}
+                <div id="error-status"></div>
+              </div>
+
+              <div class="col-md-6">
+                <label class="form-label required">Discount Type</label>
+                {{ form.discount_type }}
+                <div id="error-discount_type"></div>
+              </div>
+
+              <div class="col-md-6">
+                <label class="form-label required">Discount Value</label>
+                <div class="input-group">
+                  {{ form.discount_value }}
+                  <span class="input-group-text" id="discount-suffix">%</span>
+                </div>
+                <div id="error-discount_value"></div>
+              </div>
+
+              <div class="col-md-6">
+                <label class="form-label">Minimum Order Value</label>
+                <div class="input-group">
+                  <span class="input-group-text">£</span>
+                  {{ form.min_order_value }}
+                </div>
+                <div id="error-min_order_value"></div>
+              </div>
+
+              <div class="col-md-6">
+                <label class="form-label">Max Uses</label>
+                {{ form.max_uses }}
+                <small class="text-muted d-block mt-1">Leave blank for unlimited.</small>
+                <div id="error-max_uses"></div>
+              </div>
+
+              <div class="col-md-6">
+                <label class="form-label required">Valid From</label>
+                {{ form.valid_from }}
+                <div id="error-valid_from"></div>
+              </div>
+
+              <div class="col-md-6">
+                <label class="form-label">Valid Until</label>
+                {{ form.valid_until }}
+                <small class="text-muted d-block mt-1">Leave blank for no expiry.</small>
+                <div id="error-valid_until"></div>
+              </div>
+
+            </div>
+          </div>
+          <div class="card-footer text-end">
+            <a href="{% url 'promo_code_list' %}" class="btn btn-secondary btn-sm me-2">Cancel</a>
+            <button type="button"
+                    class="btn btn-primary btn-sm"
+                    data-bs-toggle="modal"
+                    data-bs-target="#confirm-promo-modal">
+              <i class="bi bi-tag me-1"></i> Create Promo Code
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Right — Guidelines -->
+      <div class="col-lg-4">
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title">
+              <i class="bi bi-info-circle me-2 text-muted"></i> Guidelines
+            </h3>
+          </div>
+          <div class="card-body p-0">
+            <div class="list-group list-group-flush">
+              <div class="list-group-item">
+                <small class="text-secondary d-block fw-medium mb-1">Code Format</small>
+                <small class="text-muted">Use letters and numbers only. e.g. <code>SUMMER25</code></small>
+              </div>
+              <div class="list-group-item">
+                <small class="text-secondary d-block fw-medium mb-1">Percentage Discount</small>
+                <small class="text-muted">Enter a value between 1–100 for % off.</small>
+              </div>
+              <div class="list-group-item">
+                <small class="text-secondary d-block fw-medium mb-1">Fixed Discount</small>
+                <small class="text-muted">Enter a fixed £ amount to deduct.</small>
+              </div>
+              <div class="list-group-item">
+                <small class="text-secondary d-block fw-medium mb-1">Max Uses</small>
+                <small class="text-muted">Leave blank to allow unlimited usage.</small>
+              </div>
+              <div class="list-group-item">
+                <small class="text-secondary d-block fw-medium mb-1">Expiry</small>
+                <small class="text-muted">Leave Valid Until blank for a permanent code.</small>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- Confirm Modal -->
+<div class="modal modal-blur fade" id="confirm-promo-modal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-sm modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-body">
+        <div class="modal-title">Create this promo code?</div>
+        <div class="text-muted mt-1">The code will be active immediately.</div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-link link-secondary me-auto"
+                data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-primary" id="confirm-promo-btn">
+          <span id="confirm-promo-label">Yes, Create</span>
+          <span id="confirm-promo-spinner" class="spinner-border spinner-border-sm ms-2"
+                style="display:none;"></span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+
+  // Update discount suffix based on type
+  var typeSelect   = document.querySelector('[name="discount_type"]');
+  var suffix       = document.getElementById('discount-suffix');
+  function updateSuffix() {
+    suffix.textContent = typeSelect.value === 'percentage' ? '%' : '£';
+  }
+  typeSelect.addEventListener('change', updateSuffix);
+  updateSuffix();
+
+  // Confirm submit
+  document.getElementById('confirm-promo-btn').addEventListener('click', function () {
+    var btn     = this;
+    var label   = document.getElementById('confirm-promo-label');
+    var spinner = document.getElementById('confirm-promo-spinner');
+
+    btn.disabled          = true;
+    label.textContent     = 'Creating...';
+    spinner.style.display = 'inline-block';
+
+    var form     = document.getElementById('promo-create-form');
+    var formData = new FormData(form);
+
+    fetch(form.getAttribute('hx-post'), {
+      method: 'POST', body: formData,
+      headers: { 'HX-Request': 'true' }
+    })
+    .then(function (res) { return res.text(); })
+    .then(function (html) {
+      var doc = new DOMParser().parseFromString(html, 'text/html');
+      doc.querySelectorAll('[hx-swap-oob]').forEach(function (oobEl) {
+        var target = document.getElementById(oobEl.id);
+        if (target) target.outerHTML = oobEl.outerHTML;
+      });
+      var toastEl = doc.querySelector('.toast');
+      if (toastEl) {
+        var redirectUrl = toastEl.getAttribute('data-redirect-url');
+        document.querySelector('#confirm-promo-modal [data-bs-dismiss="modal"]').click();
+        document.getElementById('toast-container').innerHTML = toastEl.outerHTML;
+        tabler.Toast.getOrCreateInstance(document.querySelector('#toast-container .toast')).show();
+        if (redirectUrl) setTimeout(function () { window.location.href = redirectUrl; }, 1500);
+      }
+    })
+    .catch(function (err) { console.error(err); })
+    .finally(function () {
+      btn.disabled          = false;
+      label.textContent     = 'Yes, Create';
+      spinner.style.display = 'none';
+    });
+  });
+
+  // Clear field errors on input
+  document.querySelectorAll('#promo-create-form input, #promo-create-form select').forEach(function (el) {
+    el.addEventListener('input', function () {
+      var err = document.getElementById('error-' + el.name);
+      if (err) err.innerHTML = '';
+    });
+    el.addEventListener('change', function () {
+      var err = document.getElementById('error-' + el.name);
+      if (err) err.innerHTML = '';
+    });
+  });
+
+});
+</script>
+
+{% endblock %}

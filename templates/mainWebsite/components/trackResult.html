@@ -1,0 +1,247 @@
+
+{% load static %}
+
+{% if not_found %}
+<!-- ── NOT FOUND ─────────────────────────────────────────────────── -->
+<div class="row justify-content-center mt-4">
+  <div class="col-xl-7 col-lg-9 col-md-10">
+    <div class="track-not-found text-center rounded-20 p-5"
+         style="background:#fff3cd; border:1px solid #ffc107;">
+      <div class="mb-3">
+        <i class="fa-solid fa-circle-exclamation fa-3x text-warning"></i>
+      </div>
+      <h4 class="fw-bold mb-2">Shipment Not Found</h4>
+      <p class="text-muted mb-0">
+        We could not find any shipment matching <strong>{{ query }}</strong>.
+        Please check your tracking number and try again.
+      </p>
+    </div>
+  </div>
+</div>
+
+{% elif shipment and order %}
+<!-- ── RESULT ─────────────────────────────────────────────────────── -->
+
+<div class="row justify-content-center mt-4 g-4">
+
+  <!-- ── Status Banner ──────────────────────────────────────────── -->
+  <div class="col-12">
+    <div class="track-status-banner rounded-20 p-4 d-flex flex-wrap align-items-center justify-content-between gap-3"
+         style="background:
+           {% if shipment.status == 'delivered' %}#d1fae5{% elif shipment.status == 'in_transit' %}#dbeafe{% elif shipment.status == 'cancelled' %}#fee2e2{% elif shipment.status == 'returned' %}#fef9c3{% else %}#f1f5f9{% endif %};
+           border-left: 5px solid
+           {% if shipment.status == 'delivered' %}#10b981{% elif shipment.status == 'in_transit' %}#3b82f6{% elif shipment.status == 'cancelled' %}#ef4444{% elif shipment.status == 'returned' %}#f59e0b{% else %}#94a3b8{% endif %};">
+      <div>
+        <p class="text-muted small mb-1">Tracking Number</p>
+        <h5 class="fw-bold mb-0">{{ order.tracking_number }}</h5>
+      </div>
+      <div>
+        <p class="text-muted small mb-1">Shipment Number</p>
+        <h5 class="fw-bold mb-0">{{ shipment.shipment_number }}</h5>
+      </div>
+      <div>
+        <p class="text-muted small mb-1">Current Status</p>
+        <span class="badge fs-6 px-3 py-2
+          {% if shipment.status == 'delivered' %}bg-success
+          {% elif shipment.status == 'in_transit' %}bg-primary
+          {% elif shipment.status == 'cancelled' %}bg-danger
+          {% elif shipment.status == 'returned' %}bg-warning text-dark
+          {% else %}bg-secondary{% endif %}">
+          {% if shipment.status == 'delivered' %}<i class="fa-solid fa-circle-check me-1"></i>
+          {% elif shipment.status == 'in_transit' %}<i class="fa-solid fa-truck me-1"></i>
+          {% elif shipment.status == 'cancelled' %}<i class="fa-solid fa-ban me-1"></i>
+          {% elif shipment.status == 'returned' %}<i class="fa-solid fa-rotate-left me-1"></i>
+          {% else %}<i class="fa-solid fa-clock me-1"></i>{% endif %}
+          {{ shipment.get_status_display }}
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Shipment Details ────────────────────────────────────────── -->
+  <div class="col-xl-{% if order.images.all %}8{% else %}12{% endif %} col-lg-7">
+    <div class="sidebar-widget rounded-20 h-100">
+      <h5 class="fw-bold mb-4 pb-2" style="border-bottom:2px solid #f0f0f0;">
+        <i class="fa-solid fa-box-open me-2 text-primary"></i> Shipment Details
+      </h5>
+      <div class="row g-3">
+        <div class="col-sm-6">
+          <p class="text-muted small mb-1">Customer Name</p>
+          <p class="fw-semibold mb-0">{{ order.customer_name }}</p>
+        </div>
+        <div class="col-sm-6">
+          <p class="text-muted small mb-1">Receiver</p>
+          <p class="fw-semibold mb-0">{{ order.receiver_name }}</p>
+        </div>
+        <div class="col-sm-6">
+          <p class="text-muted small mb-1">Origin</p>
+          <p class="fw-semibold mb-0">
+            <i class="fa-solid fa-location-dot me-1 text-muted"></i>
+            {{ order.sender_country|default:"—" }}
+          </p>
+        </div>
+        <div class="col-sm-6">
+          <p class="text-muted small mb-1">Destination</p>
+          <p class="fw-semibold mb-0">
+            <i class="fa-solid fa-location-dot me-1 text-primary"></i>
+            {{ order.receiver_country }}
+          </p>
+        </div>
+        {% if shipment.carrier_name %}
+        <div class="col-sm-6">
+          <p class="text-muted small mb-1">Carrier</p>
+          <p class="fw-semibold mb-0">{{ shipment.carrier_name }}</p>
+        </div>
+        {% endif %}
+        {% if shipment.pickup_date %}
+        <div class="col-sm-6">
+          <p class="text-muted small mb-1">Pickup Date</p>
+          <p class="fw-semibold mb-0">{{ shipment.pickup_date|date:"d M Y" }}</p>
+        </div>
+        {% endif %}
+        {% if shipment.expected_delivery_date %}
+        <div class="col-sm-6">
+          <p class="text-muted small mb-1">Expected Delivery</p>
+          <p class="fw-semibold mb-0">{{ shipment.expected_delivery_date|date:"d M Y" }}</p>
+        </div>
+        {% endif %}
+        {% if shipment.delivered_at %}
+        <div class="col-sm-6">
+          <p class="text-muted small mb-1">Delivered On</p>
+          <p class="fw-semibold mb-0 text-success">
+            <i class="fa-solid fa-circle-check me-1"></i>
+            {{ shipment.delivered_at|date:"d M Y, H:i" }}
+          </p>
+        </div>
+        {% endif %}
+        <div class="col-sm-6">
+            <p class="text-muted small mb-1">From</p>
+            <p class="fw-semibold mb-0">
+                <i class="fa-solid fa-location-dot me-1 text-muted"></i>
+                {{ order.sender_city|default:"" }}{% if order.sender_city and order.sender_country %}, {% endif %}{{ order.sender_country|default:"—" }}
+            </p>
+            </div>
+            <div class="col-sm-6">
+            <p class="text-muted small mb-1">To</p>
+            <p class="fw-semibold mb-0">
+                <i class="fa-solid fa-location-dot me-1 text-primary"></i>
+                {{ order.receiver_city|default:"" }}{% if order.receiver_city and order.receiver_country %}, {% endif %}{{ order.receiver_country|default:"—" }}
+            </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Shipment Images ─────────────────────────────────────────── -->
+  {% with images=order.images.all %}
+  {% if images %}
+  <div class="col-xl-4 col-lg-5">
+    <div class="sidebar-widget rounded-20 h-100">
+      <h5 class="fw-bold mb-4 pb-2" style="border-bottom:2px solid #f0f0f0;">
+        <i class="fa-solid fa-images me-2 text-primary"></i> Shipment Images
+      </h5>
+      <div class="row g-2">
+        {% for img in images %}
+        <div class="col-6">
+          <a href="{{ img.image.url }}" target="_blank" rel="noopener">
+            <img src="{{ img.image.url }}"
+                 class="img-fluid rounded-10 w-100"
+                 style="object-fit:cover; height:110px; transition:.2s; cursor:pointer;"
+                 onmouseover="this.style.opacity='.85'"
+                 onmouseout="this.style.opacity='1'"
+                 alt="Shipment image {{ forloop.counter }}">
+          </a>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+  {% endif %}
+  {% endwith %}
+
+  <!-- ── Tracking Timeline ───────────────────────────────────────── -->
+  <div class="col-12">
+    <div class="sidebar-widget rounded-20">
+      <h5 class="fw-bold mb-4 pb-2" style="border-bottom:2px solid #f0f0f0;">
+        <i class="fa-solid fa-timeline me-2 text-primary"></i> Tracking Timeline
+      </h5>
+
+      {% with events=shipment.tracking_events.all %}
+      {% if events %}
+      <div class="track-timeline position-relative ps-4"
+           style="border-left:2px solid #e2e8f0;">
+        {% for event in events %}
+        <div class="track-event position-relative mb-4
+                    {% if forloop.first %}track-event--latest{% endif %}"
+             style="margin-left:-1.35rem;">
+
+          <!-- Dot -->
+          <span class="track-dot d-flex align-items-center justify-content-center rounded-circle position-absolute"
+                style="width:28px; height:28px; top:2px; left:0;
+                       background:{% if forloop.first %}
+                         {% if event.status == 'delivered' %}#10b981
+                         {% elif event.status == 'in_transit' %}#3b82f6
+                         {% elif event.status == 'cancelled' %}#ef4444
+                         {% elif event.status == 'returned' %}#f59e0b
+                         {% else %}#64748b{% endif %}
+                       {% else %}#e2e8f0{% endif %};">
+            {% if forloop.first %}
+            <i class="fa-solid
+               {% if event.status == 'delivered' %}fa-circle-check
+               {% elif event.status == 'in_transit' %}fa-truck
+               {% elif event.status == 'cancelled' %}fa-ban
+               {% elif event.status == 'returned' %}fa-rotate-left
+               {% else %}fa-clock{% endif %}
+               text-white" style="font-size:11px;"></i>
+            {% else %}
+            <i class="fa-solid fa-circle text-secondary" style="font-size:8px;"></i>
+            {% endif %}
+          </span>
+
+          <!-- Content -->
+          <div class="ms-4 ps-2">
+            <div class="d-flex flex-wrap align-items-center gap-2 mb-1">
+              <span class="badge
+                {% if event.status == 'delivered' %}bg-success
+                {% elif event.status == 'in_transit' %}bg-primary
+                {% elif event.status == 'cancelled' %}bg-danger
+                {% elif event.status == 'returned' %}bg-warning text-dark
+                {% else %}bg-secondary{% endif %}
+                {% if forloop.first %}fs-6{% endif %}">
+                {{ event.get_status_display }}
+              </span>
+              {% if event.location %}
+              <span class="text-muted small">
+                <i class="fa-solid fa-location-dot me-1"></i>{{ event.location }}
+              </span>
+              {% endif %}
+            </div>
+            {% if event.description %}
+            <p class="mb-1 {% if forloop.first %}fw-medium{% else %}text-muted small{% endif %}">
+              {{ event.description }}
+            </p>
+            {% endif %}
+            <p class="text-muted small mb-0">
+              <i class="fa-regular fa-clock me-1"></i>
+              {{ event.created_at|date:"d M Y, H:i" }}
+            </p>
+          </div>
+
+        </div>
+        {% endfor %}
+      </div>
+      {% else %}
+      <div class="text-center py-4 text-muted">
+        <i class="fa-solid fa-clock-rotate-left fa-2x mb-3 d-block opacity-50"></i>
+        <p class="mb-0">No tracking updates yet. Please check back soon.</p>
+      </div>
+      {% endif %}
+      {% endwith %}
+
+    </div>
+  </div>
+
+</div>
+<!-- end result row -->
+
+{% endif %}

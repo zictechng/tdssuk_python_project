@@ -1,0 +1,27 @@
+
+{% extends "mainDash/layouts/baseDash.html" %}
+{% load static %}
+{% block title %}Customer Analytics{% endblock %}
+{% block content %}
+
+<div class="page-header d-print-none">
+  <div class="container-xl">
+    <div class="row g-2 align-items-center">
+      <div class="col">
+        <h2 class="page-title">Customer Analytics</h2>
+        <div class="page-pretitle">Top customers, order volumes and destination trends</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="page-body">
+  <div class="container-xl">
+    <div id="report-container">
+      {% include "mainDash/components/customer_analytics_dataTable.html" %}
+    </div>
+  </div>
+</div>
+
+{% include "mainDash/includes/report_scripts.html" %}
+{% endblock %}

@@ -1,0 +1,183 @@
+{% load humanize %}
+
+<div class="col-12">
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">Users</h3>
+            <div class="card-options">
+                <small class="text-muted">
+                    {{ users.paginator.count }} user{{ users.paginator.count|pluralize }}
+                </small>
+            </div>
+        </div>
+
+        {% if users.paginator.count > 0 %}
+        <div class="table-responsive">
+            <table class="table card-table table-vcenter text-nowrap">
+                <thead>
+                    <tr>
+                        <th class="w-1">
+                            <input class="form-check-input m-0 align-middle"
+                                   type="checkbox" id="select-all"
+                                   aria-label="Select all users" />
+                        </th>
+                        <th>User</th>
+                        <th>Phone</th>
+                        <th>Role</th>
+                        <th>Status</th>
+                        <th>Joined</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for u in users %}
+                    <tr id="row-{{ u.profile.uuid }}">
+                        <td>
+                            <input class="form-check-input m-0 align-middle table-selectable-check"
+                                   type="checkbox" value="{{ u.pk }}"
+                                   aria-label="Select user" />
+                        </td>
+                        <td>
+                            <div class="d-flex align-items-center gap-2">
+                                {% if u.profile.profile_image %}
+                                <span class="avatar avatar-sm"
+                                      style="background-image: url('{{ u.profile.profile_image.url }}')"></span>
+                                {% else %}
+                                <span class="avatar avatar-sm bg-blue-lt text-blue fw-bold">
+                                    {{ u.first_name|slice:":1" }}{{ u.last_name|slice:":1" }}
+                                </span>
+                                {% endif %}
+                                <div>
+                                    <p class="mb-0 fw-medium">{{ u.get_full_name }}</p>
+                                    <small class="text-muted">{{ u.email }}</small>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="text-secondary">{{ u.profile.phone|default:"—" }}</td>
+                        <td>
+                            {% for group in u.groups.all %}
+                            <span class="badge bg-blue-lt text-blue me-1">{{ group.name }}</span>
+                            {% empty %}
+                            <span class="text-muted small">No role</span>
+                            {% endfor %}
+                        </td>
+                        <td>
+                            <span id="status-badge-{{ u.pk }}"
+                                  class="badge {% if u.is_active %}bg-green-lt{% else %}bg-secondary-lt{% endif %}">
+                                {% if u.is_active %}Active{% else %}Inactive{% endif %}
+                            </span>
+                        </td>
+                        <td class="text-secondary">{{ u.date_joined|date:"d/m/Y" }}</td>
+                        <td class="text-end">
+                            <div class="btn-list flex-nowrap justify-content-end">
+                                <a href="{% url 'user_detail' u.profile.uuid %}"
+                                   class="btn btn-sm btn-ghost-secondary">
+                                   View
+                                </a>
+                                <a href="{% url 'user_edit' u.profile.uuid %}"
+                                   class="btn btn-sm btn-ghost-warning">
+                                    Edit
+                                </a>
+                                <button type="button"
+                                        class="btn btn-sm btn-ghost-danger js-delete-user"
+                                        data-delete-url="{% url 'user_delete' u.profile.uuid %}"
+                                        data-user-pk="{{ u.pk }}"
+                                        data-user-name="{{ u.get_full_name }}">
+                                         Delete
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="card-footer d-flex align-items-center">
+            <p class="m-0 text-secondary">
+                Showing <strong>{{ users.start_index }}–{{ users.end_index }}</strong>
+                of <strong>{{ users.paginator.count }}</strong>
+            </p>
+            <ul class="pagination m-0 ms-auto">
+                <li class="page-item {% if not users.has_previous %}disabled{% endif %}">
+                    <a class="page-link"
+                       hx-get="{% url 'user_list' %}?page={% if users.has_previous %}{{ users.previous_page_number }}{% else %}1{% endif %}&search={{ search }}&status={{ status_filter }}"
+                       hx-target="#users-table-container"
+                       hx-swap="innerHTML"
+                       hx-push-url="true">←</a>
+                </li>
+                {% for num in users.paginator.page_range %}
+                <li class="page-item {% if users.number == num %}active{% endif %}">
+                    <a class="page-link"
+                       hx-get="{% url 'user_list' %}?page={{ num }}&search={{ search }}&status={{ status_filter }}"
+                       hx-target="#users-table-container"
+                       hx-swap="innerHTML"
+                       hx-push-url="true">{{ num }}</a>
+                </li>
+                {% endfor %}
+                <li class="page-item {% if not users.has_next %}disabled{% endif %}">
+                    <a class="page-link"
+                       hx-get="{% url 'user_list' %}?page={% if users.has_next %}{{ users.next_page_number }}{% else %}{{ users.paginator.num_pages }}{% endif %}&search={{ search }}&status={{ status_filter }}"
+                       hx-target="#users-table-container"
+                       hx-swap="innerHTML"
+                       hx-push-url="true">→</a>
+                </li>
+            </ul>
+        </div>
+
+        {% else %}
+        <div class="text-center py-5 text-secondary">
+            <i class="bi bi-people fs-2 d-block mb-2 opacity-50"></i>
+            <h4 class="mb-1">No users found</h4>
+            <small>Try adjusting your search or status filter.</small>
+        </div>
+        {% endif %}
+
+    </div>
+</div>
+
+{% include "mainDash/includes/confirm_delete_modal.html" %}
+
+<script>
+document.querySelectorAll('.js-delete-user').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+        var deleteUrl = btn.getAttribute('data-delete-url');
+        var userPk    = btn.getAttribute('data-user-pk');
+        var userName  = btn.getAttribute('data-user-name');
+      
+        confirmDelete({
+            title: 'Delete ' + userName + '?',
+            message: 'This user will be deleted and cannot be restored.',
+            url: deleteUrl,
+            csrfToken: '{{ csrf_token }}',
+            onSuccess: function (data) {
+                htmx.ajax('GET', '{{ request.get_full_path }}', {
+                    target: '#users-table-container',
+                    swap: 'innerHTML'
+                });
+            },
+            onError: function (data) {
+                alert(data.error || 'Delete failed.');
+            },
+        });
+        
+    });
+});
+
+(function () {
+    function initSelectAll() {
+        var selectAll = document.getElementById('select-all');
+        if (!selectAll) return;
+        selectAll.addEventListener('change', function () {
+            document.querySelectorAll('.table-selectable-check').forEach(function (cb) {
+                cb.checked = selectAll.checked;
+            });
+        });
+    }
+    initSelectAll();
+    var container = document.getElementById('users-table-container');
+    if (container) {
+        container.addEventListener('htmx:afterSwap', initSelectAll);
+    }
+})();
+</script>

@@ -1,0 +1,58 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <style>
+    body { font-family: Arial, sans-serif; background:#f4f4f4; margin:0; padding:0; }
+    .container { max-width:600px; margin:40px auto; background:#fff; border-radius:8px; overflow:hidden; }
+    .header { background:#E73130; color:#fff; padding:24px 32px; }
+    .header h1 { margin:0; font-size:20px; }
+    .body { padding:32px; }
+    .status-badge { display:inline-block; padding:6px 16px; border-radius:20px;
+                    background:#e8f4fd; color:#E73130; font-weight:600; font-size:14px; }
+    .info-row { display:flex; justify-content:space-between;
+                padding:10px 0; border-bottom:1px solid #eee; font-size:14px; }
+    .footer { background:#f4f4f4; padding:16px 32px; font-size:12px; color:#999; text-align:center; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>Shipment Update</h1>
+      <p style="margin:4px 0 0; opacity:.8;">{{ shipment.shipment_number }}</p>
+    </div>
+    <div class="body">
+      <p>Hi {{ order.customer_name|default:"Customer" }},</p>
+      <p>Your shipment status has been updated:</p>
+
+      <p><span class="status-badge">{{ status }}</span></p>
+
+      <div style="margin:24px 0;">
+        <div class="info-row">
+          <span style="color:#666;">Shipment Number</span>
+          <strong>{{ tracking_number }}</strong>
+        </div>
+        <div class="info-row">
+          <span style="color:#666;">Destination</span>
+          <strong>{{ order.destination_country|default:"—" }}</strong>
+        </div>
+        {% if shipment.estimated_delivery %}
+        <div class="info-row">
+          <span style="color:#666;">Estimated Delivery</span>
+          <strong>{{ shipment.estimated_delivery|date:"d M Y" }}</strong>
+        </div>
+        {% endif %}
+      </div>
+
+      <p style="color:#666; font-size:14px;">
+        If you have any questions about your shipment, please contact our support team
+        or reply to this email.
+      </p>
+    </div>
+    <div class="footer">
+      This email was sent automatically. Please do not reply directly to this message.
+    </div>
+  </div>
+</body>
+</html>

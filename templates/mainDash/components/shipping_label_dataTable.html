@@ -1,0 +1,134 @@
+
+{% load humanize %}
+
+<div class="col-12">
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">Shipping Labels</h3>
+            <div class="card-options">
+                <small class="text-muted">
+                    {{ labels.paginator.count }} label{{ labels.paginator.count|pluralize }}
+                </small>
+            </div>
+        </div>
+
+        {% if labels.paginator.count > 0 %}
+        <div class="table-responsive">
+            <table class="table card-table table-vcenter text-nowrap">
+                <thead>
+                    <tr>
+                        <th>Title</th>
+                        <th>Shipment</th>
+                        <th>Order</th>
+                        <th>Uploaded By</th>
+                        <th>Date</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for label in labels %}
+                    <tr id="label-row-{{ label.pk }}">
+                        <td class="fw-medium">{{ label.title }}</td>
+                        <td>
+                            {% if label.shipment %}
+                                <a href="{% url 'viewShipmentDetail' label.shipment.uuid %}" class="text-reset">
+                                    <i class="bi bi-box-seam me-1 text-blue"></i>
+                                    {{ label.shipment.tracking_number }}
+                                </a>
+                            {% else %}<span class="text-muted">—</span>{% endif %}
+                        </td>
+                        <td>
+                            {% if label.order %}
+                                <a href="{% url 'viewOrderDetail' label.order.uuid %}" class="text-reset">
+                                    <i class="bi bi-bag me-1 text-green"></i>
+                                    {{ label.order.order_number }}
+                                </a>
+                            {% else %}<span class="text-muted">—</span>{% endif %}
+                        </td>
+                        <td class="text-secondary">
+                            {{ label.uploaded_by.get_full_name|default:label.uploaded_by.username }}
+                        </td>
+                        <td class="text-secondary">{{ label.created_at|date:"d/m/Y H:i" }}</td>
+                        <td class="text-end">
+                            <a href="{% url 'shipping_label_detail' label.uuid %}"
+                               class="btn btn-sm btn-ghost-secondary">View</a>
+                            <a href="{{ label.file.url }}" target="_blank"
+                               class="btn btn-sm btn-ghost-secondary">Download</a>
+                            <button type="button"
+                                    class="btn btn-sm btn-ghost-danger js-delete-label"
+                                    data-label-id="{{ label.pk }}">
+                                Delete
+                            </button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="card-footer d-flex align-items-center">
+            <p class="m-0 text-secondary">
+                Showing <strong>{{ labels.start_index }}–{{ labels.end_index }}</strong>
+                of <strong>{{ labels.paginator.count }}</strong>
+            </p>
+            <ul class="pagination m-0 ms-auto">
+                <li class="page-item {% if not labels.has_previous %}disabled{% endif %}">
+                    <a class="page-link"
+                       hx-get="{% url 'shipping_label_list' %}?page={% if labels.has_previous %}{{ labels.previous_page_number }}{% else %}1{% endif %}&search={{ search }}"
+                       hx-target="#labels-table-container"
+                       hx-swap="innerHTML"
+                       hx-push-url="true">←</a>
+                </li>
+                {% for num in labels.paginator.page_range %}
+                <li class="page-item {% if labels.number == num %}active{% endif %}">
+                    <a class="page-link"
+                       hx-get="{% url 'shipping_label_list' %}?page={{ num }}&search={{ search }}"
+                       hx-target="#labels-table-container"
+                       hx-swap="innerHTML"
+                       hx-push-url="true">{{ num }}</a>
+                </li>
+                {% endfor %}
+                <li class="page-item {% if not labels.has_next %}disabled{% endif %}">
+                    <a class="page-link"
+                       hx-get="{% url 'shipping_label_list' %}?page={% if labels.has_next %}{{ labels.next_page_number }}{% else %}{{ labels.paginator.num_pages }}{% endif %}&search={{ search }}"
+                       hx-target="#labels-table-container"
+                       hx-swap="innerHTML"
+                       hx-push-url="true">→</a>
+                </li>
+            </ul>
+        </div>
+
+        {% else %}
+        <div class="text-center py-5 text-secondary">
+            <i class="bi bi-tag fs-2 d-block mb-2 opacity-50"></i>
+            <h4 class="mb-1">No shipping labels found</h4>
+            <small>Try adjusting your search or upload a new label.</small>
+        </div>
+        {% endif %}
+
+    </div>
+</div>
+
+
+{% include "mainDash/includes/confirm_delete_modal.html" %}
+<script>
+document.querySelectorAll('.js-delete-label').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+        var labelId = btn.getAttribute('data-label-id');
+        var deleteUrl = "{% url 'uploaded_document_delete' '00000000-0000-0000-0000-000000000000' %}".replace('00000000-0000-0000-0000-000000000000', labelId);
+        confirmDelete({
+            url: deleteUrl,
+            title: 'Delete this shipping label?',
+            message: 'This will permanently remove the label and its file.',
+            csrfToken: '{{ csrf_token }}',
+            onSuccess: function () {
+                var row = document.getElementById('label-row-' + labelId);
+                if (row) row.remove();
+            },
+            onError: function (data) {
+                alert(data.error || 'Delete failed.');
+            },
+        });
+    });
+});
+</script>

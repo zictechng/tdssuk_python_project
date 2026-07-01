@@ -1,0 +1,150 @@
+{% load humanize %}
+
+<div class="col-12">
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">All Roles</h3>
+            <div class="card-options">
+                <small class="text-muted">
+                    {{ roles.paginator.count }} role{{ roles.paginator.count|pluralize }}
+                </small>
+            </div>
+        </div>
+
+        {% if roles.paginator.count > 0 %}
+        <div class="table-responsive">
+            <table class="table card-table table-vcenter text-nowrap">
+                <thead>
+                    <tr>
+                        <th class="w-1">
+                            <input class="form-check-input m-0 align-middle"
+                                   type="checkbox" id="select-all"
+                                   aria-label="Select all roles" />
+                        </th>
+                        <th>Role Name</th>
+                        <th>Permissions</th>
+                        <th>Users Assigned</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for role in roles %}
+                    <tr id="row-{{ role.pk }}">
+                        <td>
+                            <input class="form-check-input m-0 align-middle table-selectable-check"
+                                   type="checkbox" value="{{ role.pk }}"
+                                   aria-label="Select role" />
+                        </td>
+                        <td class="fw-medium">{{ role.name }}</td>
+                        <td class="text-secondary">
+                            {{ role.permissions.count }} permission{{ role.permissions.count|pluralize }}
+                        </td>
+                        <td class="text-secondary">
+                            {{ role.user_set.count }} user{{ role.user_set.count|pluralize }}
+                        </td>
+                        <td class="text-end">
+                            <div class="btn-list flex-nowrap justify-content-end">
+                                <a href="{% url 'role_edit' role.token %}"
+                                   class="btn btn-sm btn-ghost-warning">
+                                     Edit
+                                </a>
+                                <button type="button"
+                                        class="btn btn-sm btn-ghost-danger js-delete-role"
+                                        data-delete-url="{% url 'role_delete' role.pk %}"
+                                        data-role-name="{{ role.name }}">
+                                    Delete
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="card-footer d-flex align-items-center">
+            <p class="m-0 text-secondary">
+                Showing <strong>{{ roles.start_index }}–{{ roles.end_index }}</strong>
+                of <strong>{{ roles.paginator.count }}</strong>
+            </p>
+            <ul class="pagination m-0 ms-auto">
+                <li class="page-item {% if not roles.has_previous %}disabled{% endif %}">
+                    <a class="page-link"
+                       hx-get="{% url 'role_list' %}?page={% if roles.has_previous %}{{ roles.previous_page_number }}{% else %}1{% endif %}&search={{ search }}"
+                       hx-target="#roles-table-container"
+                       hx-swap="innerHTML"
+                       hx-push-url="true">←</a>
+                </li>
+                {% for num in roles.paginator.page_range %}
+                <li class="page-item {% if roles.number == num %}active{% endif %}">
+                    <a class="page-link"
+                       hx-get="{% url 'role_list' %}?page={{ num }}&search={{ search }}"
+                       hx-target="#roles-table-container"
+                       hx-swap="innerHTML"
+                       hx-push-url="true">{{ num }}</a>
+                </li>
+                {% endfor %}
+                <li class="page-item {% if not roles.has_next %}disabled{% endif %}">
+                    <a class="page-link"
+                       hx-get="{% url 'role_list' %}?page={% if roles.has_next %}{{ roles.next_page_number }}{% else %}{{ roles.paginator.num_pages }}{% endif %}&search={{ search }}"
+                       hx-target="#roles-table-container"
+                       hx-swap="innerHTML"
+                       hx-push-url="true">→</a>
+                </li>
+            </ul>
+        </div>
+
+        {% else %}
+        <div class="text-center py-5 text-secondary">
+            <i class="bi bi-shield fs-2 d-block mb-2 opacity-50"></i>
+            <h4 class="mb-1">No roles found</h4>
+            <small>Try adjusting your search filter.</small>
+        </div>
+        {% endif %}
+
+    </div>
+</div>
+
+{% include "mainDash/includes/confirm_delete_modal.html" %}
+
+<script>
+document.querySelectorAll('.js-delete-role').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+        var deleteUrl = btn.getAttribute('data-delete-url');
+        var roleName  = btn.getAttribute('data-role-name');
+
+        confirmDelete({
+            title:     'Delete ' + roleName + '?',
+            message:   'This role will be permanently deleted and removed from all assigned users.',
+            url:       deleteUrl,
+            csrfToken: '{{ csrf_token }}',
+            onSuccess: function () {
+                htmx.ajax('GET', '{{ request.get_full_path }}', {
+                    target: '#roles-table-container',
+                    swap:   'innerHTML'
+                });
+            },
+            onError: function (data) {
+                alert(data.error || 'Delete failed.');
+            },
+        });
+    });
+});
+
+(function () {
+    function initSelectAll() {
+        var selectAll = document.getElementById('select-all');
+        if (!selectAll) return;
+        selectAll.addEventListener('change', function () {
+            document.querySelectorAll('.table-selectable-check').forEach(function (cb) {
+                cb.checked = selectAll.checked;
+            });
+        });
+    }
+    initSelectAll();
+    var container = document.getElementById('roles-table-container');
+    if (container) {
+        container.addEventListener('htmx:afterSwap', initSelectAll);
+    }
+})();
+</script>

@@ -1,0 +1,84 @@
+    
+    {% load static %}
+    <div class="row g-0 flex-fill">
+        <div class="col-12 col-lg-6 col-xl-4 border-top-wide border-primary d-flex flex-column justify-content-center">
+          <div class="container container-tight my-5 px-lg-5">
+            <div class="text-center mb-4">
+              <!-- BEGIN NAVBAR LOGO -->
+               <a href="#" aria-label="Tabler" class="navbar-brand navbar-brand-autodark"
+                ><img src="{% static 'mainDash/images/tdssuk_logo.png'%}" width="150px" alt="logo"></a
+              ><!-- END NAVBAR LOGO -->
+            </div>
+            <h2 class="h3 text-center mb-3">Login to Dashboard</h2>
+               
+                  {% if error %}
+                  <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    {{ error }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                  </div>
+                {% endif %}
+                  
+            <form method="post" autocomplete="off">
+              {% csrf_token %}
+              <div class="mb-3">
+                <label class="form-label">Email address</label>
+                <input type="email" name="login_email" class="form-control" placeholder="your@email.com" autocomplete="off" />
+                
+                    {% if form.login_email.errors %}
+                      <small class="text-danger">
+                        {{ form.login_email.errors.0 }}
+                      </small>
+                    {% endif %}
+              </div>
+              <div class="mb-2">
+                <label class="form-label">
+                  Password
+                </label>
+                <div class="input-group input-group-flat">
+                  <input type="password" name="login_password" class="form-control" placeholder="Your password" autocomplete="off" />
+                  
+                  <span class="input-group-text">
+                    <a href="#" class="link-secondary" title="Show password" data-bs-toggle="tooltip"
+                      ><!-- Download SVG icon from http://tabler.io/icons/icon/eye -->
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="24"
+                        height="24"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        class="icon icon-1"
+                      >
+                        <path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />
+                        <path d="M21 12c-2.4 4 -5.4 6 -9 6c-3.6 0 -6.6 -2 -9 -6c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6" /></svg
+                    ></a>
+                  </span>
+                </div>
+                    {% if form.login_password.errors %}
+                      <small class="text-danger">
+                        {{ form.login_password.errors.0 }}
+                      </small>
+                    {% endif %}
+              </div>
+              <div class="mb-2">
+                <label class="form-check">
+                  <input type="checkbox" name="remember" class="form-check-input" />
+                  <span class="form-check-label">Remember me on this device</span>
+                </label>
+              </div>
+              <div class="form-footer">
+                <button type="submit" class="btn btn-danger w-100">Sign in</button>
+              </div>
+              <input type="hidden" name="next" value="{{ request.GET.next|default:'' }}">
+            </form>
+            <div class="text-center text-secondary mt-3">Forget Login Details? <a href="{% url 'forgotPassword'%}" tabindex="-1">Reset Login</a></div>
+          </div>
+        </div>
+        <div class="col-12 col-lg-6 col-xl-8 d-none d-lg-block">
+          <!-- Photo -->
+          <div class="bg-cover h-100 min-vh-100" style="background-image: url({% static 'mainDash/images/og11.jpg'%})"></div>
+        </div>
+      </div>

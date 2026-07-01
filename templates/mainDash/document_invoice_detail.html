@@ -1,0 +1,218 @@
+{% extends "mainDash/layouts/baseDash.html" %}
+{% load static humanize %}
+
+
+{% block title %}Invoice — {{ invoice.invoice_number }}{% endblock %}
+
+
+{% block content %}
+
+
+<div class="page-header d-print-none" aria-label="Page header">
+    <div class="container-xl">
+        <div class="row g-2 align-items-center">
+            <div class="col">
+                <h2 class="page-title">{{ invoice.invoice_number }}</h2>
+                <div class="page-pretitle">
+                    <a href="{% url 'document_invoice_list' %}" class="text-secondary">
+                        <i class="bi bi-arrow-left me-1"></i> Back to Invoices
+                    </a>
+                </div>
+            </div>
+            <div class="col-auto ms-auto d-print-none">
+                <div class="btn-list">
+                    <a href="{% url 'invoice_detail' invoice.uuid %}"
+                       class="btn btn-warning btn-sm d-none d-sm-inline-block">
+                        <i class="bi bi-pencil me-1"></i> Edit Invoice
+                    </a>
+                    <button onclick="window.print()"
+                            class="btn btn-outline-primary btn-sm d-none d-sm-inline-block">
+                        <i class="bi bi-printer me-1"></i> Print
+                    </button>
+                    <a href="{% url 'document_invoice_list' %}"
+                       class="btn btn-secondary btn-sm d-none d-sm-inline-block">
+                        <i class="bi bi-arrow-left me-1"></i> Back
+                    </a>
+                    <a href="{% url 'document_invoice_list' %}"
+                       class="btn btn-secondary d-sm-none btn-icon">
+                        <i class="bi bi-arrow-left"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="page-body">
+    <div class="container-xl">
+        <div class="row row-deck row-cards">
+
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body p-4 p-md-5">
+
+                        {# ---- Invoice Header ---- #}
+                        <div class="row mb-4">
+                            <div class="col-6">
+                                <h1 class="h2 mb-1 fw-bold">INVOICE</h1>
+                                <p class="text-muted mb-0 fs-5">{{ invoice.invoice_number }}</p>
+                            </div>
+                            <div class="col-6 text-end">
+                                <span class="badge fs-6 mb-2
+                                    {% if invoice.status == 'paid' %}bg-success text-white
+                                    {% elif invoice.status == 'overdue' %}bg-danger text-white
+                                    {% elif invoice.status == 'sent' %}bg-primary text-white
+                                    {% elif invoice.status == 'partially_paid' %}bg-info text-white
+                                    {% elif invoice.status == 'cancelled' %}bg-secondary text-white
+                                    {% elif invoice.status == 'rejected' %}bg-danger text-white
+                                    {% else %}bg-warning text-dark
+                                    {% endif %}">
+                                    {{ invoice.get_status_display }}
+                                </span>
+                                <p class="text-muted mb-0">
+                                    Issue Date: <strong>{{ invoice.issue_date|date:"d/m/Y" }}</strong>
+                                </p>
+                                <p class="text-muted mb-0">
+                                    Due Date: <strong>{{ invoice.due_date|date:"d/m/Y" }}</strong>
+                                </p>
+                            </div>
+                        </div>
+
+                        <hr class="my-4">
+
+                        {# ---- From / Bill To ---- #}
+                        <div class="row mb-4">
+                            <div class="col-md-6 mb-3 mb-md-0">
+                                <h4 class="text-muted fw-medium mb-2">From</h4>
+                                <p class="fw-bold mb-1">TDSSUK Global Services Ltd</p>
+                                <p class="text-muted small mb-0">United Kingdom</p>
+                                <p class="text-muted small mb-0">UK → West Africa Shipping</p>
+                            </div>
+                            <div class="col-md-6">
+                                <h4 class="text-muted fw-medium mb-2">Bill To</h4>
+                                <p class="fw-bold mb-1">{{ invoice.customer_name }}</p>
+                                {% if invoice.customer_email %}
+                                <p class="text-muted small mb-0">{{ invoice.customer_email }}</p>
+                                {% endif %}
+                                {% if invoice.customer_phone %}
+                                <p class="text-muted small mb-0">{{ invoice.customer_phone }}</p>
+                                {% endif %}
+                                <p class="text-muted small mb-0">{{ invoice.destination_country }}</p>
+                            </div>
+                        </div>
+
+                        {# ---- Line Items ---- #}
+                        <div class="table-responsive mb-4">
+                            <table class="table table-bordered">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Type</th>
+                                        <th style="width: 50%;">Description</th>
+                                        <th class="text-end">Qty</th>
+                                        <th class="text-end">Unit Price</th>
+                                        <th class="text-end">Amount</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for item in invoice.line_items.all %}
+                                    <tr>
+                                        <td class="text-secondary">{{ item.get_charge_type_display }}</td>
+                                        <td>{{ item.description }}</td>
+                                        <td class="text-end">{{ item.quantity }}</td>
+                                        <td class="text-end">
+                                            {{ invoice.currency }} {{ item.unit_price|floatformat:2|intcomma }}
+                                        </td>
+                                        <td class="text-end">
+                                            {{ invoice.currency }} {{ item.amount|floatformat:2|intcomma }}
+                                        </td>
+                                    </tr>
+                                    {% empty %}
+                                    <tr>
+                                        <td colspan="5" class="text-center text-muted py-3">
+                                            No line items on this invoice.
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                                <tfoot>
+                                    <tr>
+                                        <td colspan="4" class="text-end text-muted">Subtotal</td>
+                                        <td class="text-end">
+                                            {{ invoice.currency }} {{ invoice.subtotal|floatformat:2|intcomma }}
+                                        </td>
+                                    </tr>
+                                    {% if invoice.discount %}
+                                    <tr>
+                                        <td colspan="4" class="text-end text-muted">Discount</td>
+                                        <td class="text-end text-danger">
+                                            − {{ invoice.currency }} {{ invoice.discount|floatformat:2|intcomma }}
+                                        </td>
+                                    </tr>
+                                    {% endif %}
+                                    <tr class="table-light">
+                                        <th colspan="4" class="text-end fs-5">Total</th>
+                                        <th class="text-end fs-5">
+                                            {{ invoice.currency }} {{ invoice.total_amount|floatformat:2|intcomma }}
+                                        </th>
+                                    </tr>
+                                    <tr>
+                                        <td colspan="4" class="text-end text-muted">Amount Paid</td>
+                                        <td class="text-end text-green">
+                                            {{ invoice.currency }} {{ invoice.amount_paid|floatformat:2|intcomma }}
+                                        </td>
+                                    </tr>
+                                    <tr class="table-light fw-bold">
+                                        <th colspan="4" class="text-end">Balance Due</th>
+                                        <th class="text-end {% if invoice.balance_due > 0 %}text-danger{% else %}text-success{% endif %}">
+                                            {{ invoice.currency }} {{ invoice.balance_due|floatformat:2|intcomma }}
+                                        </th>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+
+                        {# ---- Notes ---- #}
+                        {% if invoice.notes %}
+                        <div class="mt-3">
+                            <h4 class="text-muted fw-medium mb-2">Notes</h4>
+                            <p class="text-muted mb-0">{{ invoice.notes }}</p>
+                        </div>
+                        {% endif %}
+
+                        {# ---- Print Footer ---- #}
+                        <div class="mt-5 pt-4 border-top text-center text-muted small">
+                            <p class="mb-0">TDSSUK Global Services Ltd — United Kingdom</p>
+                            <p class="mb-0">Thank you for your business.</p>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+
+<style>
+@media print {
+    .page-header,
+    .navbar,
+    .sidebar,
+    .btn,
+    .d-print-none {
+        display: none !important;
+    }
+    .card {
+        border: none !important;
+        box-shadow: none !important;
+    }
+    body {
+        background: white !important;
+    }
+}
+</style>
+
+
+{% endblock %}

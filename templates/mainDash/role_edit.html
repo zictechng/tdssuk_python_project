@@ -1,0 +1,199 @@
+
+{% extends "mainDash/layouts/baseDash.html" %}
+{% load static %}
+
+{% block title %}Edit Role — {{ role.name }}{% endblock %}
+
+{% block content %}
+
+<div class="page-header d-print-none">
+    <div class="container-xl">
+        <div class="row g-2 align-items-center">
+            <div class="col">
+                <div class="page-pretitle">
+                    <a href="{% url 'role_list' %}" class="text-secondary">
+                        <i class="bi bi-arrow-left me-1"></i> Back to Roles
+                    </a>
+                </div>
+                <h2 class="page-title">Edit — {{ role.name }}</h2>
+            </div>
+            <div class="col-auto ms-auto d-print-none">
+                <div class="btn-list">
+                    <a href="{% url 'role_list' %}"
+                       class="btn btn-secondary btn-sm d-none d-sm-inline-block">
+                        <i class="bi bi-arrow-left me-1"></i> Back
+                    </a>
+                    <a href="{% url 'role_list' %}"
+                       class="btn btn-secondary d-sm-none btn-icon">
+                        <i class="bi bi-arrow-left"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="page-body">
+    <div class="container-xl">
+        <div class="row row-deck row-cards">
+            <div class="col-12 mt-3">
+
+                <form class="card" id="role-edit-form"
+                    hx-post="{% url 'role_edit' token %}"
+                    hx-target="#toast-container"
+                    hx-swap="innerHTML"
+                    enctype="multipart/form-data">
+                    {% csrf_token %}
+
+                    <div class="card-header">
+                        <h3 class="card-title">Role Details</h3>
+                    </div>
+
+                    <div class="card-body">
+                        <div class="row row-cards">
+
+                            <div class="col-12">
+                                <div class="mb-3">
+                                    <label class="form-label required">Role Name</label>
+                                    <input type="text" name="name" class="form-control"
+                                           value="{{ role.name }}" />
+                                    <div id="error-name"></div>
+                                </div>
+                            </div>
+
+                            <div class="col-12">
+                                <div class="mb-3">
+                                    <label class="form-label">Permissions</label>
+                                    <div class="card card-body bg-light"
+                                         style="max-height: 400px; overflow-y: auto;">
+                                        {% regroup permissions by content_type.app_label as grouped_permissions %}
+                                        {% for group in grouped_permissions %}
+                                        <div class="mb-3">
+                                            <p class="fw-bold text-uppercase small text-muted mb-1">
+                                                {{ group.grouper }}
+                                            </p>
+                                            {% for perm in group.list %}
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="checkbox"
+                                                        name="permissions" value="{{ perm.pk }}"
+                                                        id="perm_{{ perm.pk }}"
+                                                        {% if perm.pk in role_permissions %}checked{% endif %}>
+                                                    <label class="form-check-label" for="perm_{{ perm.pk }}">
+                                                        {{ perm.name }}
+                                                    </label>
+                                                </div>
+                                                {% endfor %}
+                                        </div>
+                                        {% endfor %}
+                                    </div>
+                                    <div id="error-permissions"></div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <div class="card-footer text-end">
+                        <a href="{% url 'role_list' %}" class="btn btn-secondary btn-sm me-2">Cancel</a>
+                        <button type="button"
+                                class="btn btn-warning btn-sm"
+                                data-bs-toggle="modal"
+                                data-bs-target="#confirm-edit-role-modal">
+                            Save Changes
+                        </button>
+                    </div>
+                </form>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal modal-blur fade" id="confirm-edit-role-modal"
+     tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-sm modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-body">
+                <div class="modal-title">Save changes?</div>
+                <div class="text-muted mt-1">The role will be updated with the new details.</div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-link link-secondary me-auto"
+                        data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-warning" id="confirm-edit-role-btn">
+                    <span id="confirm-edit-role-label">Yes, Save</span>
+                    <span id="confirm-edit-role-spinner"
+                          class="spinner-border spinner-border-sm ms-2"
+                          style="display:none;" role="status" aria-hidden="true"></span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+
+    document.getElementById('confirm-edit-role-btn').addEventListener('click', function () {
+        var btn     = this;
+        var label   = document.getElementById('confirm-edit-role-label');
+        var spinner = document.getElementById('confirm-edit-role-spinner');
+
+        btn.disabled = true;
+        label.textContent = 'Saving...';
+        spinner.style.display = 'inline-block';
+
+        var form     = document.getElementById('role-edit-form');
+        var formData = new FormData(form);
+
+        fetch(form.getAttribute('hx-post'), {
+            method: 'POST',
+            body: formData,
+            headers: { 'HX-Request': 'true' }
+        })
+        .then(function (res) { return res.text(); })
+        .then(function (html) {
+            var parser = new DOMParser();
+            var doc    = parser.parseFromString(html, 'text/html');
+
+            doc.querySelectorAll('[hx-swap-oob]').forEach(function (oobEl) {
+                var target = document.getElementById(oobEl.id);
+                if (target) target.outerHTML = oobEl.outerHTML;
+            });
+
+            var toastEl = doc.querySelector('.toast');
+            if (toastEl) {
+                var redirectUrl = toastEl.getAttribute('data-redirect-url');
+                var dismissBtn  = document.querySelector('#confirm-edit-role-modal [data-bs-dismiss="modal"]');
+                if (dismissBtn) dismissBtn.click();
+                document.getElementById('toast-container').innerHTML = toastEl.outerHTML;
+                var liveToast = document.querySelector('#toast-container .toast');
+                tabler.Toast.getOrCreateInstance(liveToast).show();
+                if (redirectUrl) {
+                    setTimeout(function () { window.location.href = redirectUrl; }, 1500);
+                }
+            }
+        })
+        .catch(function (err) { console.error('Submit error:', err); })
+        .finally(function () {
+            btn.disabled = false;
+            label.textContent = 'Yes, Save';
+            spinner.style.display = 'none';
+        });
+    });
+
+    document.querySelectorAll('#role-edit-form input, #role-edit-form select, #role-edit-form textarea')
+        .forEach(function (el) {
+            var events = el.tagName === 'SELECT' || el.type === 'file' ? ['change'] : ['input', 'change'];
+            events.forEach(function (evt) {
+                el.addEventListener(evt, function () {
+                    var errDiv = document.getElementById('error-' + el.name);
+                    if (errDiv) errDiv.innerHTML = '';
+                });
+            });
+        });
+
+});
+</script>
+
+{% endblock %}

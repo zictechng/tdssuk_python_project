@@ -1,0 +1,61 @@
+        
+        {% for contact in contacts %}
+            <tr>
+                <td><input class="form-check-input m-0 align-middle table-selectable-check" type="checkbox" aria-label="Select invoice" /></td>
+                <td><span class="text-secondary">{{contact.sender_name}}</span></td>
+                <td><a href="#" class="text-reset" tabindex="-1">{{contact.sender_email}}</a></td>
+                <td> {{contact.sender_phone}}</td>
+                <td>{{contact.sender_subject}}</td>
+                <td>
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#message-{{ contact.id }}" aria-expanded="false">
+                        
+                        <a class="btn btn-outline btn-secondary btn-sm"> View Message</a>
+                        <div class="accordion-button-toggle">
+                            <!-- Download SVG icon from http://tabler.io/icons/icon/chevron-down -->
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-1">
+                            <path d="M6 9l6 6l6 -6"></path>
+                            </svg>
+                        </div>
+                    </button>
+                </td>
+
+                <td>
+                    <span class="badge bg-{{ contact.status_badge }} me-1"></span>
+                    {{ contact.get_status_display }}
+                </td>
+
+                <td>{{ contact.create_at }}</td>
+                <td class="text-end">
+                <span class="dropdown">
+                    <button class="btn dropdown-toggle align-text-top" data-bs-boundary="viewport" data-bs-toggle="dropdown">Actions</button>
+                    <div class="dropdown-menu dropdown-menu-end">
+                    <a class="dropdown-item" href="#"> Action </a>
+                    <a class="dropdown-item" href="#"> Another action </a>
+                    </div>
+                </span>
+                </td>
+            </tr>
+            <tr class="accordion-collapse collapse" id="message-{{ contact.id }}">
+                <td colspan="9" class="p-0 border-0">
+                    <div class="card m-3 shadow-sm">
+                        <div class="card-header">
+                            <h4 class="card-title mb-0">
+                                Message from {{ contact.sender_name }}
+                            </h4>
+                        </div>
+
+                        <div class="card bg-body-secondary">
+                            <div class="card-body ">
+                                <div class="text-secondary text-uppercase mb-2">
+                                    Full Message
+                                </div>
+
+                                <div style="white-space: normal; overflow-wrap: break-word; word-break: break-word; line-height: 1.5;">
+                                    {{ contact.sender_message }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}

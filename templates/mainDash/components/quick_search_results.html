@@ -1,0 +1,118 @@
+
+{% load static %}
+
+{% if not query %}
+<div class="text-center text-muted py-4">
+    <i class="bi bi-search fs-2 d-block mb-2 opacity-50"></i>
+    <small>Enter a tracking ID, order number, name, email or phone.</small>
+</div>
+
+{% elif not orders and not shipments %}
+<div class="text-center text-muted py-4">
+    <i class="bi bi-inbox fs-2 d-block mb-2 opacity-50"></i>
+    <small>No results found for <strong>{{ query }}</strong></small>
+</div>
+
+{% else %}
+
+{% if orders %}
+<div class="mb-3">
+    <div class="d-flex align-items-center mb-2">
+        <span class="text-secondary small fw-medium text-uppercase">
+            <i class="bi bi-box-seam me-1"></i> Orders
+        </span>
+        <span class="badge bg-secondary ms-2">{{ orders|length }}</span>
+    </div>
+    <div class="list-group list-group-flush">
+        {% for order in orders %}
+        <a href="{% url 'viewOrderDetail' order.uuid %}"
+            class="list-group-item list-group-item-action px-0 py-2 qs-result-link">
+            <div class="d-flex align-items-center gap-3">
+                <span class="avatar avatar-sm bg-primary-lt text-primary">
+                    <i class="bi bi-box-seam"></i>
+                </span>
+                <div class="flex-fill overflow-hidden">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <span class="fw-medium font-monospace">{{ order.order_number }}</span>
+                        <span class="badge text-white
+                            {% if order.status == 'completed' %}bg-success
+                            {% elif order.status == 'cancelled' %}bg-danger
+                            {% elif order.status == 'in_transit' %}bg-blue
+                            {% elif order.status == 'processing' %}bg-warning
+                            {% else %}bg-secondary{% endif %} ms-2">
+                            {{ order.get_status_display }}
+                        </span>
+                    </div>
+                    <div class="d-flex align-items-center gap-3 mt-1">
+                        <small class="text-secondary text-truncate">
+                            <i class="bi bi-person me-1"></i>{{ order.customer_name }}
+                        </small>
+                        {% if order.tracking_number %}
+                        <small class="text-muted font-monospace">
+                            <i class="bi bi-upc-scan me-1"></i>{{ order.tracking_number }}
+                        </small>
+                        {% endif %}
+                        <small class="text-muted ms-auto">
+                            {{ order.created_at|date:"d M Y" }}
+                        </small>
+                    </div>
+                </div>
+                <i class="bi bi-chevron-right text-muted"></i>
+            </div>
+        </a>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+
+{% if shipments %}
+<div class="mb-2">
+    <div class="d-flex align-items-center mb-2">
+        <span class="text-secondary small fw-medium text-uppercase">
+            <i class="bi bi-truck me-1"></i> Shipments
+        </span>
+        <span class="badge bg-secondary ms-2">{{ shipments|length }}</span>
+    </div>
+    <div class="list-group list-group-flush">
+        {% for shipment in shipments %}
+        <a href="{% url 'viewShipmentDetail' shipment.uuid %}"
+            class="list-group-item list-group-item-action px-0 py-2 qs-result-link">
+            <div class="d-flex align-items-center gap-3">
+                <span class="avatar avatar-sm bg-blue-lt text-blue">
+                    <i class="bi bi-truck"></i>
+                </span>
+                <div class="flex-fill overflow-hidden">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <span class="fw-medium font-monospace">{{ shipment.shipment_number }}</span>
+                        <span class="badge text-white
+                            {% if shipment.status == 'delivered' %}bg-success
+                            {% elif shipment.status == 'cancelled' %}bg-danger
+                            {% elif shipment.status == 'in_transit' %}bg-blue
+                            {% elif shipment.status == 'pending' %}bg-warning
+                            {% else %}bg-secondary{% endif %} ms-2">
+                            {{ shipment.get_status_display }}
+                        </span>
+                    </div>
+                    <div class="d-flex align-items-center gap-3 mt-1">
+                        <small class="text-secondary">
+                            <i class="bi bi-box-seam me-1"></i>{{ shipment.order.order_number }}
+                        </small>
+                        {% if shipment.carrier_name %}
+                        <small class="text-muted">
+                            <i class="bi bi-building me-1"></i>{{ shipment.carrier_name }}
+                        </small>
+                        {% endif %}
+                        <small class="text-muted ms-auto">
+                            {{ shipment.created_at|date:"d M Y" }}
+                        </small>
+                    </div>
+                </div>
+                <i class="bi bi-chevron-right text-muted"></i>
+            </div>
+        </a>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+
+{% endif %}

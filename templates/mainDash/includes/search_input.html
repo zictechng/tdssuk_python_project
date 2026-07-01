@@ -1,0 +1,41 @@
+{% load static %}
+
+<div class="input-group input-group-flat w-auto">
+    <input
+        type="text"
+        name="search"
+        value="{{ search_query|default:'' }}"
+        class="form-control js-search-input"
+        placeholder="{{ placeholder|default:'Search...' }}"
+        autocomplete="off"
+        hx-get="{{ request.path }}"
+        hx-trigger="keyup changed delay:400ms, search"
+        hx-target="#{{ target_id|default:'table-container' }}"
+        hx-swap="innerHTML"
+        hx-include="[name='search']">
+
+    <span class="input-group-text p-0">
+        <button type="button"
+                class="btn btn-link text-muted px-2 py-0 js-search-clear"
+                style="display: {% if search_query %}flex{% else %}none{% endif %};"
+                title="Clear search">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+                 viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M18 6l-12 12"></path>
+                <path d="M6 6l12 12"></path>
+            </svg>
+        </button>
+
+        <button type="submit"
+                class="btn btn-link text-muted px-2 py-0"
+                title="Search">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+                 viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M10 10m-7 0a7 7 0 1 0 14 0a7 7 0 1 0 -14 0"></path>
+                <path d="M21 21l-6 -6"></path>
+            </svg>
+        </button>
+    </span>
+</div>

@@ -1,0 +1,141 @@
+{% load static %}
+<div class="col-12">
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">Movement Records</h3>
+            <div class="card-options">
+                <small class="text-muted">
+                    {{ movements_page.paginator.count }} record{{ movements_page.paginator.count|pluralize }}
+                </small>
+            </div>
+        </div>
+
+        {% if movements_page.paginator.count > 0 %}
+        <div class="table-responsive">
+            <table class="table card-table table-vcenter text-nowrap">
+                <thead>
+                    <tr>
+                        <th>Type</th>
+                        <th>Item / Customer</th>
+                        <th>Warehouse</th>
+                        <th>Qty</th>
+                        <th>From</th>
+                        <th>To</th>
+                        <th>Reference</th>
+                        <th>Date</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for mv in movements_page %}
+                    <tr id="movement-row-{{ mv.pk }}">
+                        <td>
+                            {% if mv.movement_type == 'inbound' %}
+                                <span class="badge bg-green-lt">
+                                    <i class="bi bi-arrow-down-circle me-1"></i> Inbound
+                                </span>
+                            {% elif mv.movement_type == 'outbound' %}
+                                <span class="badge bg-red-lt">
+                                    <i class="bi bi-arrow-up-circle me-1"></i> Outbound
+                                </span>
+                            {% else %}
+                                <span class="badge bg-blue-lt">
+                                    <i class="bi bi-arrow-left-right me-1"></i> Transfer
+                                </span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div><strong>{{ mv.item.customer_name }}</strong></div>
+                            {% if mv.item.tracking_number %}
+                            <div class="text-muted small"><code>{{ mv.item.tracking_number }}</code></div>
+                            {% endif %}
+                        </td>
+                        <td class="text-secondary">{{ mv.item.warehouse.name }}</td>
+                        <td>{{ mv.quantity }}</td>
+                        <td class="text-secondary">{{ mv.from_location|default:"—" }}</td>
+                        <td class="text-secondary">{{ mv.to_location|default:"—" }}</td>
+                        <td class="text-secondary">{{ mv.reference|default:"—" }}</td>
+                        <td class="text-secondary">{{ mv.movement_date|date:"d/m/Y" }}</td>
+                        <td class="text-end">
+                            <button type="button"
+                                    class="btn btn-sm js-delete-movement btn-ghost-danger"
+                                    data-movement-id="{{ mv.pk }}">
+                                Delete
+                            </button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="card-footer d-flex align-items-center">
+            <p class="m-0 text-secondary">
+                Showing
+                <strong>{{ movements_page.start_index }}–{{ movements_page.end_index }}</strong>
+                of <strong>{{ movements_page.paginator.count }}</strong>
+            </p>
+            <ul class="pagination m-0 ms-auto">
+                <li class="page-item {% if not movements_page.has_previous %}disabled{% endif %}">
+                    <a class="page-link" href="#"
+                       hx-get="{% url 'stock_movement_list' %}?page={% if movements_page.has_previous %}{{ movements_page.previous_page_number }}{% else %}1{% endif %}"
+                       hx-target="#movement-table-container"
+                       hx-swap="innerHTML"
+                       hx-push-url="true"
+                       hx-include="#movement-search-input, #movement-type-filter">←</a>
+                </li>
+                {% for num in movements_page.paginator.page_range %}
+                <li class="page-item {% if movements_page.number == num %}active{% endif %}">
+                    <a class="page-link" href="#"
+                       hx-get="{% url 'stock_movement_list' %}?page={{ num }}"
+                       hx-target="#movement-table-container"
+                       hx-swap="innerHTML"
+                       hx-push-url="true"
+                       hx-include="#movement-search-input, #movement-type-filter">{{ num }}</a>
+                </li>
+                {% endfor %}
+                <li class="page-item {% if not movements_page.has_next %}disabled{% endif %}">
+                    <a class="page-link" href="#"
+                       hx-get="{% url 'stock_movement_list' %}?page={% if movements_page.has_next %}{{ movements_page.next_page_number }}{% else %}{{ movements_page.paginator.num_pages }}{% endif %}"
+                       hx-target="#movement-table-container"
+                       hx-swap="innerHTML"
+                       hx-push-url="true"
+                       hx-include="#movement-search-input, #movement-type-filter">→</a>
+                </li>
+            </ul>
+        </div>
+
+        {% else %}
+        <div class="text-center py-5 text-secondary">
+            <i class="bi bi-arrow-left-right fs-2 d-block mb-2 opacity-50"></i>
+            <h4 class="mb-1">No movement records found</h4>
+            <small>Try adjusting your search or filters.</small>
+        </div>
+        {% endif %}
+
+    </div>
+</div>
+
+{% include "mainDash/includes/confirm_delete_modal.html" %}
+<script>
+document.querySelectorAll('.js-delete-movement').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+        var movementId = btn.getAttribute('data-movement-id');
+        var deleteUrl = "{% url 'stock_movement_delete' 0 %}".replace('/0/', '/' + movementId + '/');
+
+        confirmDelete({
+            url: deleteUrl,
+            title: 'Delete this movement record?',
+            message: 'This will permanently remove the stock movement record. Item status will not be reversed.',
+            csrfToken: '{{ csrf_token }}',
+            onSuccess: function () {
+                var row = document.getElementById('movement-row-' + movementId);
+                if (row) row.remove();
+            },
+            onError: function (data) {
+                alert(data.error || 'Delete failed.');
+            },
+        });
+    });
+});
+</script>

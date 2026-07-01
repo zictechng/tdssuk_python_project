@@ -1,0 +1,281 @@
+{% extends "mainDash/layouts/baseDash.html" %}
+{% load static %}
+
+{% block title %}Record Stock Movement{% endblock %}
+
+{% block content %}
+
+<div class="page-header d-print-none">
+    <div class="container-xl">
+        <div class="row g-2 align-items-center">
+            <div class="col">
+                <div class="page-pretitle">
+                    <a href="{% url 'stock_movement_list' %}" class="text-secondary">
+                        <i class="bi bi-arrow-left me-1"></i> Back to Stock Movements
+                    </a>
+                </div>
+                <h2 class="page-title">Record Stock Movement</h2>
+            </div>
+            <div class="col-auto ms-auto d-print-none">
+                  <div class="btn-list">
+                      <a href="{% url 'stock_movement_list' %}"
+                        class="btn btn-secondary btn-sm d-none d-sm-inline-block">
+                          <i class="bi bi-arrow-left me-1"></i> Back
+                      </a>
+                      <a href="{% url 'stock_movement_list' %}"
+                        class="btn btn-secondary d-sm-none btn-icon" aria-label="Record movement">
+                          <i class="bi bi-arrow-left me-1"></i>
+                      </a>
+                  </div>
+              </div>
+        </div>
+    </div>
+</div>
+
+<div class="page-body">
+    <div class="container-xl">
+        <div class="row row-deck row-cards">
+            <div class="col-12 mt-3">
+
+                <form class="card" id="movement-form"
+                      hx-post="{% url 'stock_movement_create' %}"
+                      hx-target="#toast-container"
+                      hx-swap="innerHTML">
+                    {% csrf_token %}
+
+                    <div class="card-header">
+                        <h3 class="card-title">Movement Details</h3>
+                    </div>
+
+                    <div class="card-body">
+                        <div class="row row-cards">
+
+                            {# Item + Type #}
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label required">Inventory Item</label>
+                                    <select name="item" class="form-select">
+                                        <option value="">Select item</option>
+                                        {% for item in form.fields.item.queryset %}
+                                        <option value="{{ item.pk }}">
+                                            {{ item.customer_name }}
+                                            {% if item.tracking_number %}({{ item.tracking_number }}){% endif %}
+                                            — {{ item.warehouse.name }}
+                                        </option>
+                                        {% endfor %}
+                                    </select>
+                                    <div id="error-item"></div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-3">
+                                <div class="mb-3">
+                                    <label class="form-label required">Movement Type</label>
+                                    <select name="movement_type" class="form-select">
+                                        <option value="">Select type</option>
+                                        <option value="inbound">Inbound</option>
+                                        <option value="outbound">Outbound</option>
+                                        <option value="transfer">Internal Transfer</option>
+                                    </select>
+                                    <div id="error-movement_type"></div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-3">
+                                <div class="mb-3">
+                                    <label class="form-label required">Quantity</label>
+                                    <input type="number" name="quantity" class="form-control"
+                                           min="1" value="1">
+                                    <div id="error-quantity"></div>
+                                </div>
+                            </div>
+
+                            {# Locations #}
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">From Location</label>
+                                    <select name="from_location" class="form-select">
+                                        <option value="">— None —</option>
+                                        {% for loc in form.fields.from_location.queryset %}
+                                        <option value="{{ loc.pk }}">{{ loc }}</option>
+                                        {% endfor %}
+                                    </select>
+                                    <div id="error-from_location"></div>
+                                    <div class="form-hint">Required for outbound and transfers.</div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">To Location</label>
+                                    <select name="to_location" class="form-select">
+                                        <option value="">— None —</option>
+                                        {% for loc in form.fields.to_location.queryset %}
+                                        <option value="{{ loc.pk }}">{{ loc }}</option>
+                                        {% endfor %}
+                                    </select>
+                                    <div id="error-to_location"></div>
+                                    <div class="form-hint">Required for inbound and transfers.</div>
+                                </div>
+                            </div>
+
+                            {# Date + Reference #}
+                            <div class="col-md-3">
+                                <div class="mb-3">
+                                    <label class="form-label required">Movement Date</label>
+                                    <input name="movement_date" class="form-control datepicker"
+                                           placeholder="Select Date">
+                                    <div id="error-movement_date"></div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-5">
+                                <div class="mb-3">
+                                    <label class="form-label">Reference</label>
+                                    <input type="text" name="reference" class="form-control"
+                                           placeholder="e.g. Container no., AWB number">
+                                    <div id="error-reference"></div>
+                                </div>
+                            </div>
+
+                            <div class="col-12">
+                                <div class="mb-0">
+                                    <label class="form-label">Notes</label>
+                                    <textarea name="notes" rows="2" class="form-control"
+                                              placeholder="Any additional details..."></textarea>
+                                    <div id="error-notes"></div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <div class="card-footer text-end">
+                        <a href="{% url 'stock_movement_list' %}"
+                           class="btn btn-secondary btn-sm me-2">Cancel</a>
+                        <button type="button"
+                                class="btn btn-primary btn-sm"
+                                data-bs-toggle="modal"
+                                data-bs-target="#confirm-movement-modal">
+                            Record Movement
+                        </button>
+                    </div>
+                </form>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+{# --- Confirm modal --- #}
+<div class="modal modal-blur fade" id="confirm-movement-modal"
+     tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-sm modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-body">
+                <div class="modal-title">Record this movement?</div>
+                <div class="text-muted mt-1">
+                    Outbound movements will automatically mark the item as Dispatched.
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-link link-secondary me-auto"
+                        data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="confirm-movement-btn">
+                    <span id="confirm-movement-label">Yes, Record</span>
+                    <span id="confirm-movement-spinner"
+                          class="spinner-border spinner-border-sm ms-2"
+                          style="display:none;" role="status" aria-hidden="true"></span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+
+    reinitDatepickers();
+
+    var confirmBtn = document.getElementById('confirm-movement-btn');
+    if (!confirmBtn) return;
+
+    confirmBtn.addEventListener('click', function () {
+        var btn = this;
+        var label = document.getElementById('confirm-movement-label');
+        var spinner = document.getElementById('confirm-movement-spinner');
+
+        btn.disabled = true;
+        label.textContent = 'Saving...';
+        spinner.style.display = 'inline-block';
+
+        var form = document.getElementById('movement-form');
+        var formData = new FormData(form);
+
+        fetch(form.getAttribute('hx-post'), {
+            method: 'POST',
+            body: formData,
+            headers: { 'HX-Request': 'true' }
+        })
+        .then(function (res) { return res.text(); })
+        .then(function (html) {
+            var parser = new DOMParser();
+            var doc = parser.parseFromString(html, 'text/html');
+
+            doc.querySelectorAll('[hx-swap-oob]').forEach(function (oobEl) {
+                var target = document.getElementById(oobEl.id);
+                if (target) target.outerHTML = oobEl.outerHTML;
+            });
+
+            var toastEl = doc.querySelector('.toast');
+            if (toastEl) {
+                var redirectUrl = toastEl.getAttribute('data-redirect-url');
+                var dismissBtn = document.querySelector('#confirm-movement-modal [data-bs-dismiss="modal"]');
+                if (dismissBtn) dismissBtn.click();
+
+                document.getElementById('toast-container').innerHTML = toastEl.outerHTML;
+                var liveToast = document.querySelector('#toast-container .toast');
+                tabler.Toast.getOrCreateInstance(liveToast).show();
+
+                if (redirectUrl) {
+                    setTimeout(function () { window.location.href = redirectUrl; }, 1500);
+                }
+            }
+        })
+        .catch(function (err) { console.error('Submit error:', err); })
+        .finally(function () {
+            btn.disabled = false;
+            label.textContent = 'Yes, Record';
+            spinner.style.display = 'none';
+        });
+    });
+
+    document.querySelectorAll('#movement-form input, #movement-form select, #movement-form textarea')
+        .forEach(function (el) {
+            el.addEventListener('input', function () {
+                var errorDiv = document.getElementById('error-' + el.name);
+                if (errorDiv) errorDiv.innerHTML = '';
+            });
+            el.addEventListener('change', function () {
+                var errorDiv = document.getElementById('error-' + el.name);
+                if (errorDiv) errorDiv.innerHTML = '';
+            });
+        });
+});
+
+function reinitDatepickers() {
+    document.querySelectorAll('.datepicker').forEach(function (el) {
+        if (el.litepicker) { el.litepicker.destroy(); el.litepicker = null; }
+        new Litepicker({
+            element: el,
+            format: 'YYYY-MM-DD',
+            buttonText: {
+                previousMonth: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-1"><path d="M15 6l-6 6l6 6"/></svg>`,
+                nextMonth: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-1"><path d="M9 6l6 6l-6 6"/></svg>`,
+            },
+        });
+    });
+}
+</script>
+
+{% endblock %}

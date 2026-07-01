@@ -1,0 +1,123 @@
+
+{% load static %}
+<div class="col-12">
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">Freight Charges</h3>
+            <div class="card-options">
+                <small class="text-muted">
+                    {{ charges_page.paginator.count }} charge{{ charges_page.paginator.count|pluralize }}
+                </small>
+            </div>
+        </div>
+
+        {% if charges_page.paginator.count > 0 %}
+        <div class="table-responsive">
+            <table class="table card-table table-vcenter text-nowrap">
+                <thead>
+                    <tr>
+                        <th class="w-1"><input class="form-check-input m-0 align-middle" type="checkbox" id="select-all" aria-label="Select all charges" /></th>
+                        <th>Invoice</th>
+                        <th>Customer</th>
+                        <th>Description</th>
+                        <th>Qty</th>
+                        <th>Unit Price</th>
+                        <th>Amount</th>
+                        <th>Currency</th>
+                        <th>Invoice Status</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for charge in charges_page %}
+                    <tr id="freight-row-{{ charge.pk }}">
+                        <td><input class="form-check-input m-0 align-middle table-selectable-check" type="checkbox" value="{{ charge.pk }}" aria-label="Select charge" /></td>
+                        <td>
+                            <a href="{% url 'invoice_detail' charge.invoice.uuid %}" class="text-reset fw-medium">
+                                {{ charge.invoice.invoice_number }}
+                            </a>
+                        </td>
+                        <td>
+                            <div><strong>{{ charge.invoice.customer_name }}</strong></div>
+                            <div class="text-muted small">{{ charge.invoice.destination_country }}</div>
+                        </td>
+                        <td class="text-secondary">{{ charge.description }}</td>
+                        <td>{{ charge.quantity }}</td>
+                        <td>{{ charge.invoice.currency }} {{ charge.unit_price|floatformat:2 }}</td>
+                        <td><strong>{{ charge.invoice.currency }} {{ charge.amount|floatformat:2 }}</strong></td>
+                        <td>
+                            <span class="badge bg-purple-lt">{{ charge.invoice.currency }}</span>
+                        </td>
+                        <td>
+                            <span class="badge text-white bg-{% if charge.invoice.status == 'paid' %}green{% elif charge.invoice.status == 'partially_paid' %}yellow text-dark{% elif charge.invoice.status == 'overdue' %}red{% elif charge.invoice.status == 'sent' %}blue{% else %}secondary{% endif %}-lt">
+                                {{ charge.invoice.get_status_display }}
+                            </span>
+                        </td>
+                        <td class="text-end">
+                            <a href="{% url 'invoice_detail' charge.invoice.uuid %}"
+                                        class="btn btn-sm btn-ghost-secondary">
+                                        View
+                            </a>
+
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="card-footer d-flex align-items-center">
+            <p class="m-0 text-secondary">
+                Showing <strong>{{ charges_page.start_index }}–{{ charges_page.end_index }}</strong>
+                of <strong>{{ charges_page.paginator.count }}</strong>
+            </p>
+            <ul class="pagination m-0 ms-auto">
+                <li class="page-item {% if not charges_page.has_previous %}disabled{% endif %}">
+                    <a class="page-link" href="#"
+                       hx-get="{% url 'freight_charge_list' %}?page={% if charges_page.has_previous %}{{ charges_page.previous_page_number }}{% else %}1{% endif %}&search={{ search_query }}"
+                       hx-target="#freight-table-container" hx-swap="innerHTML" hx-push-url="true">←</a>
+                </li>
+                {% for num in charges_page.paginator.page_range %}
+                <li class="page-item {% if charges_page.number == num %}active{% endif %}">
+                    <a class="page-link" href="#"
+                       hx-get="{% url 'freight_charge_list' %}?page={{ num }}&search={{ search_query }}"
+                       hx-target="#freight-table-container" hx-swap="innerHTML" hx-push-url="true">{{ num }}</a>
+                </li>
+                {% endfor %}
+                <li class="page-item {% if not charges_page.has_next %}disabled{% endif %}">
+                    <a class="page-link" href="#"
+                       hx-get="{% url 'freight_charge_list' %}?page={% if charges_page.has_next %}{{ charges_page.next_page_number }}{% else %}{{ charges_page.paginator.num_pages }}{% endif %}&search={{ search_query }}"
+                       hx-target="#freight-table-container" hx-swap="innerHTML" hx-push-url="true">→</a>
+                </li>
+            </ul>
+        </div>
+
+        {% else %}
+        <div class="text-center py-5 text-secondary">
+            <i class="bi bi-truck fs-2 d-block mb-2 opacity-50"></i>
+            <h4 class="mb-1">No freight charges found</h4>
+            <small>Freight charges are added as line items on invoices.</small>
+        </div>
+        {% endif %}
+
+    </div>
+</div>
+
+<script>
+    (function () {
+    function initSelectAll() {
+        var selectAll = document.getElementById('select-all');
+        if (!selectAll) return;
+        selectAll.addEventListener('change', function () {
+            document.querySelectorAll('.table-selectable-check').forEach(function (cb) {
+                cb.checked = selectAll.checked;
+            });
+        });
+    }
+        initSelectAll();
+        var container = document.getElementById('users-table-container');
+        if (container) {
+            container.addEventListener('htmx:afterSwap', initSelectAll);
+        }
+})();
+</script>

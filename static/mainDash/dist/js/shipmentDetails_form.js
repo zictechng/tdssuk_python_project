@@ -1,0 +1,130 @@
+
+window.addEventListener('load', function () {
+
+    function getCsrfToken() {
+        return document.querySelector('#image-upload-form [name=csrfmiddlewaretoken]').value;
+    }
+
+    var uploadForm = document.getElementById('image-upload-form');
+    var submitBtn = document.getElementById('image-upload-submit-btn');
+    var fileInput = document.getElementById('id_images_input');
+    var previewGrid = document.getElementById('image-preview-grid');
+    var previewUrls = [];
+
+    // --- Preview ---
+    function clearPreviews() {
+        previewUrls.forEach(function (url) { URL.revokeObjectURL(url); });
+        previewUrls = [];
+        previewGrid.innerHTML = '';
+    }
+
+    fileInput.addEventListener('change', function () {
+        clearPreviews();
+        Array.from(fileInput.files).forEach(function (file) {
+            if (!file.type.startsWith('image/')) return;
+            var url = URL.createObjectURL(file);
+            previewUrls.push(url);
+
+            var col = document.createElement('div');
+            col.className = 'col-auto';
+            col.innerHTML =
+                '<div class="card" style="width: 200px;">' +
+                    '<img src="' + url + '" class="card-img-top" style="height: 100px; object-fit: cover;" alt="Preview">' +
+                    '<div class="card-body p-1 text-center">' +
+                        '<small class="text-muted" style="font-size: 10px; word-break: break-all;">' + file.name + '</small>' +
+                    '</div>' +
+                '</div>';
+            previewGrid.appendChild(col);
+        });
+    });
+
+    document.getElementById('upload-image-modal').addEventListener('hidden.bs.modal', function () {
+        fileInput.value = '';
+        clearPreviews();
+    });
+
+    // --- Delete (now uses the global confirmDelete() helper) ---
+    function bindDeleteButton(btn) {
+        btn.addEventListener('click', function () {
+            var imageId = btn.getAttribute('data-image-id');
+            var deleteUrl = "{% url 'order_image_delete' 0 %}".replace('/0/', '/' + imageId + '/');
+
+            confirmDelete({
+                url: deleteUrl,
+                title: 'Remove this image?',
+                message: 'This image will be permanently deleted.',
+                csrfToken: getCsrfToken(),
+                onSuccess: function () {
+                    var card = document.getElementById('image-card-' + imageId);
+                    if (card) card.remove();
+                    var grid = document.getElementById('order-images-grid');
+                    if (!grid.children.length) {
+                        document.getElementById('no-images-msg').style.display = 'block';
+                    }
+                },
+                onError: function (data) {
+                    alert(data.error || 'Delete failed.');
+                },
+            });
+        });
+    }
+
+    document.querySelectorAll('.js-delete-image').forEach(bindDeleteButton);
+
+    // --- Upload ---
+    uploadForm.addEventListener('submit', function (e) {
+        e.preventDefault();
+        var formData = new FormData(uploadForm);
+
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Uploading...';
+
+        fetch("{% url 'order_image_upload' order.uuid %}", {
+            method: 'POST',
+            body: formData,
+            headers: { 'X-CSRFToken': getCsrfToken() },
+        })
+        .then(function (res) { return res.json(); })
+        .then(function (data) {
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Upload';
+
+            if (!data.success) {
+                alert(data.error || 'Upload failed.');
+                return;
+            }
+
+            document.getElementById('no-images-msg').style.display = 'none';
+            var grid = document.getElementById('order-images-grid');
+
+            data.images.forEach(function (img) {
+                var col = document.createElement('div');
+                col.className = 'col-auto';
+                col.id = 'image-card-' + img.id;
+                col.innerHTML =
+                    '<div class="card" style="width: 200px;">' +
+                        '<a href="' + img.url + '" target="_blank">' +
+                            '<img src="' + img.url + '" class="card-img-top" style="height: 120px; object-fit: cover;" alt="Order image">' +
+                        '</a>' +
+                        '<div class="card-body p-2 text-center">' +
+                            '<small class="text-muted d-block">' + img.uploaded_at + '</small>' +
+                            '<button type="button" class="btn btn-sm btn-link text-danger p-0 js-delete-image" data-image-id="' + img.id + '">Remove</button>' +
+                        '</div>' +
+                    '</div>';
+                grid.appendChild(col);
+                bindDeleteButton(col.querySelector('.js-delete-image'));
+            });
+
+            uploadForm.reset();
+            clearPreviews();
+
+            document.querySelector('#upload-image-modal [data-bs-dismiss="modal"]').click();
+        })
+        .catch(function (err) {
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Upload';
+            console.error('Upload error:', err);
+        });
+    });
+
+});

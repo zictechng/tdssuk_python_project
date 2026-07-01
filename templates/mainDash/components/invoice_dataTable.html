@@ -1,0 +1,150 @@
+{% load static %}
+<div class="col-12">
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">Invoices</h3>
+            <div class="card-options">
+                <small class="text-muted">
+                    {{ invoices_page.paginator.count }} invoice{{ invoices_page.paginator.count|pluralize }}
+                </small>
+            </div>
+        </div>
+
+        {% if invoices_page.paginator.count > 0 %}
+        <div class="table-responsive">
+            <table class="table card-table table-vcenter text-nowrap">
+                <thead>
+                    <tr>
+                        <th class="w-1"><input class="form-check-input m-0 align-middle" type="checkbox" id="select-all" aria-label="Select all invoice" /></th>
+                        <th>Invoice No.</th>
+                        <th>Customer</th>
+                        <th>Destination</th>
+                        <th>Currency</th>
+                        <th>Total</th>
+                        <th>Paid</th>
+                        <th>Balance</th>
+                        <th>Due Date</th>
+                        <th>Status</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for invoice in invoices_page %}
+                    <tr id="invoice-row-{{ invoice.pk }}">
+                        <td><input class="form-check-input m-0 align-middle table-selectable-check" type="checkbox" value="{{ invoice.pk }}" aria-label="Select invoice" /></td>
+                        <td>
+                            <a href="{% url 'invoice_detail' invoice.uuid %}" class="text-reset fw-medium">
+                                {{ invoice.invoice_number }}
+                            </a>
+                        </td>
+                        <td>
+                            <div><strong>{{ invoice.customer_name }}</strong></div>
+                            {% if invoice.customer_email %}
+                            <div class="text-muted small">{{ invoice.customer_email }}</div>
+                            {% endif %}
+                        </td>
+                        <td class="text-secondary">{{ invoice.destination_country }}</td>
+                        <td class="text-secondary">{{ invoice.currency }}</td>
+                        <td>{{ invoice.currency }} {{ invoice.total_amount|floatformat:2 }}</td>
+                        <td class="text-green">{{ invoice.currency }} {{ invoice.amount_paid|floatformat:2 }}</td>
+                        <td class="{% if invoice.balance_due > 0 %}text-danger{% else %}text-green{% endif %}">
+                            {{ invoice.currency }} {{ invoice.balance_due|floatformat:2 }}
+                        </td>
+                        <td class="text-secondary">{{ invoice.due_date|date:"d/m/Y" }}</td>
+                        <td>
+                            <span class="badge bg-{% if invoice.status == 'paid' %}green{% elif invoice.status == 'partially_paid' %}yellow text-dark{% elif invoice.status == 'overdue' %}red{% elif invoice.status == 'sent' %}blue{% elif invoice.status == 'cancelled' or invoice.status == 'rejected' %}secondary{% else %}secondary{% endif %}-lt">
+                                {{ invoice.get_status_display }}
+                            </span>
+                        </td>
+                        <td class="text-end">
+                            <a href="{% url 'invoice_detail' invoice.uuid %}"><span class="btn btn-sm  btn-ghost-secondary">View</span></a>
+                               
+                            <button type="button"
+                                    class="btn btn-sm js-delete-invoice btn-ghost-danger"
+                                    data-invoice-id="{{ invoice.pk }}">
+                                Delete
+                            </button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="card-footer d-flex align-items-center">
+            <p class="m-0 text-secondary">
+                Showing <strong>{{ invoices_page.start_index }}–{{ invoices_page.end_index }}</strong>
+                of <strong>{{ invoices_page.paginator.count }}</strong>
+            </p>
+            <ul class="pagination m-0 ms-auto">
+                <li class="page-item {% if not invoices_page.has_previous %}disabled{% endif %}">
+                    <a class="page-link" href="#"
+                       hx-get="{% url 'invoice_list' %}?page={% if invoices_page.has_previous %}{{ invoices_page.previous_page_number }}{% else %}1{% endif %}&search={{ search_query }}&status={{ status_filter }}&currency={{ currency_filter }}"
+                       hx-target="#invoice-table-container" hx-swap="innerHTML" hx-push-url="true">←</a>
+                </li>
+                {% for num in invoices_page.paginator.page_range %}
+                <li class="page-item {% if invoices_page.number == num %}active{% endif %}">
+                    <a class="page-link" href="#"
+                       hx-get="{% url 'invoice_list' %}?page={{ num }}&search={{ search_query }}&status={{ status_filter }}&currency={{ currency_filter }}"
+                       hx-target="#invoice-table-container" hx-swap="innerHTML" hx-push-url="true">{{ num }}</a>
+                </li>
+                {% endfor %}
+                <li class="page-item {% if not invoices_page.has_next %}disabled{% endif %}">
+                    <a class="page-link" href="#"
+                       hx-get="{% url 'invoice_list' %}?page={% if invoices_page.has_next %}{{ invoices_page.next_page_number }}{% else %}{{ invoices_page.paginator.num_pages }}{% endif %}&search={{ search_query }}&status={{ status_filter }}&currency={{ currency_filter }}"
+                       hx-target="#invoice-table-container" hx-swap="innerHTML" hx-push-url="true">→</a>
+                </li>
+            </ul>
+        </div>
+
+        {% else %}
+        <div class="text-center py-5 text-secondary">
+            <i class="bi bi-receipt fs-2 d-block mb-2 opacity-50"></i>
+            <h4 class="mb-1">No invoices found</h4>
+            <small>Try adjusting your search or filters.</small>
+        </div>
+        {% endif %}
+
+    </div>
+</div>
+
+{% include "mainDash/includes/confirm_delete_modal.html" %}
+<script>
+document.querySelectorAll('.js-delete-invoice').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+        var invoiceId = btn.getAttribute('data-invoice-id');
+        var deleteUrl = "{% url 'invoice_delete' 0 %}".replace('/0/', '/' + invoiceId + '/');
+
+        confirmDelete({
+            url: deleteUrl,
+            title: 'Delete this invoice?',
+            message: 'This will permanently remove the invoice, all line items and payment records.',
+            csrfToken: '{{ csrf_token }}',
+            onSuccess: function () {
+                var row = document.getElementById('invoice-row-' + invoiceId);
+                if (row) row.remove();
+            },
+            onError: function (data) {
+                alert(data.error || 'Delete failed.');
+            },
+        });
+    });
+});
+
+(function () {
+    function initSelectAll() {
+        var selectAll = document.getElementById('select-all');
+        if (!selectAll) return;
+        selectAll.addEventListener('change', function () {
+            document.querySelectorAll('.table-selectable-check').forEach(function (cb) {
+                cb.checked = selectAll.checked;
+            });
+        });
+    }
+        initSelectAll();
+        var container = document.getElementById('users-table-container');
+        if (container) {
+            container.addEventListener('htmx:afterSwap', initSelectAll);
+        }
+})();
+</script>

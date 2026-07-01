@@ -1,0 +1,304 @@
+
+{% extends "mainDash/layouts/baseDash.html" %}
+{% load static %}
+
+{% block title %}Finance — Add Customs Duty Record{% endblock %}
+
+{% block content %}
+
+<div class="page-header d-print-none" aria-label="Page header">
+    <div class="container-xl">
+        <div class="row g-2 align-items-center">
+            <div class="col">
+                <div class="page-pretitle">
+                    <a href="{% url 'customs_duty_list' %}" class="text-secondary">
+                        <i class="bi bi-arrow-left me-1"></i> Back to Customs & Duty
+                    </a>
+                </div>
+                <h2 class="page-title">Add Customs Duty Record</h2>
+            </div>
+            <div class="col-auto ms-auto d-print-none">
+                <a href="{% url 'customs_duty_list' %}"
+                   class="btn btn-secondary btn-sm d-none d-sm-inline-block">
+                    <i class="bi bi-arrow-left me-1"></i> Back
+                </a>
+                <a href="{% url 'customs_duty_list'%}" class="btn btn-secondary d-sm-none btn-icon">
+                        <i class="bi bi-arrow-left"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="page-body">
+    <div class="container-xl">
+        <div class="row row-deck row-cards">
+            <div class="col-12 mt-3">
+
+                <form class="card" id="customs-form"
+                      hx-post="{% url 'customs_duty_create' %}"
+                      hx-target="#toast-container"
+                      hx-swap="innerHTML">
+                    {% csrf_token %}
+
+                    <div class="card-header">
+                        <h3 class="card-title">Customs Duty Details</h3>
+                    </div>
+
+                    <div class="card-body">
+                        <div class="row row-cards">
+
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label required">Linked Item</label>
+                                    <select name="item" class="form-select" data-search="on">
+                                        <option value="">— Select warehouse item —</option>
+                                        {% for item in form.fields.item.queryset %}
+                                        <option value="{{ item.pk }}">
+                                            {{ item.customer_name }} —
+                                            {{ item.description|truncatechars:40 }}
+                                        </option>
+                                        {% endfor %}
+                                    </select>
+                                    <div id="error-item"></div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Linked Invoice</label>
+                                    <select name="invoice" class="form-select" data-search="on">
+                                        <option value="">— Select invoice (optional) —</option>
+                                        {% for inv in form.fields.invoice.queryset %}
+                                        <option value="{{ inv.pk }}">
+                                            {{ inv.invoice_number }} — {{ inv.customer_name }}
+                                        </option>
+                                        {% endfor %}
+                                    </select>
+                                    <div id="error-invoice"></div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label class="form-label required">Destination Country</label>
+                                    <input type="text" name="destination_country"
+                                           class="form-control" placeholder="e.g. Nigeria">
+                                    <div id="error-destination_country"></div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-3">
+                                <div class="mb-3">
+                                    <label class="form-label required">Duty Amount</label>
+                                    <input type="number" name="duty_amount"
+                                           class="form-control" min="0" step="0.01"
+                                           placeholder="0.00">
+                                    <div id="error-duty_amount"></div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-2">
+                                <div class="mb-3">
+                                    <label class="form-label required">Currency</label>
+                                    <select name="duty_currency" class="form-select" data-search="on">
+                                        {% for value, label in form.fields.duty_currency.choices %}
+                                        <option value="{{ value }}">{{ value }}</option>
+                                        {% endfor %}
+                                    </select>
+                                    <div id="error-duty_currency"></div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-3">
+                                <div class="mb-3">
+                                    <label class="form-label">Customs Reference</label>
+                                    <input type="text" name="customs_reference"
+                                           class="form-control"
+                                           placeholder="Receipt / clearance ref">
+                                    <div id="error-customs_reference"></div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-3">
+                                <div class="mb-3">
+                                    <label class="form-label required">Status</label>
+                                    <select name="status" class="form-select" data-search="on">
+                                        {% for value, label in form.fields.status.choices %}
+                                        <option value="{{ value }}">{{ label }}</option>
+                                        {% endfor %}
+                                    </select>
+                                    <div id="error-status"></div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-3">
+                                <div class="mb-3">
+                                    <label class="form-label">Paid Date</label>
+                                    <input name="paid_date" class="form-control datepicker"
+                                           placeholder="Select date" autocomplete="off">
+                                    <div id="error-paid_date"></div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-3">
+                                <div class="mb-3">
+                                    <label class="form-label">Reimbursed Date</label>
+                                    <input name="reimbursed_date"
+                                           class="form-control datepicker"
+                                           placeholder="Select date" autocomplete="off">
+                                    <div id="error-reimbursed_date"></div>
+                                </div>
+                            </div>
+
+                            <div class="col-12">
+                                <div class="mb-0">
+                                    <label class="form-label">Notes</label>
+                                    <textarea name="notes" rows="2" class="form-control"
+                                              placeholder="Any additional details..."></textarea>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <div class="card-footer text-end">
+                        <a href="{% url 'customs_duty_list' %}"
+                           class="btn btn-secondary btn-sm me-2">Cancel</a>
+                        <button type="button"
+                                class="btn btn-primary btn-sm"
+                                data-bs-toggle="modal"
+                                data-bs-target="#confirm-customs-modal">
+                            Save Record
+                        </button>
+                    </div>
+                </form>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+{# --- Confirm Modal --- #}
+<div class="modal modal-blur fade" id="confirm-customs-modal"
+     tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-sm modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-body">
+                <div class="modal-title">Save this duty record?</div>
+                <div class="text-muted mt-1">
+                    The customs duty record will be saved to the system.
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-link link-secondary me-auto"
+                        data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="confirm-customs-btn">
+                    <span id="confirm-customs-label">Yes, Save</span>
+                    <span id="confirm-customs-spinner"
+                          class="spinner-border spinner-border-sm ms-2"
+                          style="display:none;" role="status" aria-hidden="true"></span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function reinitDatepickers() {
+        document.querySelectorAll('.datepicker').forEach(function (el) {
+            if (el.litepicker) { el.litepicker.destroy(); el.litepicker = null; }
+            var minDate = el.dataset.minDate === 'today' ? new Date()
+                        : el.dataset.minDate ? new Date(el.dataset.minDate) : null;
+            new Litepicker({
+                element: el, minDate: minDate, format: 'YYYY-MM-DD',
+                buttonText: {
+                    previousMonth: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-1"><path d="M15 6l-6 6l6 6" /></svg>`,
+                    nextMonth: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-1"><path d="M9 6l6 6l-6 6" /></svg>`,
+                },
+            });
+        });
+    }
+
+    // --- TomSelect ---
+    function initTomSelects() {
+        document.querySelectorAll('select[data-search="on"]').forEach(function (el) {
+            if (!el.tomselect) new TomSelect(el, {
+                placeholder: el.querySelector('option[value=""]')?.textContent || 'Select...'
+            });
+        });
+    }
+
+    function syncTomSelectValues() {
+        document.querySelectorAll('select[data-search="on"]').forEach(function (el) {
+            if (el.tomselect) el.value = el.tomselect.getValue();
+        });
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+    
+    document.getElementById('confirm-customs-btn').addEventListener('click', function () {
+        var btn = this;
+        var label = document.getElementById('confirm-customs-label');
+        var spinner = document.getElementById('confirm-customs-spinner');
+
+        btn.disabled = true;
+        label.textContent = 'Saving...';
+        spinner.style.display = 'inline-block';
+
+        var form = document.getElementById('customs-form');
+        var formData = new FormData(form);
+
+        fetch(form.getAttribute('hx-post'), {
+            method: 'POST',
+            body: formData,
+            headers: { 'HX-Request': 'true' }
+        })
+        .then(function (res) { return res.text(); })
+        .then(function (html) {
+            var parser = new DOMParser();
+            var doc = parser.parseFromString(html, 'text/html');
+
+            doc.querySelectorAll('[hx-swap-oob]').forEach(function (oobEl) {
+                var target = document.getElementById(oobEl.id);
+                if (target) target.outerHTML = oobEl.outerHTML;
+            });
+
+            var toastEl = doc.querySelector('.toast');
+            if (toastEl) {
+                var dismissBtn = document.querySelector('#confirm-customs-modal [data-bs-dismiss="modal"]');
+                if (dismissBtn) dismissBtn.click();
+
+                document.getElementById('toast-container').innerHTML = toastEl.outerHTML;
+                var liveToast = document.querySelector('#toast-container .toast');
+                tabler.Toast.getOrCreateInstance(liveToast).show();
+
+                var redirectUrl = toastEl.getAttribute('data-redirect-url');
+                if (redirectUrl) {
+                    setTimeout(function () { window.location.href = redirectUrl; }, 1500);
+                }
+            }
+        })
+        .catch(function (err) { console.error('Submit error:', err); })
+        .finally(function () {
+            btn.disabled = false;
+            label.textContent = 'Yes, Save';
+            spinner.style.display = 'none';
+        });
+    });
+
+    document.querySelectorAll('#customs-form input, #customs-form select, #customs-form textarea')
+        .forEach(function (el) {
+            el.addEventListener('input', function () {
+                var errorDiv = document.getElementById('error-' + el.name);
+                if (errorDiv) errorDiv.innerHTML = '';
+            });
+            el.addEventListener('change', function () {
+                var errorDiv = document.getElementById('error-' + el.name);
+                if (errorDiv) errorDiv.innerHTML = '';
+            });
+        });
+});
+</script>
+
+{% endblock %}

@@ -1,0 +1,49 @@
+
+{% extends "mainDash/layouts/baseDash.html" %}
+    {% load static %}
+    
+        {% block title %}
+            Shipment Request
+        {% endblock %}
+
+    {% block content %}
+
+        <div class="page-header d-print-none" aria-label="Page header">
+          <div class="container-xl">
+            <div class="row g-2 align-items-center">
+              <div class="col">
+                <!-- Page pre-title -->
+                 <h2 class="page-title">Shipment</h2>
+                <div class="page-pretitle">All Shipment Request</div>
+              </div>
+              <!-- Action buttons -->
+              <div class="col-auto ms-auto d-print-none">
+                <div class="btn-list">
+                  
+                  <a href="{% url 'createNew_shipment'%}?next=/dashboard/shipment/" class="btn btn-primary btn-sm d-none d-sm-inline-block">
+                    <i class="bi bi-plus-lg"></i>
+                    Create Shipment
+                  </a>
+                  <a href="#"
+                    class="btn btn-primary btn-6 d-sm-none btn-icon"
+                    aria-label="Create new report">
+                    <i class="bi bi-plus-lg"></i>
+                  </a>
+                </div>
+              </div>
+             </div>
+          </div>
+      </div>
+
+    <div class="page-body">
+        <div class="container-xl">
+        <div class="row row-deck row-cards">
+
+            {% include "mainDash/components/shipment_dataTable.html" %}
+        </div>
+    </div>
+
+    {% endblock %}
+  
+    <!-- BEGIN PAGE MODALS -->
+    

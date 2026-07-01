@@ -1,0 +1,144 @@
+
+{% load humanize %}
+{% include "mainDash/includes/filter_bar.html" %}
+
+<div class="row row-deck row-cards mb-4">
+  <div class="col-sm-6 col-lg-3">
+    <div class="card">
+      <div class="card-body">
+        <div class="subheader mb-3">Total Items</div>
+        <div class="h1 mb-0">{{ total_items }}</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-sm-6 col-lg-3">
+    <div class="card">
+      <div class="card-body">
+        <div class="subheader mb-3">In Stock</div>
+        <div class="h1 mb-0 text-success">{{ in_stock }}</div>
+        <div class="progress progress-sm mt-2">
+          <div class="progress-bar bg-success"
+               style="width:{% if total_items %}{% widthratio in_stock total_items 100 %}{% else %}0{% endif %}%"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-sm-6 col-lg-3">
+    <div class="card">
+      <div class="card-body">
+        <div class="subheader mb-3">Dispatched</div>
+        <div class="h1 mb-0 text-primary">{{ dispatched }}</div>
+        <div class="progress progress-sm mt-2">
+          <div class="progress-bar bg-primary"
+               style="width:{% if total_items %}{% widthratio dispatched total_items 100 %}{% else %}0{% endif %}%"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-sm-6 col-lg-3">
+    <div class="card">
+      <div class="card-body">
+        <div class="subheader mb-3">On Hold</div>
+        <div class="h1 mb-0 text-warning">{{ held }}</div>
+        <small class="text-muted">Total weight: {{ total_weight|floatformat:1 }} kg</small>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row row-deck row-cards mb-4">
+  <div class="col-lg-8">
+    <div class="card">
+      <div class="card-header"><h3 class="card-title">Monthly Intake</h3></div>
+      <div class="card-body"><div id="chart-warehouse-monthly"></div></div>
+    </div>
+  </div>
+  <div class="col-lg-4">
+    <div class="card">
+      <div class="card-header"><h3 class="card-title">Status Breakdown</h3></div>
+      <div class="card-body"><div id="chart-warehouse-donut"></div></div>
+    </div>
+  </div>
+</div>
+
+<div class="row row-deck row-cards mb-4">
+  <div class="col-lg-8">
+    <div class="card">
+      <div class="card-header"><h3 class="card-title">Per Warehouse</h3>
+            <div class="card-options">
+                <small class="text-muted">
+                {{ items_page.paginator.count }} record{{ items_page.paginator.count|pluralize }}
+            </small>
+            </div>
+        </div>
+      {% if items_page.paginator.count > 0 %}
+      <div class="table-responsive">
+        <table class="table table-vcenter card-table text-nowrap">
+          <thead>
+            <tr><th>Warehouse</th><th>Total</th><th>In Stock</th><th>Dispatched</th><th>On Hold</th></tr>
+          </thead>
+          <tbody>
+            {% for w in per_warehouse %}
+            <tr>
+              <td class="fw-medium">{{ w.warehouse__name }}</td>
+              <td><span class="badge bg-blue-lt text-white">{{ w.total }}</span></td>
+              <td><span class="badge bg-success text-white">{{ w.in_stock }}</span></td>
+              <td><span class="badge bg-primary text-white">{{ w.dispatched }}</span></td>
+              <td><span class="badge bg-warning text-white">{{ w.held }}</span></td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% include "mainDash/includes/report_pagination.html" with page_obj=items_page%}
+      {% else %}
+      <div class="text-center py-4 text-secondary">
+        <small>No warehouse data found.</small>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+  <div class="col-lg-4">
+    <div class="card">
+      <div class="card-header"><h3 class="card-title">Top Destinations</h3></div>
+      <div class="card-body">
+        {% for d in top_destinations %}
+        <div class="d-flex align-items-center mb-2">
+          <div class="flex-fill">
+            <div class="d-flex justify-content-between mb-1">
+              <span class="text-secondary small">{{ d.destination_country }}</span>
+              <span class="fw-medium small">{{ d.count }}</span>
+            </div>
+            <div class="progress progress-sm">
+              <div class="progress-bar bg-primary"
+                   style="width:{% if total_items %}{% widthratio d.count total_items 100 %}{% else %}0{% endif %}%"></div>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+new ApexCharts(document.getElementById('chart-warehouse-monthly'), {
+  chart:  { type: 'area', height: 240, toolbar: { show: false } },
+  series: [{ name: 'Items Received', data: {{ chart_series|safe }} }],
+  xaxis:  { categories: {{ chart_labels|safe }} },
+  stroke: { curve: 'smooth', width: 2 },
+  fill:   { type: 'gradient', gradient: { opacityFrom: 0.4, opacityTo: 0.05 } },
+  colors: ['#2fb344'],
+  grid:   { strokeDashArray: 4 },
+  tooltip: { theme: 'light' },
+}).render();
+
+new ApexCharts(document.getElementById('chart-warehouse-donut'), {
+  chart:  { type: 'donut', height: 240, toolbar: { show: false } },
+  series: {{ status_data|safe }},
+  labels: {{ status_labels|safe }},
+  colors: ['#2fb344', '#206bc4', '#f59f00'],
+  legend: { position: 'bottom' },
+  tooltip: { theme: 'light' },
+}).render();
+</script>

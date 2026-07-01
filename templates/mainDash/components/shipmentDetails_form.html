@@ -1,0 +1,296 @@
+
+{% load static %}
+{% load humanize %}
+<div class="page-body">
+    <div class="container-xl">
+        <div class="row row-deck row-cards">
+
+            {# --- Shipment Status Banner --- #}
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="row align-items-center">
+                            <div class="col">
+                                <h3 class="mb-1">{{ shipment.shipment_number }}</h3>
+                                <div class="text-muted">
+                                    Order: <a href="{% url 'viewOrderDetail' order.uuid %}">{{ order.order_number }}</a>
+                                    &nbsp;|&nbsp; Tracking: <strong>{{ order.tracking_number }}</strong>
+                                </div>
+                            </div>
+                            <div class="col-auto">
+                                <span class="badge bg-{% if shipment.status == 'pending' %}yellow text-white{% elif shipment.status == 'in_transit' %}cyan text-white{% elif shipment.status == 'delivered' %}green text-white{% elif shipment.status == 'cancelled' %}red text-white{% elif shipment.status == 'returned' %}orange text-white{% else %}secondary{% endif %} fw-bold fs-5 px-3 py-2">
+                                    {{ shipment.get_status_display }}
+                                </span>
+                            </div>
+                            <div class="col-auto text-muted">
+                                Created {{ shipment.created_at|date:"d/m/Y H:i" }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {# --- Update Status --- #}
+            {% if has_next_status %}
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Update Shipment Status</h3>
+                    </div>
+                    <div class="card-body">
+                        <form id="status-change-form"
+                              hx-post="{% url 'shipmentChangeStatus' shipment.uuid %}"
+                              hx-target="#toast-container"
+                              hx-swap="innerHTML">
+                            {% csrf_token %}
+                            <div class="row row-cards align-items-end">
+                                <div class="col-md-3">
+                                    <div class="mb-3 mb-md-0">
+                                        <label class="form-label">New Status</label>
+                                        <select name="status" id="id_new_status" class="form-select" data-search="on" required>
+                                            <option value="">Select status</option>
+                                            {% for value, label in status_form.fields.status.choices %}
+                                                <option value="{{ value }}">{{ label }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="mb-3 mb-md-0">
+                                        <label class="form-label">Location <span class="text-muted">(optional)</span></label>
+                                        <input type="text" name="location" class="form-control" placeholder="e.g. Lagos Hub">
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="mb-3 mb-md-0">
+                                        <label class="form-label">Note <span class="text-muted">(optional)</span></label>
+                                        <input type="text" name="description" class="form-control" placeholder="Additional detail">
+                                    </div>
+                                </div>
+                                <div class="col-md-2">
+                                    <button type="button" class="btn btn-primary w-100 js-htmx-action"
+                                            data-bs-toggle="modal" data-bs-target="#confirm-status-modal">
+                                        Update
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            {% else %}
+            <div class="col-12">
+                <div class="alert alert-secondary mb-0">
+                    <strong>{{ shipment.get_status_display }}</strong> is a final status — no further updates are possible for this shipment.
+                </div>
+            </div>
+            {% endif %}
+
+            {# --- Receiver & Route (from Order, read-only) --- #}
+            <div class="col-md-4">
+                <div class="card h-100">
+                    <div class="card-header">
+                        <h3 class="card-title">Receiver Details</h3>
+                    </div>
+                    <div class="card-body">
+                        <dl class="row">
+                            <dt class="col-5 text-muted">Name</dt>
+                            <dd class="col-7">{{ order.receiver_name }}</dd>
+
+                            <dt class="col-5 text-muted">Phone</dt>
+                            <dd class="col-7">{{ order.receiver_phone }}</dd>
+
+                            <dt class="col-5 text-muted">Address</dt>
+                            <dd class="col-7">{{ order.receiver_address|default:"—" }}</dd>
+
+                            <dt class="col-5 text-muted">City / Country</dt>
+                            <dd class="col-7">{{ order.receiver_city|default:"—" }}, {{ order.receiver_country }}</dd>
+                        </dl>
+                        <a href="{% url 'viewOrderDetail' order.uuid %}" class="text-muted">
+                            <small>Edit on the Order →</small>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            {# --- Shipment-specific details (editable here, owned by Shipment) --- #}
+            <div class="col-md-4">
+                <div class="card h-100">
+                    <div class="card-header">
+                        <h3 class="card-title">Carrier & Schedule</h3>
+                    </div>
+                    <div class="card-body">
+                        <dl class="row">
+                            <dt class="col-5 text-muted">Carrier</dt>
+                            <dd class="col-7">{{ shipment.carrier_name|default:"—" }}</dd>
+
+                            <dt class="col-5 text-muted">Pickup Date</dt>
+                            <dd class="col-7">{{ shipment.pickup_date|date:"d/m/Y"|default:"—" }}</dd>
+
+                            <dt class="col-5 text-muted">Expected Delivery</dt>
+                            <dd class="col-7">{{ shipment.expected_delivery_date|date:"d/m/Y"|default:"—" }}</dd>
+
+                            <dt class="col-5 text-muted">Shipped At</dt>
+                            <dd class="col-7">{{ shipment.shipped_at|date:"d/m/Y H:i"|default:"—" }}</dd>
+
+                            <dt class="col-5 text-muted">Delivered At</dt>
+                            <dd class="col-7">{{ shipment.delivered_at|date:"d/m/Y H:i"|default:"—" }}</dd>
+                        </dl>
+                    </div>
+                </div>
+            </div>
+
+            {# --- Order Summary (read-only) --- #}
+            <div class="col-md-4">
+                <div class="card h-100">
+                    <div class="card-header">
+                        <h3 class="card-title">Order Summary</h3>
+                    </div>
+                    <div class="card-body">
+                        <dl class="row">
+                            <dt class="col-5 text-muted">Order Type</dt>
+                            <dd class="col-7">{{ order.order_type.name|default:"—" }}</dd>
+
+                            <dt class="col-5 text-muted">Quantity</dt>
+                            <dd class="col-7">{{ order.quantity }}</dd>
+
+                            <dt class="col-5 text-muted">Weight</dt>
+                            <dd class="col-7">{{ order.weight }} kg</dd>
+
+                            <dt class="col-5 text-muted">Route</dt>
+                            <dd class="col-7">{{ order.order_origin_country }} → {{ order.order_destination_country }}</dd>
+
+                            <dt class="col-5 text-muted">Shipping Cost</dt>
+                            <dd class="col-7">£{{ order.shipping_cost|floatformat:2|intcomma }}</dd>
+                        </dl>
+                    </div>
+                </div>
+            </div>
+
+            {# --- Tracking Timeline --- #}
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Tracking History</h3>
+                    </div>
+                    <div class="card-body">
+                        {% if tracking_events %}
+                        <ul class="list-unstyled mb-0">
+                            {% for event in tracking_events %}
+                            <li class="d-flex mb-3 {% if not forloop.last %}border-bottom pb-3{% endif %}">
+                                <div class="me-3">
+                                    <span class="badge bg-{% if event.status == 'pending' %}yellow text-white{% elif event.status == 'in_transit' %}cyan text-white{% elif event.status == 'delivered' %}green text-white{% elif event.status == 'cancelled' %}red text-white{% elif event.status == 'returned' %}orange text-white{% else %}secondary{% endif %}">
+                                        {{ event.get_status_display }}
+                                    </span>
+                                </div>
+                                <div class="flex-fill">
+                                    {% if event.location %}<strong>{{ event.location }}</strong><br>{% endif %}
+                                    {% if event.description %}<span class="text-secondary">{{ event.description }}</span><br>{% endif %}
+                                    <small class="text-muted">{{ event.created_at|date:"d/m/Y H:i" }}{% if event.recorded_by %} · by {{ event.recorded_by }}{% endif %}</small>
+                                </div>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                        {% else %}
+                        <div class="text-center py-4 text-secondary">
+                            <small>No tracking events yet.</small>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            {# --- Notes --- #}
+            {% if shipment.notes %}
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Additional Notes</h3>
+                    </div>
+                    <div class="card-body">{{ shipment.notes }}</div>
+                </div>
+            </div>
+            {% endif %}
+
+            {# --- Product / Package Images --- #}
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Product Images</h3>
+                        <div class="card-actions">
+                            <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#upload-image-modal">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon me-1">
+                                    <path d="M12 5l0 14" /><path d="M5 12l14 0" />
+                                </svg>
+                                Upload Image
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="row row-cards" id="order-images-grid">
+                            {% for img in order_images %}
+                            <div class="col-auto" id="image-card-{{ img.id }}">
+                                <div class="card" style="width: 160px;">
+                                    <a href="{{ img.image.url }}" target="_blank">
+                                        <img src="{{ img.image.url }}" class="card-img-top" style="height: 120px; object-fit: cover;" alt="Order image">
+                                    </a>
+                                    <div class="card-body p-2 text-center">
+                                        <small class="text-muted d-block">{{ img.uploaded_at|date:"d/m/Y H:i" }}</small>
+                                        <button type="button" class="btn btn-sm btn-link text-danger p-0 js-delete-image" data-image-id="{{ img.id }}">
+                                            Remove
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        <div id="no-images-msg" class="text-center py-4 text-secondary" {% if order_images %}style="display:none;"{% endif %}>
+                            <small>No images uploaded yet for this order.</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal modal-blur fade" id="upload-image-modal" tabindex="-1" role="dialog" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered" role="document">
+                    <div class="modal-content">
+                        <form id="image-upload-form" enctype="multipart/form-data">
+                            {% csrf_token %}
+                            <div class="modal-body">
+                                <div class="modal-title mb-3">Upload Product Images</div>
+                                <input type="file" name="images" id="id_images_input" accept="image/*" class="form-control" multiple required>
+                                <small class="form-hint">You can select multiple images. Max 8MB each.</small>
+
+                                <!-- Preview grid, populated by JS when files are selected -->
+                                <div class="row row-cards mt-3" id="image-preview-grid"></div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-link link-danger me-auto" data-bs-dismiss="modal">Cancel</button>
+                                <button type="submit" class="btn btn-primary" id="image-upload-submit-btn">Upload</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            {% include "mainDash/includes/confirm_delete_modal.html" %}
+        </div>
+    </div>
+</div>
+
+    <div class="modal modal-blur fade" id="confirm-status-modal" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-sm modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-body">
+                    <div class="modal-title">Confirm status update</div>
+                    <div class="text-muted mt-1">This will update the shipment and the linked order. Continue?</div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-link link-secondary me-auto" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="confirm-status-btn" data-bs-dismiss="modal">Yes, Update</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% include "mainDash/includes/shipmentDetails_formScript.html" %}

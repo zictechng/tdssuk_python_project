@@ -1,0 +1,56 @@
+
+
+{% load static %}
+
+<div class="row g-3">
+
+    <div class="col-6">
+        <div class="d-flex align-items-center gap-2">
+            <span class="avatar avatar-sm bg-green-lt rounded">
+                <i class="bi bi-box-arrow-in-down" style="font-size:0.9rem;"></i>
+            </span>
+            <div>
+                <div class="text-secondary small">Inbound</div>
+                <div class="h3 mb-0">{{ inbound }}</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-6">
+        <div class="d-flex align-items-center gap-2">
+            <span class="avatar avatar-sm bg-blue-lt rounded">
+                <i class="bi bi-box-arrow-up" style="font-size:0.9rem;"></i>
+            </span>
+            <div>
+                <div class="text-secondary small">Outbound</div>
+                <div class="h3 mb-0">{{ outbound }}</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-12">
+        <hr class="my-2">
+    </div>
+
+    <div class="col-12">
+        <div class="d-flex align-items-center gap-2">
+            <span class="avatar avatar-sm bg-purple-lt rounded">
+                <i class="bi bi-speedometer2" style="font-size:0.9rem;"></i>
+            </span>
+            <div>
+                <div class="text-secondary small">Total Weight Received</div>
+                <div class="h3 mb-0">{{ total_weight|floatformat:1 }} <small class="fs-5 text-muted">kg</small></div>
+            </div>
+        </div>
+    </div>
+
+    {% if inbound == 0 and outbound == 0 %}
+    <div class="col-12">
+        <div class="text-center text-secondary py-3">
+            <i class="bi bi-inboxes fs-2 d-block mb-2 opacity-50"></i>
+            <small>No movement recorded for this period.</small>
+        </div>
+    </div>
+    {% endif %}
+
+</div>

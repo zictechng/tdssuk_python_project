@@ -1,0 +1,222 @@
+
+{% extends "mainDash/layouts/baseDash.html" %}
+{% load static %}
+
+
+{% block title %}Shipping Label — {{ label.title }}{% endblock %}
+
+
+{% block content %}
+
+
+<div class="page-header d-print-none" aria-label="Page header">
+    <div class="container-xl">
+        <div class="row g-2 align-items-center">
+            <div class="col">
+                <h2 class="page-title">{{ label.title }}</h2>
+                <div class="page-pretitle">
+                    <a href="{% url 'shipping_label_list' %}" class="text-secondary">
+                        <i class="bi bi-arrow-left me-1"></i> Back to Shipping Labels
+                    </a>
+                </div>
+                 
+            </div>
+            <div class="col-auto ms-auto d-print-none">
+                <div class="btn-list">
+                    <button onclick="window.print()"
+                            class="btn btn-outline-primary btn-sm d-none d-sm-inline-block">
+                        <i class="bi bi-printer me-1"></i> Print
+                    </button>
+                   
+                    <a href="{% url 'shipping_label_list' %}"
+                       class="btn btn-secondary btn-sm d-none d-sm-inline-block">
+                        <i class="bi bi-arrow-left me-1"></i> Back
+                    </a>
+                    <a href="{% url 'shipping_label_list' %}"
+                       class="btn btn-secondary d-sm-none btn-icon">
+                        <i class="bi bi-arrow-left"></i>
+                    </a>
+                    <a href="{% url 'uploaded_document_edit' label.uuid %}"
+                       class="btn btn-warning btn-sm d-none d-sm-inline-block">
+                        <i class="bi bi-pencil me-1"></i> Edit
+                    </a>
+                   
+                    <a href="{% url 'uploaded_document_list' %}"
+                       class="btn btn-secondary d-sm-none btn-icon">
+                        <i class="bi bi-arrow-left"></i>
+                    </a>
+
+                    <a href="{% url 'uploaded_document_edit' label.uuid %}"
+                       class="btn btn-warning d-sm-none btn-icon">
+                        <i class="bi bi-pencil"></i>
+                    </a>
+                    <button type="button"
+                        class="btn btn-danger btn-sm js-delete-label d-none d-sm-inline-block"
+                        data-label-id="{{ label.pk }}">
+                    <i class="bi bi-trash me-1"></i> Delete
+                    </button>
+                    <button type="button"
+                        class="btn btn-danger js-delete-label d-sm-none btn-icon"
+                        data-label-id="{{ label.pk }}">
+                    <i class="bi bi-trash me-1"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="page-body">
+    <div class="container-xl">
+        <div class="row row-deck row-cards">
+
+
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Label Details</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label text-muted">Title</label>
+                                <p class="fw-medium mb-0">{{ label.title }}</p>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label text-muted">Document Type</label>
+                                <p class="mb-0">{{ label.get_document_type_display }}</p>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label text-muted">Status</label>
+                                <p class="mb-0">
+                                    <span class="badge bg-{% if label.status == 'approved' %}green{% elif label.status == 'rejected' %}red{% else %}yellow{% endif %}-lt">
+                                        {{ label.get_status_display }}
+                                    </span>
+                                </p>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label text-muted">Uploaded By</label>
+                                <p class="mb-0">
+                                    {{ label.uploaded_by.get_full_name|default:label.uploaded_by.username }}
+                                </p>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label text-muted">Linked Shipment</label>
+                                <p class="mb-0">
+                                    {% if label.shipment %}
+                                        <a href="{% url 'shipment_detail' label.shipment.uuid %}">
+                                            <i class="bi bi-box-seam me-1"></i>
+                                            {{ label.shipment.tracking_number }}
+                                        </a>
+                                    {% else %}
+                                        <span class="text-muted">—</span>
+                                    {% endif %}
+                                </p>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label text-muted">Linked Order</label>
+                                <p class="mb-0">
+                                    {% if label.order %}
+                                        <a href="{% url 'viewOrderDetail' label.order.uuid %}">
+                                            <i class="bi bi-bag me-1"></i>
+                                            {{ label.order.order_number }}
+                                        </a>
+                                    {% else %}
+                                        <span class="text-muted">—</span>
+                                    {% endif %}
+                                </p>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label text-muted">Uploaded At</label>
+                                <p class="mb-0 text-secondary">
+                                    {{ label.created_at|date:"d/m/Y H:i" }}
+                                </p>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label text-muted">Last Updated</label>
+                                <p class="mb-0 text-secondary">
+                                    {{ label.updated_at|date:"d/m/Y H:i" }}
+                                </p>
+                            </div>
+
+                            {% if label.notes %}
+                            <div class="col-12">
+                                <label class="form-label text-muted">Notes</label>
+                                <p class="mb-0">{{ label.notes }}</p>
+                            </div>
+                            {% endif %}
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">File</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label class="form-label text-muted">Filename</label>
+                            <p class="mb-0 fw-medium">{{ label.filename }}</p>
+                        </div>
+                        {% if label.file_size %}
+                        <div class="mb-3">
+                            <label class="form-label text-muted">File Size</label>
+                            <p class="mb-0 text-secondary">{{ label.file_size|filesizeformat }}</p>
+                        </div>
+                        {% endif %}
+                        <div class="d-grid gap-2">
+                            <a href="{{ label.file.url }}" target="_blank"
+                               class="btn btn-outline-primary">
+                                <i class="bi bi-eye me-1"></i> Open File
+                            </a>
+                            <a href="{{ label.file.url }}" download
+                               class="btn btn-outline-secondary">
+                                <i class="bi bi-download me-1"></i> Download
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+
+{% include "mainDash/includes/confirm_delete_modal.html" %}
+<script>
+document.querySelectorAll('.js-delete-label').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+        var labelId = btn.getAttribute('data-label-id');
+        var deleteUrl = "{% url 'uploaded_document_delete' '00000000-0000-0000-0000-000000000000' %}".replace('00000000-0000-0000-0000-000000000000', labelId);
+        confirmDelete({
+            url: deleteUrl,
+            title: 'Delete this shipping label?',
+            message: 'This will permanently remove the label and its file.',
+            csrfToken: '{{ csrf_token }}',
+            onSuccess: function () {
+                window.location.href = "{% url 'shipping_label_list' %}";
+            },
+            onError: function (data) {
+                alert(data.error || 'Delete failed.');
+            },
+        });
+    });
+});
+</script>
+
+
+{% endblock %}

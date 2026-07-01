@@ -1,0 +1,376 @@
+
+{% extends "mainDash/layouts/baseDash.html" %}
+{% load static %}
+
+{% block title %}Customs — New Duty & Tax Record{% endblock %}
+
+{% block content %}
+
+<div class="page-header d-print-none">
+    <div class="container-xl">
+        <div class="row g-2 align-items-center">
+            <div class="col">
+                <div class="page-pretitle">
+                    <a href="{% url 'duty_tax_list' %}" class="text-secondary">
+                        <i class="bi bi-arrow-left me-1"></i> Back to Duty & Tax
+                    </a>
+                </div>
+                <h2 class="page-title">New Duty & Tax Record</h2>
+            </div>
+            <div class="col-auto ms-auto d-print-none">
+                <div class="btn-list">
+                  <a href="{% url 'duty_tax_list' %}" class="btn btn-sm btn-secondary btn-5 d-none d-sm-inline-block">
+                    <i class="bi bi-arrow-left"></i>
+                    Back
+                  </a>
+                  <a href="{% url 'duty_tax_list' %}"
+                    class="btn btn-secondary btn-6 d-sm-none btn-icon"
+                    aria-label="Create new report">
+                    <i class="bi bi-arrow-left"></i>
+                  </a>
+                </div>
+              </div>
+        </div>
+    </div>
+</div>
+
+<div class="page-body">
+    <div class="container-xl">
+        <div class="row row-deck row-cards">
+            <div class="col-12 mt-3">
+
+                <form class="card" id="duty-tax-form"
+                      hx-post="{% url 'duty_tax_create' %}"
+                      hx-target="#toast-container"
+                      hx-swap="innerHTML">
+                    {% csrf_token %}
+
+                    <div class="card-header">
+                        <h3 class="card-title">Duty & Tax Details</h3>
+                    </div>
+
+                    <div class="card-body">
+                        <div class="row row-cards">
+
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label required">Warehouse Item</label>
+                                    <select name="item" class="form-select" data-search="on">
+                                        <option value="">— Select Item —</option>
+                                        {% for item in form.fields.item.queryset %}
+                                        <option value="{{ item.pk }}">
+                                            {{ item.customer_name }} — {{ item.description|truncatechars:40 }}
+                                        </option>
+                                        {% endfor %}
+                                    </select>
+                                    <div id="error-item"></div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Linked Invoice</label>
+                                    <select name="invoice" class="form-select" data-search="on">
+                                        <option value="">— Select Invoice (optional) —</option>
+                                        {% for invoice in form.fields.invoice.queryset %}
+                                        <option value="{{ invoice.pk }}">
+                                            {{ invoice.invoice_number }} — {{ invoice.customer_name }}
+                                        </option>
+                                        {% endfor %}
+                                    </select>
+                                    <div id="error-invoice"></div>
+                                </div>
+                            </div>
+
+                             <div class="col-12">
+                                <div id="error-__all__"></div>
+                            </div>
+
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label class="form-label required">Destination Country</label>
+                                    <select name="destination_country" class="form-select" data-search="on">
+                                            <option value="">Select country</option>
+                                            {% for code, name in countries %}
+                                                <option value="{{ name }}">{{ name }}</option>
+                                            {% endfor %}
+                                    </select>
+                                    <div id="error-destination_country"></div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label class="form-label">Clearance Port</label>
+                                    <input type="text" name="clearance_port" class="form-control"
+                                           placeholder="e.g. Lagos (Apapa), Tema">
+                                    <div id="error-clearance_port"></div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label class="form-label">Customs Agent</label>
+                                    <input type="text" name="customs_agent" class="form-control"
+                                           placeholder="Clearing agent name">
+                                    <div id="error-customs_agent"></div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-3">
+                                <div class="mb-3">
+                                    <label class="form-label required">Duty Amount</label>
+                                    <input type="number" name="duty_amount" class="form-control"
+                                           min="0" step="0.01" placeholder="0.00">
+                                    <div id="error-duty_amount"></div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-3">
+                                <div class="mb-3">
+                                    <label class="form-label required">Duty Currency</label>
+                                    <select name="duty_currency" class="form-select" data-search="on">
+                                        {% for value, label in form.fields.duty_currency.choices %}
+                                        <option value="{{ value }}">{{ label }}</option>
+                                        {% endfor %}
+                                    </select>
+                                    <div id="error-duty_currency"></div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-3">
+                                <div class="mb-3">
+                                    <label class="form-label">Duty Rate (%)</label>
+                                    <div class="input-group">
+                                        <input type="number" name="duty_rate" class="form-control"
+                                               min="0" step="0.01" placeholder="e.g. 20.00">
+                                        <span class="input-group-text">%</span>
+                                    </div>
+                                    <div id="error-duty_rate"></div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-3">
+                                <div class="mb-3">
+                                    <label class="form-label">Tax / Levy Amount</label>
+                                    <input type="number" name="tax_amount" class="form-control"
+                                           min="0" step="0.01" value="0" placeholder="0.00">
+                                    <div id="error-tax_amount"></div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label class="form-label">HS Code</label>
+                                    <input type="text" name="hs_code" class="form-control"
+                                           placeholder="e.g. 8703.23">
+                                    <div class="form-hint">Harmonized System commodity code</div>
+                                    <div id="error-hs_code"></div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label class="form-label">Customs Reference</label>
+                                    <input type="text" name="customs_reference" class="form-control"
+                                           placeholder="Customs office reference">
+                                    <div id="error-customs_reference"></div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label class="form-label required">Status</label>
+                                    <select name="status" class="form-select" data-search="on">
+                                        {% for value, label in form.fields.status.choices %}
+                                        <option value="{{ value }}">{{ label }}</option>
+                                        {% endfor %}
+                                    </select>
+                                    <div id="error-status"></div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Paid Date</label>
+                                    <input name="paid_date" class="form-control datepicker"
+                                           placeholder="Date paid" autocomplete="off">
+                                    <div id="error-paid_date"></div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Reimbursed Date</label>
+                                    <input name="reimbursed_date" class="form-control datepicker"
+                                           placeholder="Date reimbursed" autocomplete="off">
+                                    <div id="error-reimbursed_date"></div>
+                                </div>
+                            </div>
+
+                            <div class="col-12">
+                                <div class="mb-0">
+                                    <label class="form-label">Notes</label>
+                                    <textarea name="notes" rows="2" class="form-control"
+                                              placeholder="Any additional notes..."></textarea>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <div class="card-footer text-end">
+                        <a href="{% url 'duty_tax_list' %}" class="btn btn-secondary btn-sm me-2">Cancel</a>
+                        <button type="button"
+                                class="btn btn-primary btn-sm"
+                                data-bs-toggle="modal"
+                                data-bs-target="#confirm-duty-modal">
+                            Save Record
+                        </button>
+                    </div>
+                </form>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal modal-blur fade" id="confirm-duty-modal"
+     tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-sm modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-body">
+                <div class="modal-title">Save this duty & tax record?</div>
+                <div class="text-muted mt-1">The record will be saved and linked to the selected item.</div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-link link-secondary me-auto"
+                        data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="confirm-duty-btn">
+                    <span id="confirm-duty-label">Yes, Save</span>
+                    <span id="confirm-duty-spinner"
+                          class="spinner-border spinner-border-sm ms-2"
+                          style="display:none;" role="status" aria-hidden="true"></span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // --- Reinitialize Litepicker datepickers ---
+    function reinitDatepickers() {
+    var pickers = document.querySelectorAll('.datepicker');
+    
+    pickers.forEach(function (el) {
+        if (el.litepicker) {
+            el.litepicker.destroy();
+            el.litepicker = null;
+        }
+
+        var minDate = el.dataset.minDate === 'today' ? new Date()
+                    : el.dataset.minDate ? new Date(el.dataset.minDate)
+                    : null;
+
+        var picker = new Litepicker({
+            element: el,
+            minDate: minDate,
+            format: 'YYYY-MM-DD',
+            buttonText: {
+                previousMonth: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-1"><path d="M15 6l-6 6l6 6" /></svg>`,
+                nextMonth: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-1"><path d="M9 6l6 6l-6 6" /></svg>`,
+            },
+        });
+
+        el.litepicker = picker;
+        });
+    }
+
+    // --- TomSelect ---
+    function initTomSelects() {
+        document.querySelectorAll('select[data-search="on"]').forEach(function (el) {
+            if (!el.tomselect) new TomSelect(el, {
+                placeholder: el.querySelector('option[value=""]')?.textContent || 'Select...'
+            });
+        });
+    }
+
+    function syncTomSelectValues() {
+        document.querySelectorAll('select[data-search="on"]').forEach(function (el) {
+            if (el.tomselect) el.value = el.tomselect.getValue();
+        });
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+    
+    initTomSelects();
+
+    document.getElementById('confirm-duty-btn').addEventListener('click', function () {
+        var btn = this;
+        var label = document.getElementById('confirm-duty-label');
+        var spinner = document.getElementById('confirm-duty-spinner');
+
+        btn.disabled = true;
+        label.textContent = 'Saving...';
+        spinner.style.display = 'inline-block';
+
+        var form = document.getElementById('duty-tax-form');
+        var formData = new FormData(form);
+
+        fetch(form.getAttribute('hx-post'), {
+            method: 'POST',
+            body: formData,
+            headers: { 'HX-Request': 'true' }
+        })
+        .then(function (res) { return res.text(); })
+        .then(function (html) {
+            var parser = new DOMParser();
+            var doc = parser.parseFromString(html, 'text/html');
+
+            doc.querySelectorAll('[hx-swap-oob]').forEach(function (oobEl) {
+                var target = document.getElementById(oobEl.id);
+                if (target) target.outerHTML = oobEl.outerHTML;
+            });
+
+            var toastEl = doc.querySelector('.toast');
+            if (toastEl) {
+                var redirectUrl = toastEl.getAttribute('data-redirect-url');
+                var dismissBtn = document.querySelector('#confirm-duty-modal [data-bs-dismiss="modal"]');
+                if (dismissBtn) dismissBtn.click();
+                document.getElementById('toast-container').innerHTML = toastEl.outerHTML;
+                var liveToast = document.querySelector('#toast-container .toast');
+                tabler.Toast.getOrCreateInstance(liveToast).show();
+                if (redirectUrl) {
+                    setTimeout(function () { window.location.href = redirectUrl; }, 1500);
+                }
+            }
+        })
+        .catch(function (err) { console.error('Submit error:', err); })
+        .finally(function () {
+            btn.disabled = false;
+            label.textContent = 'Yes, Save';
+            spinner.style.display = 'none';
+        });
+    });
+
+        // --- Clear field-level errors on input/change ---
+        document.querySelectorAll('#duty-tax-form input, #duty-tax-form select, #duty-tax-form textarea')
+            .forEach(function (el) {
+                var events = el.tagName === 'SELECT' || el.type === 'file' ? ['change'] : ['input', 'change'];
+                events.forEach(function (evt) {
+                    el.addEventListener(evt, function () {
+                        var errorDiv = document.getElementById('error-' + el.name);
+                        if (errorDiv) errorDiv.innerHTML = '';
+                        if (el.name === 'shipment' || el.name === 'item') {
+                            var allError = document.getElementById('error-__all__');
+                            if (allError) allError.innerHTML = '';
+                        }
+                    });
+                });
+            });
+    });
+
+
+</script>
+
+{% endblock %}

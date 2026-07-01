@@ -1,0 +1,43 @@
+    
+    <p class="m-0 text-secondary">
+        Showing
+        <strong>{{ contacts.start_index }} to {{ contacts.end_index }}</strong>
+        of
+        <strong>{{ contacts.paginator.count }}</strong>
+        entries
+    </p>
+
+    <ul class="pagination m-0 ms-auto">
+
+        <!-- Prev -->
+        <li class="page-item {% if not contacts.has_previous %}disabled{% endif %}">
+            <a class="page-link"
+            hx-get="?page={{ contacts.previous_page_number }}"
+            hx-target="#contact-table-body"
+            hx-swap="innerHTML">
+                ←
+            </a>
+        </li>
+
+        {% for num in page_range %}
+            <li class="page-item {% if contacts.number == num %}active{% endif %}">
+                <a class="page-link"
+                hx-get="?page={{ num }}"
+                hx-target="#contact-table-body"
+                hx-swap="innerHTML">
+                    {{ num }}
+                </a>
+            </li>
+        {% endfor %}
+
+        <!-- Next -->
+        <li class="page-item {% if not contacts.has_next %}disabled{% endif %}">
+            <a class="page-link"
+            hx-get="?page={{ contacts.next_page_number }}"
+            hx-target="#contact-table-body"
+            hx-swap="innerHTML">
+                →
+            </a>
+        </li>
+
+    </ul>

@@ -1,0 +1,663 @@
+{% extends "mainDash/layouts/baseDash.html" %}
+{% load static %}
+
+{% block title %}{{ invoice.invoice_number }} — Invoice Detail{% endblock %}
+
+{% block content %}
+
+<div class="page-header d-print-none">
+    <div class="container-xl">
+        <div class="row g-2 align-items-center">
+            <div class="col">
+                <div class="page-pretitle">
+                    <a href="{% url 'invoice_list' %}" class="text-secondary">
+                        <i class="bi bi-arrow-left me-1"></i> Back to Invoices
+                    </a>
+                </div>
+                <h2 class="page-title">{{ invoice.invoice_number }}</h2>
+            </div>
+            <div class="col-auto ms-auto d-print-none">
+                <div class="btn-list">
+                    <a href="{% url 'invoice_list' %}" class="btn btn-secondary btn-sm d-none d-sm-inline-block">
+                        <i class="bi bi-arrow-left me-1"></i> Back
+                    </a>
+                    <a href="{% url 'invoice_list' %}" class="btn btn-secondary d-sm-none btn-icon">
+                        <i class="bi bi-arrow-left"></i>
+                    </a>
+
+                    <a href="{% url 'invoice_edit' invoice.uuid %}"
+                       class="btn btn-warning btn-sm">
+                        <i class="bi bi-pencil me-1"></i> Edit
+                    </a>
+                    <button type="button" class="btn btn-danger btn-sm js-delete-invoice"
+                            data-invoice-id="{{ invoice.pk }}">
+                        <i class="bi bi-trash me-1"></i> Delete
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="page-body">
+    <div class="container-xl">
+        <div class="row g-3">
+
+            {# --- Status Banner --- #}
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="row align-items-center">
+                            <div class="col-auto">
+                                <span class="avatar avatar-lg bg-blue-lt rounded">
+                                    <i class="bi bi-receipt fs-2"></i>
+                                </span>
+                            </div>
+                            <div class="col">
+                                <div class="d-flex align-items-center gap-2 mb-1">
+                                    <h3 class="mb-0">{{ invoice.invoice_number }}</h3>
+                                    <span class="badge bg-{% if invoice.status == 'paid' %}green{% elif invoice.status == 'partially_paid' %}yellow text-dark{% elif invoice.status == 'overdue' %}red{% elif invoice.status == 'sent' %}blue{% elif invoice.status == 'cancelled' or invoice.status == 'rejected' %}secondary{% else %}secondary{% endif %}-lt">
+                                        {{ invoice.get_status_display }}
+                                    </span>
+                                    <span class="badge bg-purple-lt">{{ invoice.currency }}</span>
+                                </div>
+                                <div class="text-secondary">
+                                    {{ invoice.customer_name }}
+                                    {% if invoice.customer_email %}
+                                    &middot; {{ invoice.customer_email }}
+                                    {% endif %}
+                                    &middot; {{ invoice.destination_country }}
+                                </div>
+                            </div>
+                            <div class="col-auto text-end">
+                                <div class="text-secondary small">Issue Date</div>
+                                <div class="fw-medium">{{ invoice.issue_date|date:"M d, Y" }}</div>
+                                <div class="text-secondary small mt-1">Due Date</div>
+                                <div class="fw-medium {% if invoice.balance_due > 0 and invoice.status == 'overdue' %}text-danger{% endif %}">
+                                    {{ invoice.due_date|date:"M d, Y" }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {# --- Left Column --- #}
+            <div class="col-md-8">
+
+                {# Line Items #}
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Line Items</h3>
+                    </div>
+
+                    {% if line_items %}
+                    <div class="table-responsive">
+                        <table class="table card-table table-vcenter">
+                            <thead>
+                                <tr>
+                                    <th>Description</th>
+                                    <th>Charge Type</th>
+                                    <th>Qty</th>
+                                    <th>Unit Price</th>
+                                    <th>Amount</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody id="line-items-tbody">
+                                {% for item in line_items %}
+                                <tr id="line-item-row-{{ item.pk }}">
+                                    <td>{{ item.description }}</td>
+                                    <td>
+                                        <span class="badge bg-blue-lt">
+                                            {{ item.get_charge_type_display }}
+                                        </span>
+                                    </td>
+                                    <td>{{ item.quantity }}</td>
+                                    <td>{{ invoice.currency }} {{ item.unit_price|floatformat:2 }}</td>
+                                    <td><strong>{{ invoice.currency }} {{ item.amount|floatformat:2 }}</strong></td>
+                                    <td class="text-end">
+                                        <button type="button"
+                                                class="btn btn-sm js-delete-line-item btn-ghost-danger"
+                                                data-item-id="{{ item.pk }}">
+                                            Delete
+                                        </button>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                            <tfoot class="table-light">
+                                <tr>
+                                    <td colspan="4" class="text-end text-secondary">Subtotal</td>
+                                    <td><strong>{{ invoice.currency }} {{ invoice.subtotal|floatformat:2 }}</strong></td>
+                                    <td></td>
+                                </tr>
+                                {% if invoice.discount > 0 %}
+                                <tr>
+                                    <td colspan="4" class="text-end text-secondary">Discount</td>
+                                    <td class="text-danger">- {{ invoice.currency }} {{ invoice.discount|floatformat:2 }}</td>
+                                    <td></td>
+                                </tr>
+                                {% endif %}
+                                <tr>
+                                    <td colspan="4" class="text-end fw-bold">Total</td>
+                                    <td><strong class="text-primary">{{ invoice.currency }} {{ invoice.total_amount|floatformat:2 }}</strong></td>
+                                    <td></td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="card-body text-center text-secondary py-4">
+                        <i class="bi bi-list-ul fs-2 d-block mb-2 opacity-50"></i>
+                        No line items yet. Add one below.
+                    </div>
+                    {% endif %}
+
+                    {# Add Line Item Form #}
+                    <div class="card-footer">
+                        <div class="subheader mb-2">Add Line Item</div>
+                        <form id="line-item-form"
+                              hx-post="{% url 'invoice_add_line_item' invoice.uuid %}"
+                              hx-target="#toast-container"
+                              hx-swap="innerHTML">
+                            {% csrf_token %}
+                            <div class="row g-2 align-items-end">
+                                <div class="col-md-3">
+                                    <label class="form-label required">Charge Type</label>
+                                    <select name="charge_type" class="form-select form-select-sm">
+                                        {% for value, label in line_item_form.fields.charge_type.choices %}
+                                        <option value="{{ value }}">{{ label }}</option>
+                                        {% endfor %}
+                                    </select>
+                                    <div id="error-charge_type"></div>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label required">Description</label>
+                                    <input type="text" name="description" class="form-control form-control-sm"
+                                           placeholder="e.g. Freight to Lagos">
+                                    <div id="error-description"></div>
+                                </div>
+                                <div class="col-md-1">
+                                    <label class="form-label required">Qty</label>
+                                    <input type="number" name="quantity" class="form-control form-control-sm"
+                                           min="1" value="1">
+                                    <div id="error-quantity"></div>
+                                </div>
+                                <div class="col-md-2">
+                                    <label class="form-label required">Unit Price</label>
+                                    <input type="number" name="unit_price" class="form-control form-control-sm"
+                                           min="0" step="0.01" placeholder="0.00">
+                                    <div id="error-unit_price"></div>
+                                </div>
+                                <div class="col-md-2">
+                                    <button type="button"
+                                            class="btn btn-primary btn-sm w-100"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#confirm-line-item-modal">
+                                        <i class="bi bi-plus-lg me-1"></i> Add
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                {# Payment History #}
+                <div class="card mt-3">
+                    <div class="card-header">
+                        <h3 class="card-title">Payment History</h3>
+                    </div>
+                    {% if payments %}
+                    <div class="table-responsive">
+                        <table class="table card-table table-vcenter">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Method</th>
+                                    <th>Reference</th>
+                                    <th>Amount</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for payment in payments %}
+                                <tr id="payment-row-{{ payment.pk }}">
+                                    <td>{{ payment.paid_on|date:"d/m/Y" }}</td>
+                                    <td>{{ payment.get_method_display }}</td>
+                                    <td class="text-secondary">{{ payment.reference|default:"—" }}</td>
+                                    <td><strong>{{ invoice.currency }} {{ payment.amount|floatformat:2 }}</strong></td>
+                                    <td class="text-end">
+                                        <button type="button"
+                                                class="btn btn-sm js-delete-payment btn-ghost-danger"
+                                                data-payment-id="{{ payment.pk }}">
+                                            Delete
+                                        </button>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="card-body text-center text-secondary py-4">
+                        <i class="bi bi-cash-coin fs-2 d-block mb-2 opacity-50"></i>
+                        No payments recorded yet.
+                    </div>
+                    {% endif %}
+                </div>
+
+            </div>
+
+            {# --- Right Column --- #}
+            <div class="col-md-4">
+
+                {# Balance Summary #}
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Balance Summary</h3>
+                    </div>
+                    <div class="card-body">
+                        <dl class="row mb-0">
+                            <dt class="col-7 text-secondary fw-normal">Total Amount</dt>
+                            <dd class="col-5 text-end">
+                                {{ invoice.currency }} {{ invoice.total_amount|floatformat:2 }}
+                            </dd>
+
+                            <dt class="col-7 text-secondary fw-normal">Amount Paid</dt>
+                            <dd class="col-5 text-end text-green">
+                                {{ invoice.currency }} {{ invoice.amount_paid|floatformat:2 }}
+                            </dd>
+
+                            <dt class="col-7 fw-bold">Balance Due</dt>
+                            <dd class="col-5 text-end fw-bold {% if invoice.balance_due > 0 %}text-danger{% else %}text-green{% endif %}">
+                                {{ invoice.currency }} {{ invoice.balance_due|floatformat:2 }}
+                            </dd>
+                        </dl>
+                    </div>
+                </div>
+
+                {# Record Payment #}
+                {% if invoice.balance_due > 0 %}
+                <div class="card mt-3">
+                    <div class="card-header">
+                        <h3 class="card-title">Record Payment</h3>
+                    </div>
+                    <div class="card-body">
+                        <form id="payment-form"
+                              hx-post="{% url 'payment_create' %}"
+                              hx-target="#toast-container"
+                              hx-swap="innerHTML">
+                            {% csrf_token %}
+                            <input type="hidden" name="invoice" value="{{ invoice.pk }}">
+
+                            <div class="mb-3">
+                                <label class="form-label required">Amount</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">{{ invoice.currency }}</span>
+                                    <input type="number" name="amount" class="form-control"
+                                           min="0.01" step="0.01"
+                                           placeholder="0.00"
+                                           max="{{ invoice.balance_due }}">
+                                </div>
+                                <div id="error-amount"></div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label required">Payment Method</label>
+                                <select name="method" class="form-select">
+                                    {% for value, label in payment_form.fields.method.choices %}
+                                    <option value="{{ value }}">{{ label }}</option>
+                                    {% endfor %}
+                                </select>
+                                <div id="error-method"></div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label required">Payment Date</label>
+                                <input name="paid_on" class="form-control datepicker"
+                                       placeholder="Payment date" autocomplete="off">
+                                <div id="error-paid_on"></div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Reference</label>
+                                <input type="text" name="reference" class="form-control"
+                                       placeholder="e.g. Bank ref, transaction ID">
+                                <div id="error-reference"></div>
+                            </div>
+
+                            <div class="mb-0">
+                                <label class="form-label">Notes</label>
+                                <textarea name="notes" rows="2" class="form-control"
+                                          placeholder="Optional..."></textarea>
+                            </div>
+
+                        </form>
+                    </div>
+                    <div class="card-footer text-end">
+                        <button type="button"
+                                class="btn btn-primary btn-sm"
+                                data-bs-toggle="modal"
+                                data-bs-target="#confirm-payment-modal">
+                            Record Payment
+                        </button>
+                    </div>
+                </div>
+                {% endif %}
+
+                {# Quick Status Update #}
+                <div class="card mt-3">
+                    <div class="card-header">
+                        <h3 class="card-title">Update Status</h3>
+                    </div>
+                    <div class="card-body">
+                        <form id="status-form"
+                              hx-post="{% url 'invoice_update_status' invoice.uuid %}"
+                              hx-target="#toast-container"
+                              hx-swap="innerHTML">
+                            {% csrf_token %}
+                            <div class="mb-3">
+                                <label class="form-label">Status</label>
+                                <select name="status" class="form-select">
+                                    {% for value, label in invoice.STATUS_CHOICES %}
+                                    <option value="{{ value }}"
+                                        {% if invoice.status == value %}selected{% endif %}>
+                                        {{ label }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="card-footer text-end">
+                        <button type="button"
+                                class="btn btn-secondary btn-sm"
+                                data-bs-toggle="modal"
+                                data-bs-target="#confirm-status-modal">
+                            Update Status
+                        </button>
+                    </div>
+                </div>
+
+                {# Invoice Info #}
+                <div class="card mt-3">
+                    <div class="card-header">
+                        <h3 class="card-title">Invoice Info</h3>
+                    </div>
+                    <div class="card-body">
+                        <dl class="row mb-0">
+                            <dt class="col-6 text-secondary fw-normal">Created</dt>
+                            <dd class="col-6">{{ invoice.created_at|date:"M d, Y" }}</dd>
+
+                            <dt class="col-6 text-secondary fw-normal">Last Updated</dt>
+                            <dd class="col-6">{{ invoice.updated_at|date:"M d, Y" }}</dd>
+
+                            {% if invoice.notes %}
+                            <dt class="col-12 text-secondary fw-normal mt-2">Notes</dt>
+                            <dd class="col-12">{{ invoice.notes }}</dd>
+                            {% endif %}
+                        </dl>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+</div>
+
+{# --- Modals --- #}
+
+{# Line Item Confirm #}
+<div class="modal modal-blur fade" id="confirm-line-item-modal"
+     tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-sm modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-body">
+                <div class="modal-title">Add this line item?</div>
+                <div class="text-muted mt-1">It will be added to the invoice and totals recalculated.</div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-link link-secondary me-auto"
+                        data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="confirm-line-item-btn">
+                    <span id="confirm-line-item-label">Yes, Add</span>
+                    <span id="confirm-line-item-spinner"
+                          class="spinner-border spinner-border-sm ms-2"
+                          style="display:none;" role="status" aria-hidden="true"></span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{# Payment Confirm #}
+<div class="modal modal-blur fade" id="confirm-payment-modal"
+     tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-sm modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-body">
+                <div class="modal-title">Record this payment?</div>
+                <div class="text-muted mt-1">Invoice balance and status will be updated automatically.</div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-link link-secondary me-auto"
+                        data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="confirm-payment-btn">
+                    <span id="confirm-payment-label">Yes, Record</span>
+                    <span id="confirm-payment-spinner"
+                          class="spinner-border spinner-border-sm ms-2"
+                          style="display:none;" role="status" aria-hidden="true"></span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{# Status Confirm #}
+<div class="modal modal-blur fade" id="confirm-status-modal"
+     tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-sm modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-body">
+                <div class="modal-title">Update invoice status?</div>
+                <div class="text-muted mt-1">This will change the current status of the invoice.</div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-link link-secondary me-auto"
+                        data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="confirm-status-btn">
+                    <span id="confirm-status-label">Yes, Update</span>
+                    <span id="confirm-status-spinner"
+                          class="spinner-border spinner-border-sm ms-2"
+                          style="display:none;" role="status" aria-hidden="true"></span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% include "mainDash/includes/confirm_delete_modal.html" %}
+
+<script>
+
+    // --- Reinitialize Litepicker datepickers ---
+  function reinitDatepickers() {
+  var pickers = document.querySelectorAll('.datepicker');
+  pickers.forEach(function (el) {
+      if (el.litepicker) {
+          el.litepicker.destroy();
+          el.litepicker = null;
+      }
+
+      var minDate = el.dataset.minDate === 'today' ? new Date()
+                  : el.dataset.minDate ? new Date(el.dataset.minDate)
+                  : null;
+
+      var picker = new Litepicker({
+          element: el,
+          minDate: minDate,
+          format: 'YYYY-MM-DD',
+          buttonText: {
+              previousMonth: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-1"><path d="M15 6l-6 6l6 6" /></svg>`,
+              nextMonth: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-1"><path d="M9 6l6 6l-6 6" /></svg>`,
+          },
+          onSelect: function () {
+              // Clear error when user picks a date
+              var errorDiv = document.getElementById('error-' + el.name);
+              if (errorDiv) errorDiv.innerHTML = '';
+            },
+        });
+
+          el.litepicker = picker;
+      });
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        // ── Helper: submit a form via fetch with confirmed pattern ──
+        function submitForm(formId, modalId, btnId, labelId, spinnerId) {
+            var btn = document.getElementById(btnId);
+            var label = document.getElementById(labelId);
+            var spinner = document.getElementById(spinnerId);
+
+            btn.disabled = true;
+            label.textContent = 'Saving...';
+            spinner.style.display = 'inline-block';
+
+            var form = document.getElementById(formId);
+            var formData = new FormData(form);
+
+            fetch(form.getAttribute('hx-post'), {
+                method: 'POST',
+                body: formData,
+                headers: { 'HX-Request': 'true' }
+            })
+            .then(function (res) { return res.text(); })
+            .then(function (html) {
+                var parser = new DOMParser();
+                var doc = parser.parseFromString(html, 'text/html');
+
+                doc.querySelectorAll('[hx-swap-oob]').forEach(function (oobEl) {
+                    var target = document.getElementById(oobEl.id);
+                    if (target) target.outerHTML = oobEl.outerHTML;
+                });
+
+                var toastEl = doc.querySelector('.toast');
+                if (toastEl) {
+                    var redirectUrl = toastEl.getAttribute('data-redirect-url');
+                    var dismissBtn = document.querySelector('#' + modalId + ' [data-bs-dismiss="modal"]');
+                    if (dismissBtn) dismissBtn.click();
+
+                    document.getElementById('toast-container').innerHTML = toastEl.outerHTML;
+                    var liveToast = document.querySelector('#toast-container .toast');
+                    tabler.Toast.getOrCreateInstance(liveToast).show();
+
+                    if (redirectUrl) {
+                        setTimeout(function () { window.location.href = redirectUrl; }, 1500);
+                    }
+                }
+            })
+            .catch(function (err) { console.error('Submit error:', err); })
+            .finally(function () {
+                btn.disabled = false;
+                label.textContent = btn.getAttribute('data-default-label') || 'Yes, Save';
+                spinner.style.display = 'none';
+            });
+        }
+
+        // ── Line Item ──
+        document.getElementById('confirm-line-item-btn').addEventListener('click', function () {
+            submitForm('line-item-form', 'confirm-line-item-modal',
+                       'confirm-line-item-btn', 'confirm-line-item-label', 'confirm-line-item-spinner');
+        });
+
+        // ── Payment ──
+        document.getElementById('confirm-payment-btn').addEventListener('click', function () {
+            submitForm('payment-form', 'confirm-payment-modal',
+                       'confirm-payment-btn', 'confirm-payment-label', 'confirm-payment-spinner');
+        });
+
+        // ── Status Update ──
+        document.getElementById('confirm-status-btn').addEventListener('click', function () {
+            submitForm('status-form', 'confirm-status-modal',
+                       'confirm-status-btn', 'confirm-status-label', 'confirm-status-spinner');
+        });
+
+        // ── Delete Line Item ──
+        document.querySelectorAll('.js-delete-line-item').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                var itemId = btn.getAttribute('data-item-id');
+                var deleteUrl = "{% url 'invoice_delete_line_item' 0 %}".replace('/0/', '/' + itemId + '/');
+                confirmDelete({
+                    url: deleteUrl,
+                    title: 'Delete this line item?',
+                    message: 'Invoice totals will be recalculated.',
+                    csrfToken: '{{ csrf_token }}',
+                    onSuccess: function () {
+                        var row = document.getElementById('line-item-row-' + itemId);
+                        if (row) row.remove();
+                        setTimeout(function () { window.location.reload(); }, 300);
+                    },
+                    onError: function (data) { alert(data.error || 'Delete failed.'); },
+                });
+            });
+        });
+
+        // ── Delete Payment ──
+        document.querySelectorAll('.js-delete-payment').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                var paymentId = btn.getAttribute('data-payment-id');
+                var deleteUrl = "{% url 'payment_delete' 0 %}".replace('/0/', '/' + paymentId + '/');
+                confirmDelete({
+                    url: deleteUrl,
+                    title: 'Delete this payment?',
+                    message: 'Invoice balance and status will be updated automatically.',
+                    csrfToken: '{{ csrf_token }}',
+                    onSuccess: function () {
+                        var row = document.getElementById('payment-row-' + paymentId);
+                        if (row) row.remove();
+                        setTimeout(function () { window.location.reload(); }, 300);
+                    },
+                    onError: function (data) { alert(data.error || 'Delete failed.'); },
+                });
+            });
+        });
+
+        // ── Delete Invoice ──
+        var deleteInvoiceBtn = document.querySelector('.js-delete-invoice');
+        if (deleteInvoiceBtn) {
+            deleteInvoiceBtn.addEventListener('click', function () {
+                var invoiceId = this.getAttribute('data-invoice-id');
+                var deleteUrl = "{% url 'invoice_delete' 0 %}".replace('/0/', '/' + invoiceId + '/');
+                confirmDelete({
+                    url: deleteUrl,
+                    title: 'Delete this invoice?',
+                    message: 'This will permanently remove the invoice, all line items and payment records.',
+                    csrfToken: '{{ csrf_token }}',
+                    onSuccess: function () {
+                        window.location.href = "{% url 'invoice_list' %}";
+                    },
+                    onError: function (data) { alert(data.error || 'Delete failed.'); },
+                });
+            });
+        }
+
+        // ── Clear field errors on input ──
+        document.querySelectorAll('#line-item-form input, #line-item-form select, #payment-form input, #payment-form select, #payment-form textarea')
+            .forEach(function (el) {
+                el.addEventListener('input', function () {
+                    var errorDiv = document.getElementById('error-' + el.name);
+                    if (errorDiv) errorDiv.innerHTML = '';
+                });
+                el.addEventListener('change', function () {
+                    var errorDiv = document.getElementById('error-' + el.name);
+                    if (errorDiv) errorDiv.innerHTML = '';
+                });
+            });
+    });
+
+    
+</script>
+
+{% endblock %}

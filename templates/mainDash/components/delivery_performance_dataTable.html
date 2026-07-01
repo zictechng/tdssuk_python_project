@@ -1,0 +1,135 @@
+
+{% load humanize %}
+{% include "mainDash/includes/filter_bar.html" %}
+
+<!-- Stats -->
+<div class="row row-deck row-cards mb-4">
+  <div class="col-sm-6 col-lg-3">
+    <div class="card">
+      <div class="card-body">
+        <div class="subheader mb-3">Total Shipments</div>
+        <div class="h1 mb-0">{{ total }}</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-sm-6 col-lg-3">
+    <div class="card">
+      <div class="card-body">
+        <div class="subheader mb-3">Delivered</div>
+        <div class="h1 mb-3 text-success">{{ delivered }}</div>
+        <div class="progress progress-sm">
+          <div class="progress-bar bg-success"
+               style="width:{% if total %}{% widthratio delivered total 100 %}{% else %}0{% endif %}%"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-sm-6 col-lg-3">
+    <div class="card">
+      <div class="card-body">
+        <div class="subheader mb-3">On-Time Delivery</div>
+        <div class="h1 mb-3 text-success">{{ on_time_pct }}%</div>
+        <div class="d-flex gap-2">
+          <span class="badge bg-green-lt">{{ on_time }} On Time</span>
+          <span class="badge bg-red-lt">{{ late }} Late</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-sm-6 col-lg-3">
+    <div class="card">
+      <div class="card-body">
+        <div class="subheader mb-3">In Transit / Cancelled</div>
+        <div class="h1 mb-3">{{ in_transit }}</div>
+        <span class="badge bg-red-lt">{{ cancelled }} Cancelled</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Chart -->
+<div class="row row-deck row-cards mb-4">
+  <div class="col-12">
+    <div class="card">
+      <div class="card-header">
+        <h3 class="card-title">Monthly Deliveries</h3>
+      </div>
+      <div class="card-body">
+        <div id="chart-delivery-monthly"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Table -->
+<div class="row">
+  <div class="col-12">
+    <div class="card">
+      <div class="card-header">
+        <h3 class="card-title">Delivered Shipments</h3>
+        <div class="card-options">
+             <small class="text-muted">
+            {{ recent.paginator.count }} record{{ recent.paginator.count|pluralize }}
+          </small>
+        </div>
+      </div>
+      {% if recent.paginator.count > 0 %}
+      <div class="table-responsive">
+        <table class="table table-vcenter table-hover card-table text-nowrap">
+          <thead>
+            <tr>
+              <th>Shipment No</th>
+              <th>Order No</th>
+              <th>Expected Delivery</th>
+              <th>Delivered At</th>
+              <th>On Time</th>
+              <th>Signed By</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for s in recent %}
+            <tr>
+                <td class="fw-medium">{{ s.shipment_number }}</td>
+                <td class="text-secondary">{{ s.order.order_number }}</td>
+                <td class="text-secondary">{{ s.expected_delivery_date|date:"d M Y"|default:"—" }}</td>
+                <td class="text-secondary">{{ s.delivered_at|date:"d M Y, H:i"|default:"—" }}</td>
+                <td>
+                    {% if s.delivered_at and s.expected_delivery_date %}
+                    {% if s.delivered_at.date <= s.expected_delivery_date %}
+                        <span class="badge bg-success text-white">On Time</span>
+                    {% else %}
+                        <span class="badge bg-danger text-white">Late</span>
+                    {% endif %}
+                    {% else %}
+                    <span class="text-muted">—</span>
+                    {% endif %}
+                </td>
+                <td class="text-secondary">{{ s.signed_by|default:"—" }}</td>
+                </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% include "mainDash/includes/report_pagination.html" with page_obj=recent %}
+      {% else %}
+      <div class="text-center py-5 text-secondary">
+        <i class="bi bi-truck fs-2 d-block mb-2 opacity-50"></i>
+        <h4 class="mb-1">No deliveries found</h4>
+        <small>Try adjusting the date range.</small>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<script>
+new ApexCharts(document.getElementById('chart-delivery-monthly'), {
+  chart: { type: 'bar', height: 260, toolbar: { show: false } },
+  series: [{ name: 'Deliveries', data: {{ chart_series|safe }} }],
+  xaxis:  { categories: {{ chart_labels|safe }} },
+  colors: ['#2fb344'],
+  plotOptions: { bar: { borderRadius: 4, columnWidth: '50%' } },
+  tooltip: { theme: 'light' },
+  grid:    { strokeDashArray: 4 },
+}).render();
+</script>

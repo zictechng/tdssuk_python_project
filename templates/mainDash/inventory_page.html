@@ -1,0 +1,150 @@
+{% extends "mainDash/layouts/baseDash.html" %}
+{% load static %}
+
+{% block title %}Inventory Management{% endblock %}
+
+{% block content %}
+
+<div class="page-header d-print-none" aria-label="Page header">
+    <div class="container-xl">
+        <div class="row g-2 align-items-center">
+            <div class="col">
+                <h2 class="page-title">Inventory Management</h2>
+                <div class="page-pretitle">All warehouse items and cargo</div>
+            </div>
+            <div class="col-auto ms-auto d-print-none">
+                <div class="btn-list">
+                    <a href="{% url 'inventory_create' %}"
+                       class="btn btn-primary btn-sm d-none d-sm-inline-block">
+                        <i class="bi bi-plus-lg me-1"></i> Add Item
+                    </a>
+                    <a href="{% url 'inventory_create' %}"
+                       class="btn btn-primary d-sm-none btn-icon" aria-label="Add item">
+                        <i class="bi bi-plus-lg"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="page-body">
+    <div class="container-xl">
+
+        {# --- Controls — outside swap target so search input never loses focus --- #}
+        <div class="row mb-3">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body py-3">
+                        <div class="row g-2 align-items-center">
+                            <div class="col-auto text-secondary">Filters:</div>
+                            <div class="col ms-auto d-flex flex-wrap gap-2 justify-content-end">
+
+                                <div class="position-relative" style="max-width: 240px;">
+                                    <input
+                                        type="text"
+                                        id="inventory-search-input"
+                                        name="search"
+                                        class="form-control pe-4"
+                                        placeholder="Search customer, tracking..."
+                                        value="{{ search_query }}"
+                                        hx-get="{% url 'inventory_list' %}"
+                                        hx-trigger="keyup changed delay:400ms, search"
+                                        hx-target="#inventory-table-container"
+                                        hx-swap="innerHTML"
+                                        hx-push-url="true"
+                                        hx-include="#inventory-warehouse-filter, #inventory-status-filter, #inventory-category-filter"
+                                    />
+                                    <button type="button" id="inventory-search-clear"
+                                            class="p-0 text-secondary"
+                                            style="display:{% if search_query %}block{% else %}none{% endif %};
+                                                   position:absolute; right:8px; top:50%;
+                                                   transform:translateY(-50%); line-height:1;
+                                                   background:none; border:none; cursor:pointer;"
+                                            aria-label="Clear search">
+                                        <i class="bi bi-x-lg" style="font-size:0.75rem;"></i>
+                                    </button>
+                                </div>
+
+                                <select id="inventory-warehouse-filter" name="warehouse"
+                                        class="form-select" style="max-width: 180px;"
+                                        hx-get="{% url 'inventory_list' %}"
+                                        hx-trigger="change"
+                                        hx-target="#inventory-table-container"
+                                        hx-swap="innerHTML"
+                                        hx-push-url="true"
+                                        hx-include="#inventory-search-input, #inventory-status-filter, #inventory-category-filter">
+                                    <option value="">All Warehouses</option>
+                                    {% for wh in warehouses %}
+                                    <option value="{{ wh.pk }}"
+                                        {% if warehouse_filter == wh.pk|stringformat:"s" %}selected{% endif %}>
+                                        {{ wh.name }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+
+                                <select id="inventory-status-filter" name="status"
+                                        class="form-select" style="max-width: 160px;"
+                                        hx-get="{% url 'inventory_list' %}"
+                                        hx-trigger="change"
+                                        hx-target="#inventory-table-container"
+                                        hx-swap="innerHTML"
+                                        hx-push-url="true"
+                                        hx-include="#inventory-search-input, #inventory-warehouse-filter, #inventory-category-filter">
+                                    <option value="">All Status</option>
+                                    <option value="in_stock" {% if status_filter == 'in_stock' %}selected{% endif %}>In Stock</option>
+                                    <option value="dispatched" {% if status_filter == 'dispatched' %}selected{% endif %}>Dispatched</option>
+                                    <option value="held" {% if status_filter == 'held' %}selected{% endif %}>On Hold</option>
+                                </select>
+
+                                <select id="inventory-category-filter" name="category"
+                                        class="form-select" style="max-width: 170px;"
+                                        hx-get="{% url 'inventory_list' %}"
+                                        hx-trigger="change"
+                                        hx-target="#inventory-table-container"
+                                        hx-swap="innerHTML"
+                                        hx-push-url="true"
+                                        hx-include="#inventory-search-input, #inventory-warehouse-filter, #inventory-status-filter">
+                                    <option value="">All Categories</option>
+                                    {% for value, label in categories %}
+                                    <option value="{{ value }}" {% if category_filter == value %}selected{% endif %}>
+                                        {{ label }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {# --- Swap target — table only --- #}
+        <div class="row" id="inventory-table-container">
+            {% include "mainDash/components/inventory_dataTable.html" %}
+        </div>
+
+    </div>
+</div>
+
+<script>
+(function () {
+    const input = document.getElementById('inventory-search-input');
+    const clearBtn = document.getElementById('inventory-search-clear');
+
+    function toggleClear() {
+        clearBtn.style.display = input.value ? 'block' : 'none';
+    }
+
+    input.addEventListener('input', toggleClear);
+
+    clearBtn.addEventListener('click', function () {
+        input.value = '';
+        toggleClear();
+        htmx.trigger(input, 'search');
+    });
+})();
+</script>
+
+{% endblock %}

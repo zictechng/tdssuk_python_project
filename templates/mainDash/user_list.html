@@ -1,0 +1,118 @@
+{% extends "mainDash/layouts/baseDash.html" %}
+{% load static humanize %}
+
+
+{% block title %}User Management{% endblock %}
+
+
+{% block content %}
+
+
+<div class="page-header d-print-none">
+    <div class="container-xl">
+        <div class="row g-2 align-items-center">
+            <div class="col">
+                <h2 class="page-title">User Management</h2>
+                <div class="page-pretitle">All active system users</div>
+            </div>
+            <div class="col-auto ms-auto d-print-none">
+                <div class="btn-list">
+                    <a href="{% url 'user_create' %}"
+                       class="btn btn-primary btn-sm d-none d-sm-inline-block">
+                        <i class="bi bi-plus-lg me-1"></i> Create User
+                    </a>
+                    <a href="{% url 'user_create' %}"
+                       class="btn btn-primary d-sm-none btn-icon">
+                        <i class="bi bi-plus-lg"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="page-body">
+    <div class="container-xl">
+
+        <div class="row mb-3">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body py-3">
+                        <div class="row g-2 align-items-center">
+                            <div class="col-auto text-secondary">Filters:</div>
+                            <div class="col ms-auto d-flex flex-wrap gap-2 justify-content-end">
+
+                                <div class="position-relative" style="max-width: 260px;">
+                                    <input type="text"
+                                           id="user-search-input"
+                                           name="search"
+                                           class="form-control pe-4"
+                                           placeholder="Search name, email, phone..."
+                                           value="{{ search }}"
+                                           hx-get="{% url 'user_list' %}"
+                                           hx-trigger="keyup changed delay:400ms, search"
+                                           hx-target="#users-table-container"
+                                           hx-swap="innerHTML"
+                                           hx-include="#user-status-filter"
+                                           hx-push-url="true" />
+                                    <button type="button"
+                                            id="user-search-clear"
+                                            class="p-0 text-secondary"
+                                            style="display:{% if search %}block{% else %}none{% endif %};
+                                                   position:absolute; right:8px; top:50%;
+                                                   transform:translateY(-50%); line-height:1;
+                                                   background:none; border:none; cursor:pointer;"
+                                            aria-label="Clear search">
+                                        <i class="bi bi-x-lg" style="font-size:0.75rem;"></i>
+                                    </button>
+                                </div>
+
+                                <select id="user-status-filter"
+                                        name="status"
+                                        class="form-select"
+                                        style="max-width: 180px;"
+                                        hx-get="{% url 'user_list' %}"
+                                        hx-trigger="change"
+                                        hx-target="#users-table-container"
+                                        hx-swap="innerHTML"
+                                        hx-include="#user-search-input"
+                                        hx-push-url="true">
+                                    <option value="">All Users</option>
+                                    <option value="active"    {% if status_filter == 'active' %}selected{% endif %}>Active</option>
+                                    <option value="inactive"  {% if status_filter == 'inactive' %}selected{% endif %}>Inactive</option>
+                                    <option value="staff"     {% if status_filter == 'staff' %}selected{% endif %}>Staff</option>
+                                    <option value="superuser" {% if status_filter == 'superuser' %}selected{% endif %}>Superuser</option>
+                                </select>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row row-deck row-cards" id="users-table-container">
+            {% include "mainDash/components/user_dataTable.html" %}
+        </div>
+
+    </div>
+</div>
+
+
+<script>
+(function () {
+    var input    = document.getElementById('user-search-input');
+    var clearBtn = document.getElementById('user-search-clear');
+    function toggleClear() { clearBtn.style.display = input.value ? 'block' : 'none'; }
+    input.addEventListener('input', toggleClear);
+    clearBtn.addEventListener('click', function () {
+        input.value = '';
+        toggleClear();
+        htmx.trigger(input, 'search');
+    });
+})();
+</script>
+
+
+{% endblock %}

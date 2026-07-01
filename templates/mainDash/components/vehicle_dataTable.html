@@ -1,0 +1,140 @@
+
+    
+    {% load static %}
+        <div class="col-12 mt-5">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Vehicle Records</h3>
+                </div>
+                
+
+                {% if vehicles_page.paginator.count > 0 %}
+                <div class="table-responsive">
+                    <table class="table card-table table-vcenter text-nowrap">
+                        <thead>
+                            <tr>
+                                <th class="w-1"><input class="form-check-input m-0 align-middle" type="checkbox" id="select-all" aria-label="Select all vehicle" /></th>
+                                <th>Name</th>
+                                <th>Type</th>
+                                <th>Ownership</th>
+                                <th>Status</th>
+                                <th>Plate / Carrier</th>
+                                <th>Assigned Driver</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for vehicle in vehicles_page %}
+                            <tr id="vehicle-row-{{ vehicle.pk }}">
+                                <td><input class="form-check-input m-0 align-middle table-selectable-check" type="checkbox" value="{{ vehicle.pk }}" aria-label="Select vehicle" /></td>
+                                <td><strong>{{ vehicle.name }}</strong></td>
+                                <td>{{ vehicle.vehicle_type|default:"—" }}</td>
+                                <td>
+                                    <span class="badge bg-{% if vehicle.ownership_type == 'in_house' %}blue{% else %}purple{% endif %}-lt">
+                                        {{ vehicle.get_ownership_type_display }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <span class="badge bg-{% if vehicle.status == 'available' %}green{% elif vehicle.status == 'on_route' %}cyan{% elif vehicle.status == 'maintenance' %}yellow text-dark{% else %}red{% endif %}-lt">
+                                        {{ vehicle.get_status_display }}
+                                    </span>
+                                </td>
+                                <td>
+                                    {% if vehicle.ownership_type == 'in_house' %}
+                                        {{ vehicle.license_plate|default:"—" }}
+                                    {% else %}
+                                        {{ vehicle.carrier_company_name|default:"—" }}
+                                    {% endif %}
+                                </td>
+                                <td>{{ vehicle.assigned_driver_name|default:"—" }}</td>
+                                <td class="text-end">
+                                     <a href="{% url 'vehicle_detail' vehicle.uuid %}"
+                                        class="btn btn-sm btn-ghost-secondary">
+                                        View
+                                    </a>
+                                    <button type="button" class="btn btn-sm js-delete-vehicle btn-ghost-danger"
+                                            data-vehicle-id="{{ vehicle.pk }}">
+                                        Delete
+                                    </button>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="card-footer d-flex align-items-center">
+                    <p class="m-0 text-secondary">
+                        Showing <strong>{{ vehicles_page.start_index }}–{{ vehicles_page.end_index }}</strong>
+                        of <strong>{{ vehicles_page.paginator.count }}</strong>
+                    </p>
+                    <ul class="pagination m-0 ms-auto">
+                        <li class="page-item {% if not vehicles_page.has_previous %}disabled{% endif %}">
+                            <a class="page-link" href="#"
+                            hx-get="{% url 'vehicle_list' %}?page={% if vehicles_page.has_previous %}{{ vehicles_page.previous_page_number }}{% else %}1{% endif %}&search={{ search_query }}&ownership={{ ownership_filter }}&status={{ status_filter }}"
+                            hx-target="#vehicles-table-container" hx-swap="innerHTML" hx-push-url="true">←</a>
+                        </li>
+                        {% for num in vehicles_page.paginator.page_range %}
+                        <li class="page-item {% if vehicles_page.number == num %}active{% endif %}">
+                            <a class="page-link" href="#"
+                            hx-get="{% url 'vehicle_list' %}?page={{ num }}&search={{ search_query }}&ownership={{ ownership_filter }}&status={{ status_filter }}"
+                            hx-target="#vehicles-table-container" hx-swap="innerHTML" hx-push-url="true">{{ num }}</a>
+                        </li>
+                        {% endfor %}
+                        <li class="page-item {% if not vehicles_page.has_next %}disabled{% endif %}">
+                            <a class="page-link" href="#"
+                            hx-get="{% url 'vehicle_list' %}?page={% if vehicles_page.has_next %}{{ vehicles_page.next_page_number }}{% else %}{{ vehicles_page.paginator.num_pages }}{% endif %}&search={{ search_query }}&ownership={{ ownership_filter }}&status={{ status_filter }}"
+                            hx-target="#vehicles-table-container" hx-swap="innerHTML" hx-push-url="true">→</a>
+                        </li>
+                    </ul>
+                </div>
+
+                {% else %}
+                <div class="text-center py-5 text-secondary">
+                    <h4 class="mb-1">No vehicles found</h4>
+                    <small>Try adjusting your search or filters.</small>
+                </div>
+                {% endif %}
+            </div>
+    </div>
+{% include "mainDash/includes/confirm_delete_modal.html" %}
+ {# Re-bind delete buttons every time this fragment is swapped in by HTMX #}
+<script>
+    document.querySelectorAll('.js-delete-vehicle').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            var vehicleId = btn.getAttribute('data-vehicle-id');
+            var deleteUrl = "{% url 'vehicle_delete' 0 %}".replace('/0/', '/' + vehicleId + '/');
+
+            confirmDelete({
+                url: deleteUrl,
+                title: 'Delete this vehicle?',
+                message: 'This will permanently remove the vehicle and its history.',
+                csrfToken: '{{ csrf_token }}',
+                onSuccess: function () {
+                    var row = document.getElementById('vehicle-row-' + vehicleId);
+                    if (row) row.remove();
+                },
+                onError: function (data) {
+                    alert(data.error || 'Delete failed.');
+                },
+            });
+        });
+    });
+    
+(function () {
+    function initSelectAll() {
+        var selectAll = document.getElementById('select-all');
+        if (!selectAll) return;
+        selectAll.addEventListener('change', function () {
+            document.querySelectorAll('.table-selectable-check').forEach(function (cb) {
+                cb.checked = selectAll.checked;
+            });
+        });
+    }
+        initSelectAll();
+        var container = document.getElementById('users-table-container');
+        if (container) {
+            container.addEventListener('htmx:afterSwap', initSelectAll);
+        }
+})();
+</script>

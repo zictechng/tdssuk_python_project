@@ -1,0 +1,158 @@
+
+{% load humanize %}
+
+{% if not_found %}
+<div class="col-12">
+  <div class="alert alert-warning d-flex align-items-center gap-2">
+    <i class="bi bi-exclamation-triangle-fill"></i>
+    <div>No shipment found for that number.</div>
+  </div>
+</div>
+
+{% elif shipment and order %}
+
+<!-- Summary + Images Row -->
+<div class="col-md-8">
+  <div class="card h-100">
+    <div class="card-header d-flex justify-content-between align-items-center">
+      <div>
+        <span class="fw-bold">{{ shipment.shipment_number }}</span>
+        <span class="text-muted ms-2 small">{{ order.tracking_number }}</span>
+      </div>
+      <span class="badge text-white
+        {% if shipment.status == 'delivered' %}bg-success
+        {% elif shipment.status == 'in_transit' %}bg-primary
+        {% elif shipment.status == 'cancelled' %}bg-danger
+        {% elif shipment.status == 'returned' %}bg-warning
+        {% else %}bg-secondary{% endif %}">
+        {{ shipment.get_status_display }}
+      </span>
+    </div>
+    <div class="card-body">
+      <div class="row g-3">
+        <div class="col-sm-6">
+          <p class="text-muted small mb-1">Order Number</p>
+          <p class="fw-semibold mb-0">{{ order.order_number }}</p>
+        </div>
+        <div class="col-sm-6">
+          <p class="text-muted small mb-1">Customer</p>
+          <p class="fw-semibold mb-0">{{ order.customer_name }}</p>
+        </div>
+        <div class="col-sm-6">
+          <p class="text-muted small mb-1">Receiver</p>
+          <p class="fw-semibold mb-0">{{ order.receiver_name }} — {{ order.receiver_country }}</p>
+        </div>
+        <div class="col-sm-6">
+          <p class="text-muted small mb-1">Carrier</p>
+          <p class="fw-semibold mb-0">{{ shipment.carrier_name|default:"—" }}</p>
+        </div>
+        <div class="col-sm-6">
+          <p class="text-muted small mb-1">Direction</p>
+          <p class="fw-semibold mb-0">{{ shipment.get_shipment_direction_display }}</p>
+        </div>
+        <div class="col-sm-6">
+          <p class="text-muted small mb-1">Customs Status</p>
+          <p class="fw-semibold mb-0">{{ shipment.get_customs_status_display }}</p>
+        </div>
+        {% if shipment.expected_delivery_date %}
+        <div class="col-sm-6">
+          <p class="text-muted small mb-1">Expected Delivery</p>
+          <p class="fw-semibold mb-0">{{ shipment.expected_delivery_date|date:"d M Y" }}</p>
+        </div>
+        {% endif %}
+        {% if shipment.signed_by %}
+        <div class="col-sm-6">
+          <p class="text-muted small mb-1">Signed By</p>
+          <p class="fw-semibold mb-0">{{ shipment.signed_by }}</p>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+    {% if shipment.notes %}
+    <div class="card-footer text-muted small">
+      <strong>Notes:</strong> {{ shipment.notes }}
+    </div>
+    {% endif %}
+  </div>
+</div>
+
+<!-- Images -->
+<div class="col-md-4">
+  <div class="card h-100">
+    <div class="card-header">Shipment Images</div>
+    <div class="card-body">
+      {% with images=order.images.all %}
+      {% if images %}
+      <div class="row g-2">
+        {% for img in images %}
+        <div class="col-6">
+          <a href="{{ img.image.url }}" target="_blank">
+            <img src="{{ img.image.url }}" class="img-fluid rounded border" alt="Shipment image">
+          </a>
+        </div>
+        {% endfor %}
+      </div>
+      {% else %}
+      <p class="text-muted small mb-0">No images uploaded.</p>
+      {% endif %}
+      {% endwith %}
+    </div>
+  </div>
+</div>
+
+<!-- Timeline -->
+<div class="col-12">
+  <div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+      <span class="fw-semibold">Tracking Timeline</span>
+      <a href="{% url 'tracking_updates' %}?query={{ shipment.shipment_number }}"
+         class="btn btn-sm btn-primary">
+        <i class="bi bi-plus-lg me-1"></i> Add Update
+      </a>
+    </div>
+    <div class="table-responsive">
+      <table class="table table-vcenter table-hover card-table">
+        <thead>
+          <tr>
+            <th>Status</th>
+            <th>Location</th>
+            <th>Description</th>
+            <th>Recorded By</th>
+            <th>Date & Time</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for event in shipment.tracking_events.all %}
+          <tr>
+            <td>
+              <span class="badge text-white
+                {% if event.status == 'delivered' %}bg-success
+                {% elif event.status == 'in_transit' %}bg-primary
+                {% elif event.status == 'cancelled' %}bg-danger
+                {% elif event.status == 'returned' %}bg-warning
+                {% else %}bg-secondary{% endif %}">
+                {{ event.get_status_display }}
+              </span>
+            </td>
+            <td class="text-secondary">{{ event.location|default:"—" }}</td>
+            <td class="text-secondary">{{ event.description|default:"—" }}</td>
+            <td class="text-secondary">
+              {{ event.recorded_by.get_full_name|default:event.recorded_by.username|default:"System" }}
+            </td>
+            <td class="text-secondary">{{ event.created_at|date:"d M Y, H:i" }}</td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="5" class="text-center text-muted py-4">
+              <i class="bi bi-clock-history fs-3 d-block mb-2 opacity-50"></i>
+              No tracking events yet for this shipment.
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+{% endif %}

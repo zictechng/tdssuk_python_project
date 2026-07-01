@@ -1,0 +1,103 @@
+
+{% extends "mainDash/layouts/baseDash.html" %}
+{% load static %}
+{% block title %}Support Tickets{% endblock %}
+{% block content %}
+
+<div class="page-header d-print-none">
+  <div class="container-xl">
+    <div class="row g-2 align-items-center">
+      <div class="col">
+        <h2 class="page-title">Support Tickets</h2>
+        <div class="page-pretitle">Manage and track support requests</div>
+      </div>
+      <div class="col-auto ms-auto">
+        <a href="{% url 'ticket_create' %}"
+           class="btn btn-primary btn-sm d-none d-sm-inline-block">
+          <i class="bi bi-plus me-1"></i> New Ticket
+        </a>
+        <a href="{% url 'ticket_create' %}"
+           class="btn btn-primary d-sm-none btn-icon">
+          <i class="bi bi-plus"></i>
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="page-body">
+  <div class="container-xl">
+
+    <div class="card mb-3">
+      <div class="card-body py-3">
+        <div class="row g-2 align-items-center">
+          <div class="col-auto text-secondary">Filters:</div>
+          <div class="col ms-auto d-flex flex-wrap gap-2 justify-content-end">
+
+            <div class="position-relative" style="max-width:260px;">
+              <input type="text" id="ticket-search" name="q"
+                     class="form-control pe-4"
+                     placeholder="Ticket #, subject, user..."
+                     value="{{ q }}"
+                     hx-get="{% url 'ticket_list' %}"
+                     hx-trigger="keyup changed delay:400ms, search"
+                     hx-target="#ticket-container"
+                     hx-swap="innerHTML"
+                     hx-include="#ticket-status-filter"
+                     hx-push-url="true" />
+              <button type="button" id="ticket-search-clear"
+                      class="p-0 text-secondary"
+                      style="display:{% if q %}block{% else %}none{% endif %};
+                             position:absolute; right:8px; top:50%;
+                             transform:translateY(-50%);
+                             background:none; border:none; cursor:pointer;">
+                <i class="bi bi-x-lg" style="font-size:.75rem;"></i>
+              </button>
+            </div>
+
+            <select id="ticket-status-filter" name="status"
+                    class="form-select" style="max-width:160px;"
+                    hx-get="{% url 'ticket_list' %}"
+                    hx-trigger="change"
+                    hx-target="#ticket-container"
+                    hx-swap="innerHTML"
+                    hx-include="#ticket-search"
+                    hx-push-url="true">
+              <option value="">All Statuses</option>
+              {% for val, label in tickets.object_list.0.STATUS|default:'' %}
+              <option value="{{ val }}" {% if status == val %}selected{% endif %}>{{ label }}</option>
+              {% endfor %}
+              <option value="open"        {% if status == 'open' %}selected{% endif %}>Open</option>
+              <option value="in_progress" {% if status == 'in_progress' %}selected{% endif %}>In Progress</option>
+              <option value="resolved"    {% if status == 'resolved' %}selected{% endif %}>Resolved</option>
+              <option value="closed"      {% if status == 'closed' %}selected{% endif %}>Closed</option>
+            </select>
+
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="ticket-container">
+      {% include "mainDash/components/ticket_dataTable.html" %}
+    </div>
+
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var input = document.getElementById('ticket-search');
+  var clear = document.getElementById('ticket-search-clear');
+  input.addEventListener('input', function () {
+    clear.style.display = input.value ? 'block' : 'none';
+  });
+  clear.addEventListener('click', function () {
+    input.value = '';
+    clear.style.display = 'none';
+    htmx.trigger(input, 'search');
+  });
+});
+</script>
+
+{% endblock %}

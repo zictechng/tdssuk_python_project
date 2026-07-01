@@ -1,0 +1,107 @@
+    
+    {% load static %}
+    
+    
+    <script src="{% static 'mainDash/dist/libs/apexcharts/dist/apexcharts.min.js'%}" defer></script>
+    <script src="{% static 'mainDash/dist/libs/jsvectormap/dist/jsvectormap.min.js'%}" defer></script>
+    <script src="{% static 'mainDash/dist/libs/jsvectormap/dist/maps/world.js'%}" defer></script>
+    <script src="{% static 'mainDash/dist/libs/jsvectormap/dist/maps/world-merc.js'%}" defer></script>
+    <!-- END PAGE LIBRARIES -->
+    <!-- BEGIN GLOBAL MANDATORY SCRIPTS -->
+    <script src="{% static 'mainDash/dist/js/tabler.min.js'%}"></script>
+    <script src="{% static 'mainDash/dist/libs/tom-select/dist/js/tom-select.base.min.js'%}"></script>
+    <script src="{% static 'mainDash/dist/libs/litepicker/dist/litepicker.js'%}"></script>
+    
+    <!-- END GLOBAL MANDATORY SCRIPTS -->
+    <!-- BEGIN DEMO SCRIPTS -->
+    <script src="{% static 'mainDash/preview/js/demo.min.js'%}" defer></script>
+    <script src="https://unpkg.com/htmx.org@1.9.12"></script>
+    <!-- END DEMO SCRIPTS -->
+    <!-- BEGIN PAGE SCRIPTS -->
+
+    <script>
+        {% comment %} this for select2 option form {% endcomment %}
+        document.querySelectorAll('select[data-search="on"]').forEach(function (el) {
+            if (el.tomselect) return;
+            var emptyOption = el.querySelector('option[value=""]');
+            new TomSelect(el, {
+                placeholder: emptyOption ? emptyOption.textContent.trim() : 'Select...',
+                allowEmptyOption: true,
+            });
+        });
+
+        {% comment %} this for form border color aligning {% endcomment %}
+        document.querySelectorAll('.accordion-collapse').forEach(function (panel) {
+            panel.addEventListener('shown.bs.collapse', function () {
+                panel.closest('.accordion-item').classList.add('accordion-item-active');
+            });
+            panel.addEventListener('hidden.bs.collapse', function () {
+                panel.closest('.accordion-item').classList.remove('accordion-item-active');
+            });
+        });
+
+        {% comment %} this for toast and redirect after success toast {% endcomment %}
+        document.body.addEventListener('htmx:afterSwap', function (evt) {
+
+        if (evt.target.id !== 'toast-container') return;
+
+        const toastEl = evt.target.querySelector('.toast');
+
+        if (!toastEl) return;
+
+        const toast = tabler.Toast.getOrCreateInstance(toastEl);
+
+        const redirectUrl = toastEl.getAttribute('data-redirect-url');
+
+            if (redirectUrl) {
+                setTimeout(() => {
+                    window.location.href = redirectUrl;
+                }, 1200); // give time for toast visibility
+            }
+
+        toast.hide();
+        toast.show();
+        });
+
+        document.addEventListener("DOMContentLoaded", function () {
+        if (window.Litepicker) {
+            document.querySelectorAll(".datepicker").forEach(function (el) {
+            const minDate = el.dataset.minDate === "today" ? new Date() 
+                            : el.dataset.minDate ? new Date(el.dataset.minDate) 
+                            : null;  // null = no restriction
+            new Litepicker({
+                element: el,
+                minDate: minDate,
+                format: "YYYY-MM-DD",
+                buttonText: {
+                previousMonth: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-1"><path d="M15 6l-6 6l6 6" /></svg>`,
+                nextMonth: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-1"><path d="M9 6l6 6l-6 6" /></svg>`,
+                },
+            });
+            });
+        }
+        });
+
+
+    // clear search input field
+
+    // Reusable search input clear — works on all pages automatically
+        document.addEventListener('DOMContentLoaded', function () {
+            document.querySelectorAll('.js-search-input').forEach(function (input) {
+                var clearBtn = input.closest('.input-group').querySelector('.js-search-clear');
+                if (!clearBtn) return;
+
+                // Show/hide clear button as user types
+                input.addEventListener('input', function () {
+                    clearBtn.style.display = input.value ? 'flex' : 'none';
+                });
+
+                // Clear and reset
+                clearBtn.addEventListener('click', function () {
+                    input.value = '';
+                    clearBtn.style.display = 'none';
+                    input.focus(); //ready for new input immediately
+                });
+            });
+        });
+    </script>

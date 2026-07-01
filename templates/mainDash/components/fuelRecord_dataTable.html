@@ -1,0 +1,131 @@
+{% load static %}
+<div class="col-12">
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">Fuel Records</h3>
+        </div>
+
+        {% if records_page.paginator.count > 0 %}
+        <div class="table-responsive">
+            <table class="table card-table table-vcenter text-nowrap">
+                <thead>
+                    <tr>
+                        <th class="w-1"><input class="form-check-input m-0 align-middle" type="checkbox" id="select-all" aria-label="Select all fuel records" /></th>
+                        <th>Vehicle</th>
+                        <th>Date</th>
+                        <th>Liters</th>
+                        <th>Cost</th>
+                        <th>Odometer</th>
+                        <th>Station</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for record in records_page %}
+                    <tr id="fuel-row-{{ record.pk }}">
+                        <td><input class="form-check-input m-0 align-middle table-selectable-check" type="checkbox" value="{{ record.pk }}" aria-label="Select fuel record" /></td>
+                        <td>
+                            <a href="{% url 'vehicle_detail' record.vehicle.uuid %}" class="text-reset">
+                                {{ record.vehicle.name }}
+                            </a>
+                        </td>
+                        <td class="text-secondary">{{ record.fuel_date|date:"M d, Y" }}</td>
+                        <td>{{ record.liters }} L</td>
+                        <td>${{ record.cost }}</td>
+                        <td class="text-secondary">
+                            {% if record.odometer_reading %}
+                                {{ record.odometer_reading }} km
+                            {% else %}
+                                —
+                            {% endif %}
+                        </td>
+                        <td class="text-secondary">{{ record.station_name|default:"—" }}</td>
+                        <td class="text-end">
+                            <button type="button" class="btn btn-sm js-delete-fuel btn-ghost-danger"
+                                    data-record-id="{{ record.pk }}">
+                                Delete
+                            </button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="card-footer d-flex align-items-center">
+            <p class="m-0 text-secondary">
+                Showing <strong>{{ records_page.start_index }}–{{ records_page.end_index }}</strong>
+                of <strong>{{ records_page.paginator.count }}</strong>
+            </p>
+            <ul class="pagination m-0 ms-auto">
+                <li class="page-item {% if not records_page.has_previous %}disabled{% endif %}">
+                    <a class="page-link" href="#"
+                       hx-get="{% url 'fuel_list' %}?page={% if records_page.has_previous %}{{ records_page.previous_page_number }}{% else %}1{% endif %}&vehicle={{ vehicle_filter }}"
+                       hx-target="#fuel-table-container" hx-swap="innerHTML" hx-push-url="true">←</a>
+                </li>
+                {% for num in records_page.paginator.page_range %}
+                <li class="page-item {% if records_page.number == num %}active{% endif %}">
+                    <a class="page-link" href="#"
+                       hx-get="{% url 'fuel_list' %}?page={{ num }}&vehicle={{ vehicle_filter }}"
+                       hx-target="#fuel-table-container" hx-swap="innerHTML" hx-push-url="true">{{ num }}</a>
+                </li>
+                {% endfor %}
+                <li class="page-item {% if not records_page.has_next %}disabled{% endif %}">
+                    <a class="page-link" href="#"
+                       hx-get="{% url 'fuel_list' %}?page={% if records_page.has_next %}{{ records_page.next_page_number }}{% else %}{{ records_page.paginator.num_pages }}{% endif %}&vehicle={{ vehicle_filter }}"
+                       hx-target="#fuel-table-container" hx-swap="innerHTML" hx-push-url="true">→</a>
+                </li>
+            </ul>
+        </div>
+
+        {% else %}
+        <div class="text-center py-5 text-secondary">
+            <i class="bi bi-fuel-pump fs-2 d-block mb-2 opacity-50"></i>
+            <h4 class="mb-1">No fuel records found</h4>
+            <small>Try adjusting your filter.</small>
+        </div>
+        {% endif %}
+
+    </div>
+</div>
+
+{% include "mainDash/includes/confirm_delete_modal.html" %}
+<script>
+    document.querySelectorAll('.js-delete-fuel').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            var recordId = btn.getAttribute('data-record-id');
+            var deleteUrl = "{% url 'fuel_delete' 0 %}".replace('/0/', '/' + recordId + '/');
+
+            confirmDelete({
+                url: deleteUrl,
+                title: 'Delete this record?',
+                message: 'This will permanently remove the fuel record.',
+                csrfToken: '{{ csrf_token }}',
+                onSuccess: function () {
+                    var row = document.getElementById('fuel-row-' + recordId);
+                    if (row) row.remove();
+                },
+                onError: function (data) {
+                    alert(data.error || 'Delete failed.');
+                },
+            });
+        });
+    });
+
+    (function () {
+    function initSelectAll() {
+        var selectAll = document.getElementById('select-all');
+        if (!selectAll) return;
+        selectAll.addEventListener('change', function () {
+            document.querySelectorAll('.table-selectable-check').forEach(function (cb) {
+                cb.checked = selectAll.checked;
+            });
+        });
+    }
+        initSelectAll();
+        var container = document.getElementById('users-table-container');
+        if (container) {
+            container.addEventListener('htmx:afterSwap', initSelectAll);
+        }
+})();
+</script>

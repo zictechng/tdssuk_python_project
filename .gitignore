@@ -1,5 +1,7 @@
 # Python
 __pycache__/
+dashboard/__pycache__/
+dashboard/forms/__pycache__
 *.pyc
 *.pyo
 *.pyd
@@ -17,7 +19,6 @@ env/
 .vscode/
 manage.zip
 *.zip
-
 
 # Environment variables
 .env

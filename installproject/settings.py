@@ -23,6 +23,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-@@5^p#u#=x9+&t$&%$p0vi$$+*iv6r1r_0db4!3p0m!cpu9jyo'
 
 # SECURITY WARNING: don't run with debug turned on in production!
+
+# Turn DEBUG off to use your custom 404 error page and include your domain url in ALLOWED_HOST
 DEBUG = True
 
 ALLOWED_HOSTS = []
@@ -37,7 +39,10 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django_htmx',
     'mainWebsite',
+    'dashboard',
+    'django.contrib.humanize',
 ]
 
 MIDDLEWARE = [
@@ -48,6 +53,11 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'django_htmx.middleware.HtmxMiddleware',
+
+     # 👇 Protect dashboard secure pages
+    'dashboard.middleware.DashboardAuthMiddleware',
+
 ]
 
 ROOT_URLCONF = 'installproject.urls'
@@ -63,6 +73,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'dashboard.helper.context_processors.general_settings',
             ],
         },
     },
@@ -111,6 +122,9 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+LOGIN_URL = '/dashboard/auth/login/'
+LOGIN_REDIRECT_URL = '/dashboard/'
+LOGOUT_REDIRECT_URL = '/dashboard/auth/login/'
 
 # Internationalization
 # https://docs.djangoproject.com/en/4.2/topics/i18n/
@@ -132,6 +146,9 @@ STATIC_URL = '/static/'
 STATICFILES_DIRS = [
     BASE_DIR / 'static',
 ]
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field

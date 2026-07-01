@@ -1,0 +1,54 @@
+
+{% extends "mainDash/layouts/baseDash.html" %}
+    {% load static %}
+    
+        {% block title %}
+            Order Details
+        {% endblock %}
+
+    {% block content %}
+
+        <div class="page-header d-print-none" aria-label="Page header">
+          <div class="container-xl">
+            <div class="row g-2 align-items-center">
+              <div class="col">
+                <!-- Page pre-title -->
+                 <h2 class="page-title">Order Details</h2>
+                <div class="page-pretitle">Overview of the order details</div>
+              </div>
+              <!-- Action buttons -->
+              <div class="col-auto ms-auto d-print-none">
+                <div class="btn-list">
+                  {% if order.status != 'deleted'%}
+                  <div class="col-auto">
+                      <a href="{% url 'order_edit' order.uuid %}" class="btn btn-warning btn-sm">
+                        <i class="bi bi-pencil me-1"></i> Manage Order</a>
+                  </div>
+                  {%endif%}
+                  <a href="{% url 'order_list'%}?next=/dashboard/order/" class="btn btn-secondary btn-sm d-none d-sm-inline-block">
+                    <i class="bi bi-arrow-left"></i>
+                    Back
+                  </a>
+                  <a href="#"
+                    class="btn btn-secondary btn-6 d-sm-none btn-icon"
+                    aria-label="Create new report">
+                   <i class="bi bi-arrow-left"></i>
+                  </a>
+                </div>
+              </div>
+             </div>
+          </div>
+      </div>
+
+    <div class="page-body">
+        <div class="container-xl">
+        <div class="row row-deck row-cards">
+
+            {% include "mainDash/components/orderDetails_form.html" %}
+        </div>
+    </div>
+
+    {% endblock %}
+  
+    <!-- BEGIN PAGE MODALS -->
+    

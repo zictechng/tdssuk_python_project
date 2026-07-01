@@ -1,0 +1,99 @@
+{% extends "mainDash/layouts/baseDash.html" %}
+{% load static humanize %}
+
+{% block title %}Login History{% endblock %}
+
+{% block content %}
+
+<div class="page-header d-print-none">
+    <div class="container-xl">
+        <div class="row g-2 align-items-center">
+            <div class="col">
+                <h2 class="page-title">Login History</h2>
+                <div class="page-pretitle">All user login and logout activity</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="page-body">
+    <div class="container-xl">
+
+        <div class="row mb-3">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body py-3">
+                        <div class="row g-2 align-items-center">
+                            <div class="col-auto text-secondary">Filters:</div>
+                            <div class="col ms-auto d-flex flex-wrap gap-2 justify-content-end">
+
+                                <div class="position-relative" style="max-width: 260px;">
+                                    <input type="text"
+                                           id="login-search-input"
+                                           name="search"
+                                           class="form-control pe-4"
+                                           placeholder="Search name, IP..."
+                                           value="{{ search }}"
+                                           hx-get="{% url 'login_history_list' %}"
+                                           hx-trigger="keyup changed delay:400ms, search"
+                                           hx-target="#login-history-container"
+                                           hx-swap="innerHTML"
+                                           hx-include="#login-status-filter"
+                                           hx-push-url="true" />
+                                    <button type="button"
+                                            id="login-search-clear"
+                                            class="p-0 text-secondary"
+                                            style="display:{% if search %}block{% else %}none{% endif %};
+                                                   position:absolute; right:8px; top:50%;
+                                                   transform:translateY(-50%); line-height:1;
+                                                   background:none; border:none; cursor:pointer;"
+                                            aria-label="Clear search">
+                                        <i class="bi bi-x-lg" style="font-size:0.75rem;"></i>
+                                    </button>
+                                </div>
+
+                                <select id="login-status-filter"
+                                        name="status"
+                                        class="form-select"
+                                        style="max-width: 180px;"
+                                        hx-get="{% url 'login_history_list' %}"
+                                        hx-trigger="change"
+                                        hx-target="#login-history-container"
+                                        hx-swap="innerHTML"
+                                        hx-include="#login-search-input"
+                                        hx-push-url="true">
+                                    <option value="">All Statuses</option>
+                                    <option value="success" {% if status_filter == 'success' %}selected{% endif %}>Success</option>
+                                    <option value="failed"  {% if status_filter == 'failed'  %}selected{% endif %}>Failed</option>
+                                    <option value="logout"  {% if status_filter == 'logout'  %}selected{% endif %}>Logout</option>
+                                </select>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row row-deck row-cards" id="login-history-container">
+            {% include "mainDash/components/login_history_table.html" %}
+        </div>
+
+    </div>
+</div>
+
+<script>
+(function () {
+    var input    = document.getElementById('login-search-input');
+    var clearBtn = document.getElementById('login-search-clear');
+    function toggleClear() { clearBtn.style.display = input.value ? 'block' : 'none'; }
+    input.addEventListener('input', toggleClear);
+    clearBtn.addEventListener('click', function () {
+        input.value = '';
+        toggleClear();
+        htmx.trigger(input, 'search');
+    });
+})();
+</script>
+
+{% endblock %}

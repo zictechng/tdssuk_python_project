@@ -1,0 +1,206 @@
+
+{% extends "mainDash/layouts/baseDash.html" %}
+{% load static %}
+{% block title %}New Support Ticket{% endblock %}
+{% block content %}
+
+<div class="page-header d-print-none">
+  <div class="container-xl">
+    <div class="row g-2 align-items-center">
+      <div class="col">
+        <div class="page-pretitle">
+          <a href="{% url 'ticket_list' %}" class="text-secondary">
+            <i class="bi bi-arrow-left me-1"></i> Back to Tickets
+          </a>
+        </div>
+        <h2 class="page-title">New Support Ticket</h2>
+      </div>
+      
+      <div class="col-auto ms-auto d-print-none">
+        <div class="btn-list">
+            <a href="{% url 'ticket_list' %}"
+                class="btn btn-secondary btn-sm d-none d-sm-inline-block">
+                <i class="bi bi-arrow-left me-1"></i> Back
+            </a>
+            <a href="{% url 'ticket_list' %}"
+                class="btn btn-secondary d-sm-none btn-icon">
+                <i class="bi bi-arrow-left"></i>
+            </a>
+            
+        </div>
+    </div>
+    </div>
+  </div>
+</div>
+
+<div class="page-body">
+  <div class="container-xl">
+    <div class="row row-deck row-cards mt-3">
+
+      <div class="col-lg-8">
+        <form class="card" id="ticket-create-form"
+              hx-post="{% url 'ticket_create' %}"
+              hx-target="#toast-container"
+              hx-swap="innerHTML">
+          {% csrf_token %}
+          <div class="card-header">
+            <h3 class="card-title">Ticket Details</h3>
+            <div class="card-options">
+              <small class="text-muted">Ticket number auto-generated on submit</small>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label class="form-label required">Your Name</label>
+                    {{ form.submitter_name }}
+                    <div id="error-submitter_name"></div>
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label required">Email Address</label>
+                    {{ form.submitter_email }}
+                    <small class="text-muted d-block mt-1">
+                    <i class="bi bi-info-circle me-1"></i>
+                    We'll send reply notifications to this email.
+                    </small>
+                    <div id="error-submitter_email"></div>
+                </div>
+              <div class="col-12">
+                <label class="form-label required">Subject</label>
+                {{ form.subject }}
+                <div id="error-subject"></div>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label required">Priority</label>
+                {{ form.priority }}
+                <div id="error-priority"></div>
+              </div>
+              <div class="col-12">
+                <label class="form-label required">Description</label>
+                {{ form.description }}
+                <div id="error-description"></div>
+              </div>
+            </div>
+          </div>
+          <div class="card-footer text-end">
+            <a href="{% url 'ticket_list' %}" class="btn btn-secondary btn-sm me-2">Cancel</a>
+            <button type="button"
+                    class="btn btn-primary btn-sm"
+                    data-bs-toggle="modal"
+                    data-bs-target="#confirm-ticket-modal">
+              <i class="bi bi-send me-1"></i> Submit Ticket
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <div class="col-lg-4">
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title"><i class="bi bi-info-circle me-2"></i>Guidelines</h3>
+          </div>
+          <div class="card-body p-0">
+            <div class="list-group list-group-flush">
+              <div class="list-group-item">
+                <span class="badge bg-danger me-2 text-white">Urgent</span>
+                <small class="text-muted">System down or critical data loss</small>
+              </div>
+              <div class="list-group-item">
+                <span class="badge bg-orange me-2 text-white">High</span>
+                <small class="text-muted">Major feature broken, affecting work</small>
+              </div>
+              <div class="list-group-item">
+                <span class="badge bg-warning me-2 text-white">Medium</span>
+                <small class="text-muted">Issue present but workaround exists</small>
+              </div>
+              <div class="list-group-item">
+                <span class="badge bg-secondary me-2 text-white">Low</span>
+                <small class="text-muted">Minor issue or general question</small>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<div class="modal modal-blur fade" id="confirm-ticket-modal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-sm modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-body">
+        <div class="modal-title">Submit this ticket?</div>
+        <div class="text-muted mt-1">Your request will be sent to the support team.</div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-link link-secondary me-auto"
+                data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-primary" id="confirm-ticket-btn">
+          <span id="confirm-ticket-label">Yes, Submit</span>
+          <span id="confirm-ticket-spinner" class="spinner-border spinner-border-sm ms-2"
+                style="display:none;"></span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  document.getElementById('confirm-ticket-btn').addEventListener('click', function () {
+    var btn     = this;
+    var label   = document.getElementById('confirm-ticket-label');
+    var spinner = document.getElementById('confirm-ticket-spinner');
+
+    btn.disabled          = true;
+    label.textContent     = 'Submitting...';
+    spinner.style.display = 'inline-block';
+
+    var form     = document.getElementById('ticket-create-form');
+    var formData = new FormData(form);
+
+    fetch(form.getAttribute('hx-post'), {
+      method: 'POST', body: formData,
+      headers: { 'HX-Request': 'true' }
+    })
+    .then(function (res) { return res.text(); })
+    .then(function (html) {
+      var doc     = new DOMParser().parseFromString(html, 'text/html');
+      doc.querySelectorAll('[hx-swap-oob]').forEach(function (oobEl) {
+        var target = document.getElementById(oobEl.id);
+        if (target) target.outerHTML = oobEl.outerHTML;
+      });
+      var toastEl = doc.querySelector('.toast');
+      if (toastEl) {
+        var redirectUrl = toastEl.getAttribute('data-redirect-url');
+        document.querySelector('#confirm-ticket-modal [data-bs-dismiss="modal"]').click();
+        document.getElementById('toast-container').innerHTML = toastEl.outerHTML;
+        tabler.Toast.getOrCreateInstance(document.querySelector('#toast-container .toast')).show();
+        if (redirectUrl) setTimeout(function () { window.location.href = redirectUrl; }, 1500);
+      }
+    })
+    .catch(function (err) { console.error(err); })
+    .finally(function () {
+      btn.disabled          = false;
+      label.textContent     = 'Yes, Submit';
+      spinner.style.display = 'none';
+    });
+  });
+
+  document.querySelectorAll('#ticket-create-form input, #ticket-create-form select, #ticket-create-form textarea')
+    .forEach(function (el) {
+      el.addEventListener('input', function () {
+        var err = document.getElementById('error-' + el.name);
+        if (err) err.innerHTML = '';
+      });
+      el.addEventListener('change', function () {
+        var err = document.getElementById('error-' + el.name);
+        if (err) err.innerHTML = '';
+      });
+    });
+});
+</script>
+
+{% endblock %}

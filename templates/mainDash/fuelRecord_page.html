@@ -1,0 +1,68 @@
+{% extends "mainDash/layouts/baseDash.html" %}
+{% load static %}
+
+{% block title %}Fleet — Fuel Records{% endblock %}
+
+{% block content %}
+
+<div class="page-header d-print-none">
+    <div class="container-xl">
+        <div class="row g-2 align-items-center">
+            <div class="col">
+                <h2 class="page-title">Fuel Records</h2>
+                <div class="page-pretitle">Track fuel consumption across your fleet</div>
+            </div>
+            <div class="col-auto ms-auto d-print-none">
+                <a href="{% url 'fuel_create' %}" class="btn btn-primary btn-sm">
+                    <i class="bi bi-plus-lg me-1"></i> Add Record
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="page-body">
+    <div class="container-xl">
+
+        {# --- Filters --- #}
+        <div class="row mb-3">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body py-3">
+                        <div class="row g-2 align-items-center">
+                            <div class="col-auto text-secondary">
+                                Filters:
+                            </div>
+                            <div class="col ms-auto d-flex flex-wrap gap-2 justify-content-end">
+                                <select
+                                    id="fuel-vehicle-filter"
+                                    name="vehicle"
+                                    class="form-select"
+                                    style="max-width: 200px;"
+                                    hx-get="{% url 'fuel_list' %}"
+                                    hx-trigger="change"
+                                    hx-target="#fuel-table-container"
+                                    hx-swap="innerHTML"
+                                    hx-push-url="true"
+                                >
+                                    <option value="">All Vehicles</option>
+                                    {% for v in vehicles %}
+                                    <option value="{{ v.pk }}" {% if vehicle_filter == v.pk|stringformat:"s" %}selected{% endif %}>{{ v.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {# --- Table --- #}
+        <div class="row" id="fuel-table-container">
+            {% include "mainDash/components/fuelRecord_dataTable.html" %}
+        </div>
+
+    </div>
+</div>
+
+{% endblock %}

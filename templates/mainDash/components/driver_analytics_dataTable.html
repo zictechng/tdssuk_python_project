@@ -1,0 +1,104 @@
+
+{% load humanize %}
+{% include "mainDash/includes/filter_bar.html" %}
+
+<div class="row row-deck row-cards mb-4">
+  <div class="col-sm-6 col-lg-4">
+    <div class="card">
+      <div class="card-body">
+        <div class="subheader mb-3">Total Shipments</div>
+        <div class="h1 mb-0">{{ total_shipments }}</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-sm-6 col-lg-4">
+    <div class="card">
+      <div class="card-body">
+        <div class="subheader mb-3">Active Carriers</div>
+        <div class="h1 mb-0">{{ active_carriers }}</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-sm-6 col-lg-4">
+    <div class="card">
+      <div class="card-body">
+        <div class="subheader mb-3">Vehicle Status</div>
+        <div class="d-flex flex-wrap gap-2 mt-2">
+          {% for vs in vehicle_status %}
+          <span class="badge bg-blue-lt">{{ vs.count }} {{ vs.status|title }}</span>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row row-deck row-cards mb-4">
+  <div class="col-12">
+    <div class="card">
+      <div class="card-header"><h3 class="card-title">Shipments per Carrier</h3></div>
+      <div class="card-body"><div id="chart-carriers"></div></div>
+    </div>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col-12">
+    <div class="card">
+      <div class="card-header"><h3 class="card-title">Carrier Performance</h3>
+            <div class="card-options">
+             <small class="text-muted">
+                {{ carrier_stats.paginator.count }} record{{ carrier_stats.paginator.count|pluralize }}
+            </small>
+             </div>
+        </div>
+      {% if carrier_stats.paginator.count > 0 %}
+      <div class="table-responsive">
+        <table class="table table-vcenter table-hover card-table text-nowrap">
+          <thead>
+            <tr>
+              <th>Carrier / Driver</th><th>Total</th>
+              <th>Delivered</th><th>In Transit</th><th>Cancelled</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for c in carrier_stats %}
+            <tr>
+              <td class="fw-medium">{{ c.carrier_name }}</td>
+              <td><span class="badge bg-blue-lt text-white">{{ c.total }}</span></td>
+              <td><span class="badge bg-success text-white">{{ c.delivered }}</span></td>
+              <td><span class="badge bg-primary text-white">{{ c.in_transit }}</span></td>
+              <td><span class="badge bg-danger text-white">{{ c.cancelled }}</span></td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% include "mainDash/includes/report_pagination.html" with page_obj=carrier_stats%}
+      {% else %}
+      <div class="text-center py-5 text-secondary">
+        <i class="bi bi-truck fs-2 d-block mb-2 opacity-50"></i>
+        <h4 class="mb-1">No carrier data found</h4>
+        <small>Try adjusting the date range.</small>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<script>
+new ApexCharts(document.getElementById('chart-carriers'), {
+  chart:  { type: 'bar', height: 280, toolbar: { show: false }, stacked: true },
+  series: [
+    { name: 'Delivered',  data: {{ chart_delivered|safe }} },
+    { name: 'In Transit', data: {{ chart_transit|safe }} },
+    { name: 'Cancelled',  data: {{ chart_cancelled|safe }} },
+  ],
+  xaxis:  { categories: {{ chart_labels|safe }} },
+  colors: ['#2fb344', '#206bc4', '#d63939'],
+  plotOptions: { bar: { borderRadius: 3, columnWidth: '50%' } },
+  tooltip: { theme: 'light' },
+  grid:   { strokeDashArray: 4 },
+  legend: { position: 'top' },
+}).render();
+</script>

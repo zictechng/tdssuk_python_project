@@ -1,0 +1,129 @@
+
+{% load static %}
+<div class="col-12">
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">Exchange Rate Records</h3>
+            <div class="card-options">
+                <small class="text-muted">
+                    {{ rates_page.paginator.count }}
+                    rate{{ rates_page.paginator.count|pluralize }}
+                </small>
+            </div>
+        </div>
+
+        {% if rates_page.paginator.count > 0 %}
+        <div class="table-responsive">
+            <table class="table card-table table-vcenter text-nowrap">
+                <thead>
+                    <tr>
+                        <th>Base Currency</th>
+                        <th>Target Currency</th>
+                        <th>Rate</th>
+                        <th>Effective Date</th>
+                        <th>Added By</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for rate in rates_page %}
+                    <tr id="rate-row-{{ rate.pk }}">
+                        <td>
+                            <span class="badge bg-blue-lt fw-bold">
+                                {{ rate.base_currency }}
+                            </span>
+                        </td>
+                        <td>
+                            <span class="badge bg-green-lt fw-bold">
+                                {{ rate.target_currency }}
+                            </span>
+                        </td>
+                        <td>
+                            <strong>1 {{ rate.base_currency }}
+                            = {{ rate.rate }} {{ rate.target_currency }}</strong>
+                        </td>
+                        <td class="text-secondary">
+                            {{ rate.effective_date|date:"d/m/Y" }}
+                        </td>
+                        <td class="text-secondary">
+                            {{ rate.created_by.email|default:"—" }}
+                        </td>
+                        <td class="text-end">
+                            <button type="button"
+                                    class="btn btn-sm js-delete-rate btn-ghost-danger"
+                                    data-rate-id="{{ rate.pk }}">
+                                Delete
+                            </button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="card-footer d-flex align-items-center">
+            <p class="m-0 text-secondary">
+                Showing
+                <strong>{{ rates_page.start_index }}–{{ rates_page.end_index }}</strong>
+                of <strong>{{ rates_page.paginator.count }}</strong>
+            </p>
+            <ul class="pagination m-0 ms-auto">
+                <li class="page-item {% if not rates_page.has_previous %}disabled{% endif %}">
+                    <a class="page-link" href="#"
+                       hx-get="{% url 'exchange_rate_list' %}?page={% if rates_page.has_previous %}{{ rates_page.previous_page_number }}{% else %}1{% endif %}&currency={{ currency_filter }}"
+                       hx-target="#rates-table-container"
+                       hx-swap="innerHTML"
+                       hx-push-url="true">←</a>
+                </li>
+                {% for num in rates_page.paginator.page_range %}
+                <li class="page-item {% if rates_page.number == num %}active{% endif %}">
+                    <a class="page-link" href="#"
+                       hx-get="{% url 'exchange_rate_list' %}?page={{ num }}&currency={{ currency_filter }}"
+                       hx-target="#rates-table-container"
+                       hx-swap="innerHTML"
+                       hx-push-url="true">{{ num }}</a>
+                </li>
+                {% endfor %}
+                <li class="page-item {% if not rates_page.has_next %}disabled{% endif %}">
+                    <a class="page-link" href="#"
+                       hx-get="{% url 'exchange_rate_list' %}?page={% if rates_page.has_next %}{{ rates_page.next_page_number }}{% else %}{{ rates_page.paginator.num_pages }}{% endif %}&currency={{ currency_filter }}"
+                       hx-target="#rates-table-container"
+                       hx-swap="innerHTML"
+                       hx-push-url="true">→</a>
+                </li>
+            </ul>
+        </div>
+
+        {% else %}
+        <div class="text-center py-5 text-secondary">
+            <i class="bi bi-currency-exchange fs-2 d-block mb-2 opacity-50"></i>
+            <h4 class="mb-1">No exchange rates found</h4>
+            <small>Add your first exchange rate to get started.</small>
+        </div>
+        {% endif %}
+
+    </div>
+</div>
+
+<script>
+document.querySelectorAll('.js-delete-rate').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+        var rateId = btn.getAttribute('data-rate-id');
+        var deleteUrl = "{% url 'exchange_rate_delete' 0 %}".replace('/0/', '/' + rateId + '/');
+
+        confirmDelete({
+            url: deleteUrl,
+            title: 'Delete this exchange rate?',
+            message: 'This will permanently remove the exchange rate record.',
+            csrfToken: '{{ csrf_token }}',
+            onSuccess: function () {
+                var row = document.getElementById('rate-row-' + rateId);
+                if (row) row.remove();
+            },
+            onError: function (data) {
+                alert(data.error || 'Delete failed.');
+            },
+        });
+    });
+});
+</script>

@@ -1,0 +1,106 @@
+{% load humanize %}
+
+<div class="col-12">
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">Invoices</h3>
+            <div class="card-options">
+                <small class="text-muted">
+                    {{ invoices.paginator.count }} invoice{{ invoices.paginator.count|pluralize }}
+                </small>
+            </div>
+        </div>
+
+        {% if invoices.paginator.count > 0 %}
+        <div class="table-responsive">
+            <table class="table card-table table-vcenter text-nowrap">
+                <thead>
+                    <tr>
+                        <th>Invoice #</th>
+                        <th>Customer</th>
+                        <th>Destination</th>
+                        <th>Amount</th>
+                        <th>Status</th>
+                        <th>Due Date</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for invoice in invoices %}
+                    <tr>
+                        <td class="fw-medium">
+                            <i class="bi bi-receipt me-1 text-blue"></i>
+                            <a href="{% url 'document_invoice_detail' invoice.uuid %}">
+                                {{ invoice.invoice_number }}
+                            </a>
+                        </td>
+                        <td>
+                            <p class="mb-0 fw-medium">{{ invoice.customer_name }}</p>
+                            {% if invoice.customer_email %}
+                            <small class="text-muted">{{ invoice.customer_email }}</small>
+                            {% endif %}
+                        </td>
+                        <td class="text-secondary">{{ invoice.destination_country }}</td>
+                        <td class="fw-medium">
+                            {{ invoice.currency }} {{ invoice.total_amount|floatformat:2|intcomma }}
+                        </td>
+                        <td>
+                            <span class="badge bg-{% if invoice.status == 'paid' %}green{% elif invoice.status == 'overdue' %}red{% elif invoice.status == 'sent' %}blue{% elif invoice.status == 'partially_paid' %}cyan{% elif invoice.status == 'cancelled' %}secondary{% else %}yellow{% endif %}-lt">
+                                {{ invoice.get_status_display }}
+                            </span>
+                        </td>
+                        <td class="text-secondary">{{ invoice.due_date|date:"d/m/Y" }}</td>
+                        <td class="text-end">
+                            <a href="{% url 'document_invoice_detail' invoice.uuid %}"
+                               class="btn btn-sm btn-ghost-secondary"> 
+                               View
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="card-footer d-flex align-items-center">
+            <p class="m-0 text-secondary">
+                Showing <strong>{{ invoices.start_index }}–{{ invoices.end_index }}</strong>
+                of <strong>{{ invoices.paginator.count }}</strong>
+            </p>
+            <ul class="pagination m-0 ms-auto">
+                <li class="page-item {% if not invoices.has_previous %}disabled{% endif %}">
+                    <a class="page-link"
+                       hx-get="{% url 'document_invoice_list' %}?page={% if invoices.has_previous %}{{ invoices.previous_page_number }}{% else %}1{% endif %}&search={{ search }}&status={{ status_filter }}"
+                       hx-target="#invoices-table-container"
+                       hx-swap="innerHTML"
+                       hx-push-url="true">←</a>
+                </li>
+                {% for num in invoices.paginator.page_range %}
+                <li class="page-item {% if invoices.number == num %}active{% endif %}">
+                    <a class="page-link"
+                       hx-get="{% url 'document_invoice_list' %}?page={{ num }}&search={{ search }}&status={{ status_filter }}"
+                       hx-target="#invoices-table-container"
+                       hx-swap="innerHTML"
+                       hx-push-url="true">{{ num }}</a>
+                </li>
+                {% endfor %}
+                <li class="page-item {% if not invoices.has_next %}disabled{% endif %}">
+                    <a class="page-link"
+                       hx-get="{% url 'document_invoice_list' %}?page={% if invoices.has_next %}{{ invoices.next_page_number }}{% else %}{{ invoices.paginator.num_pages }}{% endif %}&search={{ search }}&status={{ status_filter }}"
+                       hx-target="#invoices-table-container"
+                       hx-swap="innerHTML"
+                       hx-push-url="true">→</a>
+                </li>
+            </ul>
+        </div>
+
+        {% else %}
+        <div class="text-center py-5 text-secondary">
+            <i class="bi bi-receipt fs-2 d-block mb-2 opacity-50"></i>
+            <h4 class="mb-1">No invoices found</h4>
+            <small>Try adjusting your search or status filter.</small>
+        </div>
+        {% endif %}
+
+    </div>
+</div>

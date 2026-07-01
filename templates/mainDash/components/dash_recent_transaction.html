@@ -1,0 +1,98 @@
+{% load static %}
+
+<div class="col-12 mt-5">
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">Recent Orders</h3>
+            <div class="card-options">
+                <a href="{% url 'order_list' %}" class="btn btn-sm btn-outline-secondary">
+                    View All Orders
+                </a>
+            </div>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-vcenter card-table table-hover text-nowrap">
+                <thead>
+                    <tr>
+                        <th>Order No.</th>
+                        <th>Customer</th>
+                        <th>Destination</th>
+                        <th>Type</th>
+                        <th>Total</th>
+                        <th>Date</th>
+                        <th>Status</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for order in recent_orders %}
+                    <tr style="cursor:pointer;"
+                        onclick="window.location='{% url 'viewOrderDetail' order.uuid %}'">
+                        <td>
+                            <span class="fw-medium font-monospace text-secondary">
+                                {{ order.order_number }}
+                            </span>
+                        </td>
+                        <td>
+                            <div class="fw-medium">{{ order.customer_name }}</div>
+                            {% if order.customer_email %}
+                            <div class="text-muted small">{{ order.customer_email }}</div>
+                            {% endif %}
+                        </td>
+                        <td class="text-secondary">
+                            {{ order.receiver_country|default:"—" }}
+                        </td>
+                        <td class="text-secondary">
+                            {{ order.order_type.name|default:"—" }}
+                        </td>
+                        <td class="fw-medium">
+                            £{{ order.total_amount|floatformat:2 }}
+                        </td>
+                        <td class="text-secondary">
+                            {{ order.created_at|date:"d M Y" }}
+                        </td>
+                        <td>
+                            <span class="badge text-white
+                                {% if order.status == 'completed' %}bg-success
+                                {% elif order.status == 'cancelled' %}bg-danger
+                                {% elif order.status == 'in_transit' %}bg-blue
+                                {% elif order.status == 'processing' %}bg-warning
+                                {% elif order.status == 'returned' or order.status == 'rejected' %}bg-secondary
+                                {% else %}bg-secondary{% endif %}">
+                                {{ order.get_status_display }}
+                            </span>
+                        </td>
+                        <td class="text-end" onclick="event.stopPropagation();">
+                            <a href="{% url 'viewOrderDetail' order.uuid %}"
+                               class="btn btn-sm btn-ghost-secondary"
+                               title="View order details">
+                               View <i class="bi bi-arrow-right ms-1"></i>
+                            </a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="8" class="text-center py-5 text-secondary">
+                            <i class="bi bi-inbox fs-2 d-block mb-2 opacity-50"></i>
+                            <h5 class="mb-1">No orders yet</h5>
+                            <small>Orders will appear here once created.</small>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="card-footer">
+            <div class="d-flex align-items-center justify-content-between">
+                <p class="m-0 text-secondary">
+                    Showing latest <strong>{{ recent_orders|length }}</strong> order{{ recent_orders|length|pluralize }}
+                </p>
+                <a href="{% url 'order_list' %}" class="btn btn-sm btn-secondary">
+                    <i class="bi bi-arrow-right me-1"></i> View All Orders
+                </a>
+            </div>
+        </div>
+    </div>
+</div>

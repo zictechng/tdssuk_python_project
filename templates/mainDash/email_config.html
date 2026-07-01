@@ -1,0 +1,336 @@
+{% extends "mainDash/layouts/baseDash.html" %}
+{% load static %}
+
+{% block title %}Email Configuration{% endblock %}
+
+{% block content %}
+
+<div class="page-header d-print-none">
+  <div class="container-xl">
+    <div class="row g-2 align-items-center">
+      <div class="col">
+        <div class="page-pretitle">
+          <a href="{% url 'general_settings' %}" class="text-secondary">
+            <i class="bi bi-arrow-left me-1"></i> Back to Settings
+          </a>
+        </div>
+        <h2 class="page-title">Email Configuration</h2>
+      </div>
+      <div class="col-auto ms-auto d-print-none">
+        <a href="{% url 'general_settings' %}" class="btn btn-secondary btn-sm d-none d-sm-inline-block">
+          <i class="bi bi-arrow-left me-1"></i> Back
+        </a>
+        <a href="{% url 'general_settings' %}" class="btn btn-secondary d-sm-none btn-icon">
+          <i class="bi bi-arrow-left"></i>
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="page-body">
+  <div class="container-xl">
+    <div class="row row-deck row-cards mt-3">
+
+      <!-- LEFT — SMTP Form -->
+      <div class="col-lg-8">
+        <form class="card h-100" id="email-config-form"
+              hx-post="{% url 'email_config' %}"
+              hx-target="#toast-container"
+              hx-swap="innerHTML">
+          {% csrf_token %}
+
+          <div class="card-header">
+            <h3 class="card-title">SMTP Configuration</h3>
+            <div class="card-options">
+              <small class="text-muted">Used for all outgoing system emails</small>
+            </div>
+          </div>
+
+          <div class="card-body">
+            <div class="row g-3">
+
+              <div class="col-md-8">
+                <label class="form-label">SMTP Host</label>
+                {{ form.smtp_host }}
+                <div id="error-smtp_host"></div>
+              </div>
+              <div class="col-md-4">
+                <label class="form-label">Port</label>
+                {{ form.smtp_port }}
+                <div id="error-smtp_port"></div>
+              </div>
+
+              <div class="col-md-6">
+                <label class="form-label">Username</label>
+                {{ form.smtp_username }}
+                <div id="error-smtp_username"></div>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Password</label>
+                {{ form.smtp_password }}
+                <small class="text-muted d-block mt-1">Leave blank to keep existing.</small>
+                <div id="error-smtp_password"></div>
+              </div>
+
+              <div class="col-md-6">
+                <label class="form-label">From Name</label>
+                {{ form.email_from_name }}
+                <div id="error-email_from_name"></div>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">From Address</label>
+                {{ form.email_from_address }}
+                <div id="error-email_from_address"></div>
+              </div>
+
+              <div class="col-12">
+                <label class="form-check">
+                  {{ form.smtp_use_tls }}
+                  <span class="form-check-label">Use TLS encryption</span>
+                </label>
+              </div>
+
+            </div>
+          </div>
+
+          <div class="card-footer text-end">
+            <a href="{% url 'general_settings' %}" class="btn btn-secondary btn-sm me-2">Cancel</a>
+            <button type="button"
+                    class="btn btn-primary btn-sm"
+                    data-bs-toggle="modal"
+                    data-bs-target="#confirm-email-modal">
+              <i class="bi bi-save me-1"></i> Save Configuration
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <!-- RIGHT — Test Email + Info -->
+      <div class="col-lg-4 d-flex flex-column gap-3">
+
+        <!-- Test Email -->
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title">
+              <i class="bi bi-send me-2 text-primary"></i> Test Email
+            </h3>
+          </div>
+          <div class="card-body">
+            <p class="text-muted small mb-3">
+              Send a test message to verify your SMTP settings are working correctly.
+            </p>
+            <label class="form-label">Recipient Email</label>
+            <input type="email" id="test-email-input"
+                class="form-control"
+                placeholder="test@example.com">
+            <div id="error-test-email"></div>
+            <button type="button"
+                    id="send-test-email-btn"
+                    class="btn btn-secondary w-100 mt-3">
+            <i class="bi bi-send me-1"></i> Send Test Email
+            </button>
+          </div>
+        </div>
+
+        <!-- Info Panel -->
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title">
+              <i class="bi bi-info-circle me-2 text-muted"></i> Configuration Tips
+            </h3>
+          </div>
+          <div class="card-body p-0">
+            <div class="list-group list-group-flush">
+              <div class="list-group-item">
+                <div class="row align-items-center">
+                  <div class="col-auto">
+                    <span class="badge bg-blue-lt">Gmail</span>
+                  </div>
+                  <div class="col">
+                    <small class="text-muted">smtp.gmail.com · Port 587 · TLS on</small>
+                  </div>
+                </div>
+              </div>
+              <div class="list-group-item">
+                <div class="row align-items-center">
+                  <div class="col-auto">
+                    <span class="badge bg-purple-lt">Outlook</span>
+                  </div>
+                  <div class="col">
+                    <small class="text-muted">smtp.office365.com · Port 587 · TLS on</small>
+                  </div>
+                </div>
+              </div>
+              <div class="list-group-item">
+                <div class="row align-items-center">
+                  <div class="col-auto">
+                    <span class="badge bg-orange-lt">SendGrid</span>
+                  </div>
+                  <div class="col">
+                    <small class="text-muted">smtp.sendgrid.net · Port 587 · TLS on</small>
+                  </div>
+                </div>
+              </div>
+              <div class="list-group-item">
+                <div class="row align-items-center">
+                  <div class="col-auto">
+                    <span class="badge bg-green-lt">Mailgun</span>
+                  </div>
+                  <div class="col">
+                    <small class="text-muted">smtp.mailgun.org · Port 587 · TLS on</small>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Current Status -->
+        <div class="card">
+          <div class="card-body">
+            <div class="d-flex align-items-center gap-3">
+              <span class="avatar bg-{% if setting.smtp_host %}green{% else %}red{% endif %}-lt text-{% if setting.smtp_host %}green{% else %}red{% endif %}">
+                <i class="bi bi-{% if setting.smtp_host %}check-circle{% else %}x-circle{% endif %}"></i>
+              </span>
+              <div>
+                <div class="fw-medium">
+                  {% if setting.smtp_host %}SMTP Configured{% else %}Not Configured{% endif %}
+                </div>
+                <small class="text-muted">
+                  {% if setting.smtp_host %}
+                    {{ setting.smtp_host }}:{{ setting.smtp_port }}
+                  {% else %}
+                    No SMTP host set yet
+                  {% endif %}
+                </small>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Confirm Modal -->
+<div class="modal modal-blur fade" id="confirm-email-modal" tabindex="-1" role="dialog" aria-hidden="true">
+  <div class="modal-dialog modal-sm modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-body">
+        <div class="modal-title">Save email configuration?</div>
+        <div class="text-muted mt-1">SMTP settings will be updated and used for all future emails.</div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-link link-secondary me-auto"
+                data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-primary" id="confirm-email-btn">
+          <span id="confirm-email-label">Yes, Save</span>
+          <span id="confirm-email-spinner"
+                class="spinner-border spinner-border-sm ms-2"
+                style="display:none;" role="status" aria-hidden="true"></span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+
+  document.getElementById('confirm-email-btn').addEventListener('click', function () {
+    var btn     = this;
+    var label   = document.getElementById('confirm-email-label');
+    var spinner = document.getElementById('confirm-email-spinner');
+
+    btn.disabled          = true;
+    label.textContent     = 'Saving...';
+    spinner.style.display = 'inline-block';
+
+    var form     = document.getElementById('email-config-form');
+    var formData = new FormData(form);
+
+    fetch(form.getAttribute('hx-post'), {
+      method: 'POST', body: formData,
+      headers: { 'HX-Request': 'true' }
+    })
+    .then(function (res) { return res.text(); })
+    .then(function (html) {
+      var parser = new DOMParser();
+      var doc    = parser.parseFromString(html, 'text/html');
+
+      doc.querySelectorAll('[hx-swap-oob]').forEach(function (oobEl) {
+        var target = document.getElementById(oobEl.id);
+        if (target) target.outerHTML = oobEl.outerHTML;
+      });
+
+      var toastEl = doc.querySelector('.toast');
+      if (toastEl) {
+        document.querySelector('#confirm-email-modal [data-bs-dismiss="modal"]').click();
+        document.getElementById('toast-container').innerHTML = toastEl.outerHTML;
+        tabler.Toast.getOrCreateInstance(document.querySelector('#toast-container .toast')).show();
+      }
+    })
+    .catch(function (err) { console.error(err); })
+    .finally(function () {
+      btn.disabled          = false;
+      label.textContent     = 'Yes, Save';
+      spinner.style.display = 'none';
+    });
+  });
+
+  document.getElementById('send-test-email-btn').addEventListener('click', function () {
+    var recipient = document.getElementById('test-email-input').value.trim();
+    var errorDiv  = document.getElementById('error-test-email');
+
+    if (!recipient) {
+        errorDiv.innerHTML = '<p class="text-danger small mb-0">Please enter a recipient email address.</p>';
+        return;
+    }
+
+    var btn = this;
+    btn.disabled  = true;
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Sending...';
+
+    var formData = new FormData();
+    formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+    formData.append('action', 'test_email');
+    formData.append('test_recipient', recipient);
+
+    fetch('{% url "email_config" %}', {
+      method: 'POST', body: formData,
+      headers: { 'HX-Request': 'true' }
+    })
+    .then(function (res) { return res.text(); })
+    .then(function (html) {
+      var doc     = new DOMParser().parseFromString(html, 'text/html');
+      var toastEl = doc.querySelector('.toast');
+      if (toastEl) {
+        document.getElementById('toast-container').innerHTML = toastEl.outerHTML;
+        tabler.Toast.getOrCreateInstance(document.querySelector('#toast-container .toast')).show();
+      }
+    })
+    .catch(function (err) { console.error(err); })
+    .finally(function () {
+      btn.disabled  = false;
+      btn.innerHTML = '<i class="bi bi-send me-1"></i> Send Test Email';
+    });
+  });
+
+  document.querySelectorAll('#email-config-form input, #email-config-form select').forEach(function (el) {
+    el.addEventListener('input', function () {
+      var err = document.getElementById('error-' + el.name);
+      if (err) err.innerHTML = '';
+    });
+  });
+
+  // Clear error on input — same as all other fields
+    document.getElementById('test-email-input').addEventListener('input', function () {
+        document.getElementById('error-test-email').innerHTML = '';
+    });
+
+});
+</script>
+
+{% endblock %}

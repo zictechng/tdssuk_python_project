@@ -1,0 +1,319 @@
+{% extends "mainDash/layouts/baseDash.html" %}
+{% load static %}
+
+{% block title %}Add Inventory Item{% endblock %}
+
+{% block content %}
+
+<div class="page-header d-print-none" aria-label="Page header">
+    <div class="container-xl">
+        <div class="row g-2 align-items-center">
+            <div class="col">
+                <h2 class="page-title">Add Inventory Item</h2>
+                <div class="page-pretitle">Record a new item or cargo into the warehouse</div>
+            </div>
+            <div class="col-auto ms-auto d-print-none">
+                <a href="{% url 'inventory_list' %}"
+                   class="btn btn-secondary btn-sm d-none d-sm-inline-block">
+                    <i class="bi bi-arrow-left me-1"></i> Back
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="page-body">
+    <div class="container-xl">
+        <div class="row row-deck row-cards">
+            <div class="col-11 mt-3">
+
+                <form class="card" id="inventory-form"
+                      hx-post="{% url 'inventory_create' %}"
+                      hx-target="#toast-container"
+                      hx-swap="innerHTML">
+                    {% csrf_token %}
+
+                    <div class="card-header">
+                        <h3 class="card-title">Item Details</h3>
+                    </div>
+
+                    <div class="card-body">
+                        <div class="row row-cards">
+
+                            {# Customer #}
+                            <div class="col-md-5">
+                                <div class="mb-3">
+                                    <label class="form-label required">Customer Name</label>
+                                    <input type="text" name="customer_name" class="form-control"
+                                           placeholder="Customer full name">
+                                    <div id="error-customer_name"></div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="mb-3">
+                                    <label class="form-label">Customer Phone</label>
+                                    <input type="text" name="customer_phone" class="form-control"
+                                           placeholder="Phone number">
+                                    <div id="error-customer_phone"></div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label class="form-label required">Tracking Number</label>
+                                    <input type="text" name="tracking_number" class="form-control"
+                                           placeholder="e.g. TRK-ABC123">
+                                    <div id="error-tracking_number"></div>
+                                </div>
+                            </div>
+
+                            {# Item details #}
+                            <div class="col-md-12">
+                                <div class="mb-3">
+                                    <label class="form-label required">Description</label>
+                                    <textarea name="description" rows="2" class="form-control"
+                                              placeholder="Describe the item or cargo..."></textarea>
+                                    <div id="error-description"></div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-3">
+                                <div class="mb-3">
+                                    <label class="form-label required">Category</label>
+                                    <select name="category" class="form-select">
+                                        {% for value, label in form.fields.category.choices %}
+                                        <option value="{{ value }}">{{ label }}</option>
+                                        {% endfor %}
+                                    </select>
+                                    <div id="error-category"></div>
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="mb-3">
+                                    <label class="form-label required">Quantity</label>
+                                    <input type="number" name="quantity" class="form-control"
+                                           min="1" value="1">
+                                    <div id="error-quantity"></div>
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="mb-3">
+                                    <label class="form-label">Weight (kg)</label>
+                                    <input type="number" name="weight_kg" class="form-control"
+                                           step="0.01" min="0" placeholder="0.00">
+                                    <div id="error-weight_kg"></div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="mb-3">
+                                    <label class="form-label required">Destination Country</label>
+                                    <input type="text" name="destination_country" class="form-control"
+                                           placeholder="e.g. Nigeria">
+                                    <div id="error-destination_country"></div>
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="mb-3">
+                                    <label class="form-label required">Status</label>
+                                    <select name="status" class="form-select">
+                                        <option value="in_stock">In Stock</option>
+                                        <option value="held">On Hold</option>
+                                        <option value="dispatched">Dispatched</option>
+                                    </select>
+                                    <div id="error-status"></div>
+                                </div>
+                            </div>
+
+                            {# Location #}
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label required">Warehouse</label>
+                                    <select name="warehouse" class="form-select">
+                                        <option value="">Select warehouse</option>
+                                        {% for wh in form.fields.warehouse.queryset %}
+                                        <option value="{{ wh.pk }}">{{ wh.name }}</option>
+                                        {% endfor %}
+                                    </select>
+                                    <div id="error-warehouse"></div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Storage Location</label>
+                                    <select name="location" class="form-select">
+                                        <option value="">Select location (optional)</option>
+                                        {% for loc in form.fields.location.queryset %}
+                                        <option value="{{ loc.pk }}">{{ loc }}</option>
+                                        {% endfor %}
+                                    </select>
+                                    <div id="error-location"></div>
+                                </div>
+                            </div>
+
+                            {# Dates #}
+                            <div class="col-md-3">
+                                <div class="mb-3">
+                                    <label class="form-label required">Received Date</label>
+                                    <input name="received_date" class="form-control datepicker" placeholder="Select Date">
+                                    <div id="error-received_date"></div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="mb-3">
+                                    <label class="form-label">Dispatched Date</label>
+                                    <input name="dispatched_date" class="form-control datepicker" placeholder="Select Date">
+                                    <div id="error-dispatched_date"></div>
+                                </div>
+                            </div>
+
+                            <div class="col-12">
+                                <div class="mb-0">
+                                    <label class="form-label">Notes</label>
+                                    <textarea name="notes" rows="2" class="form-control"
+                                              placeholder="Any additional details..."></textarea>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <div class="card-footer text-end">
+                        <a href="{% url 'inventory_list' %}"
+                           class="btn btn-secondary btn-sm me-2">Cancel</a>
+                        <button type="button"
+                                class="btn btn-primary btn-sm"
+                                data-bs-toggle="modal"
+                                data-bs-target="#confirm-inventory-modal">
+                            Save Item
+                        </button>
+                    </div>
+                </form>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+{# --- Confirm modal --- #}
+<div class="modal modal-blur fade" id="confirm-inventory-modal"
+     tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-sm modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-body">
+                <div class="modal-title">Save this item?</div>
+                <div class="text-muted mt-1">The item will be added to warehouse inventory.</div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-link link-secondary me-auto"
+                        data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="confirm-inventory-btn">
+                    <span id="confirm-inventory-label">Yes, Save</span>
+                    <span id="confirm-inventory-spinner"
+                          class="spinner-border spinner-border-sm ms-2"
+                          style="display:none;" role="status" aria-hidden="true"></span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+
+    // --- Reinitialize Litepicker datepickers ---
+    function reinitDatepickers() {
+    var pickers = document.querySelectorAll('.datepicker');
+    
+    pickers.forEach(function (el) {
+        if (el.litepicker) {
+            el.litepicker.destroy();
+            el.litepicker = null;
+        }
+
+        var minDate = el.dataset.minDate === 'today' ? new Date()
+                    : el.dataset.minDate ? new Date(el.dataset.minDate)
+                    : null;
+
+        var picker = new Litepicker({
+            element: el,
+            minDate: minDate,
+            format: 'YYYY-MM-DD',
+            buttonText: {
+                previousMonth: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-1"><path d="M15 6l-6 6l6 6" /></svg>`,
+                nextMonth: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-1"><path d="M9 6l6 6l-6 6" /></svg>`,
+            },
+        });
+
+        el.litepicker = picker;
+        });
+    }
+
+    document.getElementById('confirm-inventory-btn').addEventListener('click', function () {
+    const btn = this;
+    const label = document.getElementById('confirm-inventory-label');
+    const spinner = document.getElementById('confirm-inventory-spinner');
+
+    btn.disabled = true;
+    label.textContent = 'Saving...';
+    spinner.style.display = 'inline-block';
+
+    const form = document.getElementById('inventory-form');
+    const formData = new FormData(form);
+
+    fetch(form.getAttribute('hx-post'), {
+        method: 'POST',
+        body: formData,
+        headers: { 'HX-Request': 'true' }
+    })
+    .then(res => res.text())
+    .then(html => {
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(html, 'text/html');
+
+        // OOB field errors
+        doc.querySelectorAll('[hx-swap-oob]').forEach(function (oobEl) {
+            const target = document.getElementById(oobEl.id);
+            if (target) target.outerHTML = oobEl.outerHTML;
+        });
+
+        const toast = doc.querySelector('.toast');
+        if (toast) {
+            // Close modal before showing toast
+            const dismissBtn = document.querySelector('#confirm-inventory-modal [data-bs-dismiss="modal"]');
+            if (dismissBtn) dismissBtn.click();
+
+            document.getElementById('toast-container').innerHTML = toast.outerHTML;
+            const toastEl = document.querySelector('#toast-container .toast');
+            const redirectUrl = toastEl.getAttribute('data-redirect-url');
+            tabler.Toast.getOrCreateInstance(toastEl).show();
+            if (redirectUrl) setTimeout(() => { window.location.href = redirectUrl; }, 1500);
+        } else {
+            // Validation errors — keep modal open so user can see field errors
+            btn.disabled = false;
+            label.textContent = 'Yes, Save';
+            spinner.style.display = 'none';
+        }
+    })
+    .catch(err => {
+        console.error('Submit error:', err);
+    })
+    .finally(() => {
+        btn.disabled = false;
+        label.textContent = 'Yes, Save';
+        spinner.style.display = 'none';
+    });
+});
+
+// Clear field errors on input
+document.querySelectorAll('#inventory-form input, #inventory-form select, #inventory-form textarea')
+    .forEach(function (el) {
+        el.addEventListener('input', function () {
+            const errorDiv = document.getElementById('error-' + el.name);
+            if (errorDiv) errorDiv.innerHTML = '';
+        });
+        el.addEventListener('change', function () {
+            const errorDiv = document.getElementById('error-' + el.name);
+            if (errorDiv) errorDiv.innerHTML = '';
+        });
+    });
+</script>
+
+{% endblock %}

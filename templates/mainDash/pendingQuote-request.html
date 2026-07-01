@@ -1,0 +1,34 @@
+
+{% extends "mainDash/layouts/baseDash.html" %}
+    {% load static %}
+    
+        {% block title %}
+            Quote Request
+        {% endblock %}
+
+    {% block content %}
+
+        <div class="page-header d-print-none" aria-label="Page header">
+          <div class="container-xl">
+            <div class="row g-2 align-items-center">
+              <div class="col">
+                <!-- Page pre-title -->
+                <div class="page-pretitle">Pending Quote Request</div>
+                <h2 class="page-title">TDSS UK</h2>
+              </div>
+             </div>
+          </div>
+      </div>
+
+    <div class="page-body">
+        <div class="container-xl">
+        <div class="row row-deck row-cards">
+
+            {% include "mainDash/components/pendingQuote_dataTable.html" %}
+        </div>
+    </div>
+
+    {% endblock %}
+  
+    <!-- BEGIN PAGE MODALS -->
+    

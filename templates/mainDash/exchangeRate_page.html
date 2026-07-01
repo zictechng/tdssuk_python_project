@@ -1,0 +1,73 @@
+
+{% extends "mainDash/layouts/baseDash.html" %}
+{% load static %}
+
+{% block title %}Finance — Exchange Rates{% endblock %}
+
+{% block content %}
+
+<div class="page-header d-print-none" aria-label="Page header">
+    <div class="container-xl">
+        <div class="row g-2 align-items-center">
+            <div class="col">
+                <h2 class="page-title">Exchange Rates</h2>
+                <div class="page-pretitle">Manage currency exchange rates used in invoicing</div>
+            </div>
+            <div class="col-auto ms-auto d-print-none">
+                <div class="btn-list">
+                    <a href="{% url 'exchange_rate_create' %}"
+                       class="btn btn-primary btn-sm d-none d-sm-inline-block">
+                        <i class="bi bi-plus-lg me-1"></i> Add Rate
+                    </a>
+                    <a href="{% url 'exchange_rate_create' %}"
+                       class="btn btn-primary d-sm-none btn-icon">
+                        <i class="bi bi-plus-lg"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="page-body">
+    <div class="container-xl">
+
+        <div class="row mb-3">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body py-3">
+                        <div class="row g-2 align-items-center">
+                            <div class="col-auto text-secondary">Filter by currency:</div>
+                            <div class="col ms-auto d-flex flex-wrap gap-2 justify-content-end">
+
+                                <select id="rate-currency-filter" name="currency"
+                                        class="form-select" style="max-width: 220px;"
+                                        hx-get="{% url 'exchange_rate_list' %}"
+                                        hx-trigger="change"
+                                        hx-target="#rates-table-container"
+                                        hx-swap="innerHTML"
+                                        hx-push-url="true">
+                                    <option value="">All Currencies</option>
+                                    {% for value, label in currency_choices %}
+                                    <option value="{{ value }}"
+                                        {% if currency_filter == value %}selected{% endif %}>
+                                        {{ label }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row" id="rates-table-container">
+            {% include "mainDash/components/exchangeRate_dataTable.html" %}
+        </div>
+
+    </div>
+</div>
+
+{% endblock %}

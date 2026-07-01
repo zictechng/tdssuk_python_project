@@ -1,0 +1,103 @@
+
+<div class="row row-cards">
+
+  <!-- Create Backup -->
+  <div class="col-lg-5">
+    <div class="card">
+      <div class="card-header"><h3 class="card-title">Create Backup</h3></div>
+      <div class="card-body">
+        <p class="text-muted">
+          Creates a full copy of the current database file and stores it in
+          <code>media/backups/</code>.
+        </p>
+        <form hx-post="{% url 'backup_restore' %}"
+              hx-target="#toast-container"
+              hx-swap="innerHTML">
+          {% csrf_token %}
+          <input type="hidden" name="action" value="backup">
+          <button type="submit" class="btn btn-primary w-100">
+            <i class="bi bi-download me-1"></i> Create Backup Now
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Backup History -->
+  <div class="col-lg-7">
+    <div class="card">
+      <div class="card-header">
+        <h3 class="card-title">Backup History</h3>
+        <div class="card-options">
+          <small class="text-muted">{{ backup_logs|length }} backup{{ backup_logs|length|pluralize }}</small>
+        </div>
+      </div>
+      {% if backup_logs %}
+      <div class="table-responsive">
+        <table class="table table-vcenter card-table text-nowrap">
+          <thead>
+            <tr><th>Filename</th><th>Size</th><th>Created By</th><th>Date</th><th></th></tr>
+          </thead>
+          <tbody>
+            {% for b in backup_logs %}
+            <tr>
+              <td class="fw-medium small">{{ b.filename }}</td>
+              <td class="text-secondary">{{ b.size_kb }} KB</td>
+              <td class="text-secondary">
+                {{ b.created_by.get_full_name|default:b.created_by.username|default:"System" }}
+              </td>
+              <td class="text-secondary">{{ b.created_at|date:"d M Y, H:i" }}</td>
+              <td class="text-end">
+                <button type="button"
+                        class="btn btn-sm btn-ghost-danger"
+                        data-bs-toggle="modal"
+                        data-bs-target="#confirm-delete-backup-{{ forloop.counter }}">
+                  <i class="bi bi-trash"></i>
+                </button>
+
+                <div class="modal modal-blur fade"
+                     id="confirm-delete-backup-{{ forloop.counter }}" tabindex="-1">
+                  <div class="modal-dialog modal-sm modal-dialog-centered">
+                    <div class="modal-content">
+                      <div class="modal-body">
+                        <div class="modal-title">Delete this backup?</div>
+                        <div class="text-muted mt-1">
+                          <strong>{{ b.filename }}</strong> will be permanently removed.
+                        </div>
+                      </div>
+                      <div class="modal-footer">
+                        <button type="button" class="btn btn-link link-secondary me-auto"
+                                data-bs-dismiss="modal">Cancel</button>
+                        <form hx-post="{% url 'backup_restore' %}"
+                              hx-target="#toast-container"
+                              hx-swap="innerHTML">
+                          {% csrf_token %}
+                          <input type="hidden" name="action" value="delete_backup">
+                          <input type="hidden" name="filename" value="{{ b.filename }}">
+                          <button type="submit" class="btn btn-danger"
+                                  data-bs-dismiss="modal">
+                            Yes, Delete
+                          </button>
+                        </form>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      <div class="text-center py-5 text-secondary">
+        <i class="bi bi-archive fs-2 d-block mb-2 opacity-50"></i>
+        <h4 class="mb-1">No backups yet</h4>
+        <small>Click "Create Backup Now" to get started.</small>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+
+</div>

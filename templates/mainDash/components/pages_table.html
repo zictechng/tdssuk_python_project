@@ -1,0 +1,1892 @@
+        
+        {% load static %}
+        <div class="col-12">
+                    <!--<script>
+                    document.addEventListener("DOMContentLoaded", function() {
+                        const list = new List('table-', {
+                            sortClass: 'table-sort',
+                            listClass: 'table-tbody',
+                            valueNames: [ 'sort-name', 'sort-content', 'sort-status', 'sort-date', 'sort-tags', 'sort-category']
+                        });
+                    })
+                </script>-->
+                <div class="card">
+                  <div class="card-table">
+                    <div class="card-header">
+                      <div class="row w-full">
+                        <div class="col">
+                          <h3 class="card-title mb-0">Employee</h3>
+                          <p class="text-secondary m-0">Table description.</p>
+                        </div>
+                        <div class="col-md-auto col-sm-12">
+                          <div class="ms-auto d-flex flex-wrap btn-list">
+                            <div class="input-group input-group-flat w-auto">
+                              <span class="input-group-text">
+                                <!-- Download SVG icon from http://tabler.io/icons/icon/search -->
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-1">
+                                  <path d="M10 10m-7 0a7 7 0 1 0 14 0a7 7 0 1 0 -14 0"></path>
+                                  <path d="M21 21l-6 -6"></path>
+                                </svg>
+                              </span>
+                              <input id="advanced-table-search" type="text" class="form-control" autocomplete="off">
+                              <span class="input-group-text">
+                                <kbd>ctrl + K</kbd>
+                              </span>
+                            </div>
+                            <a href="#" class="btn btn-icon" aria-label="Button">
+                              <!-- Download SVG icon from http://tabler.io/icons/icon/dots -->
+                              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-1">
+                                <path d="M5 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path>
+                                <path d="M12 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path>
+                                <path d="M19 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path>
+                              </svg>
+                            </a>
+                            <div class="dropdown">
+                              <a href="#" class="btn dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">Download</a>
+                              <div class="dropdown-menu" style="">
+                                <a class="dropdown-item" href="#">Action</a>
+                                <a class="dropdown-item" href="#">Another action</a>
+                                <a class="dropdown-item" href="#">Third action</a>
+                              </div>
+                            </div>
+                            <a href="#" class="btn btn-0"> Button </a>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div id="advanced-table">
+                      <div class="table-responsive">
+                        <table class="table table-vcenter table-selectable">
+                          <thead>
+                            <tr>
+                              <th class="w-1"></th>
+                              <th>
+                                <button class="table-sort d-flex justify-content-between" data-sort="sort-name">Name</button>
+                              </th>
+                              <th>
+                                <button class="table-sort d-flex justify-content-between" data-sort="sort-city">City</button>
+                              </th>
+                              <th>
+                                <button class="table-sort d-flex justify-content-between" data-sort="sort-status">Status</button>
+                              </th>
+                              <th>
+                                <button class="table-sort d-flex justify-content-between" data-sort="sort-date">Start date</button>
+                              </th>
+                              <th>
+                                <button class="table-sort d-flex justify-content-between" data-sort="sort-tags">Tags</button>
+                              </th>
+                              <th>
+                                <button class="table-sort d-flex justify-content-between" data-sort="sort-category">Category</button>
+                              </th>
+                            </tr>
+                          </thead>
+                          <tbody class="table-tbody"><tr>
+                              <td>
+                                <input class="form-check-input m-0 align-middle table-selectable-check" type="checkbox" aria-label="Select invoice" value="true">
+                              </td>
+                              <td class="sort-name">
+                                <span class="avatar avatar-xs me-2" style="background-image: url({% static 'mainDash/images/avatars/000m.jpg)'%}"> </span>
+                                Paweł Kuna
+                              </td>
+                              <td class="sort-city">Peimei, China</td>
+                              <td class="sort-status">
+                                <span class="badge bg-success-lt">Active</span>
+                              </td>
+                              <td class="sort-date">December 08, 2024</td>
+                              <td class="sort-tags">
+                                <div class="badges-list">
+                                  <span class="badge">Event</span>
+                                  <span class="badge">Tickets</span>
+                                </div>
+                              </td>
+                              <td class="sort-category py-0">
+                                <span class="on-unchecked"> Individual </span>
+                                <div class="on-checked">
+                                  <div class="d-flex justify-content-end">
+                                    <a href="#" class="btn btn-2 btn-icon" aria-label="Button">
+                                      <!-- Download SVG icon from http://tabler.io/icons/icon/dots -->
+                                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-2">
+                                        <path d="M5 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path>
+                                        <path d="M12 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path>
+                                        <path d="M19 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path>
+                                      </svg>
+                                    </a>
+                                  </div>
+                                </div>
+                              </td>
+                            </tr><tr>
+                              <td>
+                                <input class="form-check-input m-0 align-middle table-selectable-check" type="checkbox" aria-label="Select invoice" value="true">
+                              </td>
+                              <td class="sort-name">
+                                <span class="avatar avatar-xs me-2" style="background-image: url({% static 'mainDash/images/avatars/052f.jpg)'%}"> </span>
+                                Jeffie Lewzey
+                              </td>
+                              <td class="sort-city">Indaial, Brazil</td>
+                              <td class="sort-status">
+                                <span class="badge bg-danger-lt">Inactive</span>
+                              </td>
+                              <td class="sort-date">January 01, 2024</td>
+                              <td class="sort-tags">
+                                <div class="badges-list">
+                                  <span class="badge">QTA</span>
+                                  <span class="badge">Event</span>
+                                </div>
+                              </td>
+                              <td class="sort-category py-0">
+                                <span class="on-unchecked"> Agencies </span>
+                                <div class="on-checked">
+                                  <div class="d-flex justify-content-end">
+                                    <a href="#" class="btn btn-2 btn-icon" aria-label="Button">
+                                      <!-- Download SVG icon from http://tabler.io/icons/icon/dots -->
+                                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-2">
+                                        <path d="M5 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path>
+                                        <path d="M12 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path>
+                                        <path d="M19 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path>
+                                      </svg>
+                                    </a>
+                                  </div>
+                                </div>
+                              </td>
+                            </tr><tr>
+                              <td>
+                                <input class="form-check-input m-0 align-middle table-selectable-check" type="checkbox" aria-label="Select invoice" value="true">
+                              </td>
+                              <td class="sort-name">
+                                <span class="avatar avatar-xs me-2" style="background-image: url({% static 'mainDash/images/avatars/002m.jpg)'%}"> </span>
+                                Mallory Hulme
+                              </td>
+                              <td class="sort-city">Cimuncang, Indonesia</td>
+                              <td class="sort-status">
+                                <span class="badge">Requested</span>
+                              </td>
+                              <td class="sort-date">January 01, 2024</td>
+                              <td class="sort-tags">
+                                <div class="badges-list">
+                                  <span class="badge">Tickets</span>
+                                </div>
+                              </td>
+                              <td class="sort-category py-0">
+                                <span class="on-unchecked"> Agencies </span>
+                                <div class="on-checked">
+                                  <div class="d-flex justify-content-end">
+                                    <a href="#" class="btn btn-2 btn-icon" aria-label="Button">
+                                      <!-- Download SVG icon from http://tabler.io/icons/icon/dots -->
+                                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-2">
+                                        <path d="M5 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path>
+                                        <path d="M12 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path>
+                                        <path d="M19 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path>
+                                      </svg>
+                                    </a>
+                                  </div>
+                                </div>
+                              </td>
+                            </tr><tr>
+                              <td>
+                                <input class="form-check-input m-0 align-middle table-selectable-check" type="checkbox" aria-label="Select invoice" value="true">
+                              </td>
+                              <td class="sort-name">
+                                <span class="avatar avatar-xs me-2" style="background-image: url({% static 'mainDash/images/avatars/003m.jpg)'%}"> </span>
+                                Dunn Slane
+                              </td>
+                              <td class="sort-city">Liutang, China</td>
+                              <td class="sort-status">
+                                <span class="badge bg-success-lt">Active</span>
+                              </td>
+                              <td class="sort-date">September 01, 2024</td>
+                              <td class="sort-tags">
+                                <div class="badges-list">
+                                  <span class="badge">QTA</span>
+                                  <span class="badge">Event</span>
+                                  <span class="badge">Tickets</span>
+                                  <span class="badge">TODO</span>
+                                </div>
+                              </td>
+                              <td class="sort-category py-0">
+                                <span class="on-unchecked"> Ticket </span>
+                                <div class="on-checked">
+                                  <div class="d-flex justify-content-end">
+                                    <a href="#" class="btn btn-2 btn-icon" aria-label="Button">
+                                      <!-- Download SVG icon from http://tabler.io/icons/icon/dots -->
+                                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-2">
+                                        <path d="M5 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path>
+                                        <path d="M12 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path>
+                                        <path d="M19 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path>
+                                      </svg>
+                                    </a>
+                                  </div>
+                                </div>
+                              </td>
+                            </tr><tr>
+                              <td>
+                                <input class="form-check-input m-0 align-middle table-selectable-check" type="checkbox" aria-label="Select invoice" value="true">
+                              </td>
+                              <td class="sort-name">
+                                <span class="avatar avatar-xs me-2" style="background-image: url({% static 'mainDash/images/avatars/000f.jpg)'%}"> </span>
+                                Emmy Levet
+                              </td>
+                              <td class="sort-city">Kaliprak, Indonesia</td>
+                              <td class="sort-status">
+                                <span class="badge bg-success-lt">Active</span>
+                              </td>
+                              <td class="sort-date">January 01, 2024</td>
+                              <td class="sort-tags">
+                                <div class="badges-list">
+                                  <span class="badge">QTA</span>
+                                  <span class="badge">Event</span>
+                                  <span class="badge">Tickets</span>
+                                  <span class="badge">TODO</span>
+                                </div>
+                              </td>
+                              <td class="sort-category py-0">
+                                <span class="on-unchecked"> Agencies </span>
+                                <div class="on-checked">
+                                  <div class="d-flex justify-content-end">
+                                    <a href="#" class="btn btn-2 btn-icon" aria-label="Button">
+                                      <!-- Download SVG icon from http://tabler.io/icons/icon/dots -->
+                                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-2">
+                                        <path d="M5 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path>
+                                        <path d="M12 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path>
+                                        <path d="M19 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path>
+                                      </svg>
+                                    </a>
+                                  </div>
+                                </div>
+                              </td>
+                            </tr><tr>
+                              <td>
+                                <input class="form-check-input m-0 align-middle table-selectable-check" type="checkbox" aria-label="Select invoice" value="true">
+                              </td>
+                              <td class="sort-name">
+                                <span class="avatar avatar-xs me-2" style="background-image: url({% static 'mainDash/images/avatars/001f.jpg)'%}"> </span>
+                                Maryjo Lebarree
+                              </td>
+                              <td class="sort-city">Hantai, China</td>
+                              <td class="sort-status">
+                                <span class="badge bg-danger-lt">Inactive</span>
+                              </td>
+                              <td class="sort-date">July 17, 2024</td>
+                              <td class="sort-tags">
+                                <div class="badges-list">
+                                  <span class="badge">Event</span>
+                                  <span class="badge">Tickets</span>
+                                </div>
+                              </td>
+                              <td class="sort-category py-0">
+                                <span class="on-unchecked"> Individual </span>
+                                <div class="on-checked">
+                                  <div class="d-flex justify-content-end">
+                                    <a href="#" class="btn btn-2 btn-icon" aria-label="Button">
+                                      <!-- Download SVG icon from http://tabler.io/icons/icon/dots -->
+                                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-2">
+                                        <path d="M5 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path>
+                                        <path d="M12 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path>
+                                        <path d="M19 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path>
+                                      </svg>
+                                    </a>
+                                  </div>
+                                </div>
+                              </td>
+                            </tr><tr>
+                              <td>
+                                <input class="form-check-input m-0 align-middle table-selectable-check" type="checkbox" aria-label="Select invoice" value="true">
+                              </td>
+                              <td class="sort-name">
+                                <span class="avatar avatar-xs me-2" style="background-image: url({% static 'mainDash/images/avatars/004m.jpg)'%}"> </span>
+                                Egan Poetz
+                              </td>
+                              <td class="sort-city">Villaguay, Argentina</td>
+                              <td class="sort-status">
+                                <span class="badge bg-success-lt">Active</span>
+                              </td>
+                              <td class="sort-date">November 22, 2024</td>
+                              <td class="sort-tags">
+                                <div class="badges-list">
+                                  <span class="badge">QTA</span>
+                                  <span class="badge">Event</span>
+                                  <span class="badge">Tickets</span>
+                                  <span class="badge">TODO</span>
+                                </div>
+                              </td>
+                              <td class="sort-category py-0">
+                                <span class="on-unchecked"> Event </span>
+                                <div class="on-checked">
+                                  <div class="d-flex justify-content-end">
+                                    <a href="#" class="btn btn-2 btn-icon" aria-label="Button">
+                                      <!-- Download SVG icon from http://tabler.io/icons/icon/dots -->
+                                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-2">
+                                        <path d="M5 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path>
+                                        <path d="M12 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path>
+                                        <path d="M19 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path>
+                                      </svg>
+                                    </a>
+                                  </div>
+                                </div>
+                              </td>
+                            </tr><tr>
+                              <td>
+                                <input class="form-check-input m-0 align-middle table-selectable-check" type="checkbox" aria-label="Select invoice" value="true">
+                              </td>
+                              <td class="sort-name">
+                                <span class="avatar avatar-xs me-2" style="background-image: url({% static 'mainDash/images/avatars/002f.jpg)'%}"> </span>
+                                Kellie Skingley
+                              </td>
+                              <td class="sort-city">Sidon, Lebanon</td>
+                              <td class="sort-status">
+                                <span class="badge bg-danger-lt">Inactive</span>
+                              </td>
+                              <td class="sort-date">November 29, 2024</td>
+                              <td class="sort-tags">
+                                <div class="badges-list">
+                                  <span class="badge">Event</span>
+                                  <span class="badge">Tickets</span>
+                                </div>
+                              </td>
+                              <td class="sort-category py-0">
+                                <span class="on-unchecked"> Ticket </span>
+                                <div class="on-checked">
+                                  <div class="d-flex justify-content-end">
+                                    <a href="#" class="btn btn-2 btn-icon" aria-label="Button">
+                                      <!-- Download SVG icon from http://tabler.io/icons/icon/dots -->
+                                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-2">
+                                        <path d="M5 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path>
+                                        <path d="M12 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path>
+                                        <path d="M19 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path>
+                                      </svg>
+                                    </a>
+                                  </div>
+                                </div>
+                              </td>
+                            </tr><tr>
+                              <td>
+                                <input class="form-check-input m-0 align-middle table-selectable-check" type="checkbox" aria-label="Select invoice" value="true">
+                              </td>
+                              <td class="sort-name">
+                                <span class="avatar avatar-xs me-2" style="background-image: url({% static 'mainDash/images/avatars/003f.jpg)'%}"> </span>
+                                Christabel Charlwood
+                              </td>
+                              <td class="sort-city">Recarei, Portugal</td>
+                              <td class="sort-status">
+                                <span class="badge bg-danger-lt">Inactive</span>
+                              </td>
+                              <td class="sort-date">May 30, 2024</td>
+                              <td class="sort-tags">
+                                <div class="badges-list">
+                                  <span class="badge">QTA</span>
+                                  <span class="badge">Event</span>
+                                </div>
+                              </td>
+                              <td class="sort-category py-0">
+                                <span class="on-unchecked"> Agencies </span>
+                                <div class="on-checked">
+                                  <div class="d-flex justify-content-end">
+                                    <a href="#" class="btn btn-2 btn-icon" aria-label="Button">
+                                      <!-- Download SVG icon from http://tabler.io/icons/icon/dots -->
+                                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-2">
+                                        <path d="M5 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path>
+                                        <path d="M12 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path>
+                                        <path d="M19 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path>
+                                      </svg>
+                                    </a>
+                                  </div>
+                                </div>
+                              </td>
+                            </tr><tr>
+                              <td>
+                                <input class="form-check-input m-0 align-middle table-selectable-check" type="checkbox" aria-label="Select invoice" value="true">
+                              </td>
+                              <td class="sort-name">
+                                <span class="avatar avatar-xs me-2" style="background-image: url({% static 'mainDash/images/avatars/063m.jpg)'%}"> </span>
+                                Haskel Shelper
+                              </td>
+                              <td class="sort-city">Porto Alto, Portugal</td>
+                              <td class="sort-status">
+                                <span class="badge bg-danger-lt">Inactive</span>
+                              </td>
+                              <td class="sort-date">January 01, 2024</td>
+                              <td class="sort-tags">
+                                <div class="badges-list">
+                                  <span class="badge">QTA</span>
+                                  <span class="badge">Event</span>
+                                </div>
+                              </td>
+                              <td class="sort-category py-0">
+                                <span class="on-unchecked"> Agencies </span>
+                                <div class="on-checked">
+                                  <div class="d-flex justify-content-end">
+                                    <a href="#" class="btn btn-2 btn-icon" aria-label="Button">
+                                      <!-- Download SVG icon from http://tabler.io/icons/icon/dots -->
+                                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-2">
+                                        <path d="M5 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path>
+                                        <path d="M12 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path>
+                                        <path d="M19 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path>
+                                      </svg>
+                                    </a>
+                                  </div>
+                                </div>
+                              </td>
+                            </tr><tr>
+                              <td>
+                                <input class="form-check-input m-0 align-middle table-selectable-check" type="checkbox" aria-label="Select invoice" value="true">
+                              </td>
+                              <td class="sort-name">
+                                <span class="avatar avatar-xs me-2" style="background-image: url({% static 'mainDash/images/avatars/006m.jpg)'%}"> </span>
+                                Lorry Mion
+                              </td>
+                              <td class="sort-city">Embu, Kenya</td>
+                              <td class="sort-status">
+                                <span class="badge">Requested</span>
+                              </td>
+                              <td class="sort-date">August 30, 2024</td>
+                              <td class="sort-tags">
+                                <div class="badges-list">
+                                  <span class="badge">Tickets</span>
+                                </div>
+                              </td>
+                              <td class="sort-category py-0">
+                                <span class="on-unchecked"> Individual </span>
+                                <div class="on-checked">
+                                  <div class="d-flex justify-content-end">
+                                    <a href="#" class="btn btn-2 btn-icon" aria-label="Button">
+                                      <!-- Download SVG icon from http://tabler.io/icons/icon/dots -->
+                                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-2">
+                                        <path d="M5 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path>
+                                        <path d="M12 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path>
+                                        <path d="M19 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path>
+                                      </svg>
+                                    </a>
+                                  </div>
+                                </div>
+                              </td>
+                            </tr><tr>
+                              <td>
+                                <input class="form-check-input m-0 align-middle table-selectable-check" type="checkbox" aria-label="Select invoice" value="true">
+                              </td>
+                              <td class="sort-name">
+                                <span class="avatar avatar-xs me-2" style="background-image: url({% static 'mainDash/images/avatars/004f.jpg)'%}"> </span>
+                                Leesa Beaty
+                              </td>
+                              <td class="sort-city">Quaraí, Brazil</td>
+                              <td class="sort-status">
+                                <span class="badge bg-success-lt">Active</span>
+                              </td>
+                              <td class="sort-date">January 01, 2024</td>
+                              <td class="sort-tags">
+                                <div class="badges-list">
+                                  <span class="badge">QTA</span>
+                                  <span class="badge">Event</span>
+                                  <span class="badge">Tickets</span>
+                                  <span class="badge">TODO</span>
+                                </div>
+                              </td>
+                              <td class="sort-category py-0">
+                                <span class="on-unchecked"> Agencies </span>
+                                <div class="on-checked">
+                                  <div class="d-flex justify-content-end">
+                                    <a href="#" class="btn btn-2 btn-icon" aria-label="Button">
+                                      <!-- Download SVG icon from http://tabler.io/icons/icon/dots -->
+                                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-2">
+                                        <path d="M5 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path>
+                                        <path d="M12 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path>
+                                        <path d="M19 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path>
+                                      </svg>
+                                    </a>
+                                  </div>
+                                </div>
+                              </td>
+                            </tr><tr>
+                              <td>
+                                <input class="form-check-input m-0 align-middle table-selectable-check" type="checkbox" aria-label="Select invoice" value="true">
+                              </td>
+                              <td class="sort-name">
+                                <span class="avatar avatar-xs me-2" style="background-image: url({% static 'mainDash/images/avatars/007m.jpg)'%}"> </span>
+                                Perren Keemar
+                              </td>
+                              <td class="sort-city">Dadiya, Nigeria</td>
+                              <td class="sort-status">
+                                <span class="badge bg-danger-lt">Inactive</span>
+                              </td>
+                              <td class="sort-date">September 13, 2024</td>
+                              <td class="sort-tags">
+                                <div class="badges-list">
+                                  <span class="badge">QTA</span>
+                                  <span class="badge">Event</span>
+                                </div>
+                              </td>
+                              <td class="sort-category py-0">
+                                <span class="on-unchecked"> Individual </span>
+                                <div class="on-checked">
+                                  <div class="d-flex justify-content-end">
+                                    <a href="#" class="btn btn-2 btn-icon" aria-label="Button">
+                                      <!-- Download SVG icon from http://tabler.io/icons/icon/dots -->
+                                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-2">
+                                        <path d="M5 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path>
+                                        <path d="M12 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path>
+                                        <path d="M19 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path>
+                                      </svg>
+                                    </a>
+                                  </div>
+                                </div>
+                              </td>
+                            </tr><tr>
+                              <td>
+                                <input class="form-check-input m-0 align-middle table-selectable-check" type="checkbox" aria-label="Select invoice" value="true">
+                              </td>
+                              <td class="sort-name">
+                                <span class="avatar avatar-xs me-2"> SA </span>
+                                Sunny Airey
+                              </td>
+                              <td class="sort-city">Hamburg, Germany</td>
+                              <td class="sort-status">
+                                <span class="badge bg-success-lt">Active</span>
+                              </td>
+                              <td class="sort-date">February 08, 2024</td>
+                              <td class="sort-tags">
+                                <div class="badges-list">
+                                  <span class="badge">QTA</span>
+                                  <span class="badge">Event</span>
+                                  <span class="badge">Tickets</span>
+                                  <span class="badge">TODO</span>
+                                </div>
+                              </td>
+                              <td class="sort-category py-0">
+                                <span class="on-unchecked"> Event </span>
+                                <div class="on-checked">
+                                  <div class="d-flex justify-content-end">
+                                    <a href="#" class="btn btn-2 btn-icon" aria-label="Button">
+                                      <!-- Download SVG icon from http://tabler.io/icons/icon/dots -->
+                                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-2">
+                                        <path d="M5 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path>
+                                        <path d="M12 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path>
+                                        <path d="M19 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path>
+                                      </svg>
+                                    </a>
+                                  </div>
+                                </div>
+                              </td>
+                            </tr><tr>
+                              <td>
+                                <input class="form-check-input m-0 align-middle table-selectable-check" type="checkbox" aria-label="Select invoice" value="true">
+                              </td>
+                              <td class="sort-name">
+                                <span class="avatar avatar-xs me-2" style="background-image: url({% static 'mainDash/images/avatars/009m.jpg)'%}"> </span>
+                                Geoffry Flaunders
+                              </td>
+                              <td class="sort-city">Kavār, Iran</td>
+                              <td class="sort-status">
+                                <span class="badge bg-success-lt">Active</span>
+                              </td>
+                              <td class="sort-date">June 17, 2024</td>
+                              <td class="sort-tags">
+                                <div class="badges-list">
+                                  <span class="badge">QTA</span>
+                                  <span class="badge">Event</span>
+                                  <span class="badge">Tickets</span>
+                                  <span class="badge">TODO</span>
+                                </div>
+                              </td>
+                              <td class="sort-category py-0">
+                                <span class="on-unchecked"> Event </span>
+                                <div class="on-checked">
+                                  <div class="d-flex justify-content-end">
+                                    <a href="#" class="btn btn-2 btn-icon" aria-label="Button">
+                                      <!-- Download SVG icon from http://tabler.io/icons/icon/dots -->
+                                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-2">
+                                        <path d="M5 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path>
+                                        <path d="M12 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path>
+                                        <path d="M19 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path>
+                                      </svg>
+                                    </a>
+                                  </div>
+                                </div>
+                              </td>
+                            </tr><tr>
+                              <td>
+                                <input class="form-check-input m-0 align-middle table-selectable-check" type="checkbox" aria-label="Select invoice" value="true">
+                              </td>
+                              <td class="sort-name">
+                                <span class="avatar avatar-xs me-2" style="background-image: url({% static 'mainDash/images/avatars/010m.jpg)'%}"> </span>
+                                Thatcher Keel
+                              </td>
+                              <td class="sort-city">Nanchoc, Peru</td>
+                              <td class="sort-status">
+                                <span class="badge bg-danger-lt">Inactive</span>
+                              </td>
+                              <td class="sort-date">November 11, 2024</td>
+                              <td class="sort-tags">
+                                <div class="badges-list">
+                                  <span class="badge">Event</span>
+                                  <span class="badge">Tickets</span>
+                                </div>
+                              </td>
+                              <td class="sort-category py-0">
+                                <span class="on-unchecked"> Ticket </span>
+                                <div class="on-checked">
+                                  <div class="d-flex justify-content-end">
+                                    <a href="#" class="btn btn-2 btn-icon" aria-label="Button">
+                                      <!-- Download SVG icon from http://tabler.io/icons/icon/dots -->
+                                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-2">
+                                        <path d="M5 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path>
+                                        <path d="M12 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path>
+                                        <path d="M19 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path>
+                                      </svg>
+                                    </a>
+                                  </div>
+                                </div>
+                              </td>
+                            </tr><tr>
+                              <td>
+                                <input class="form-check-input m-0 align-middle table-selectable-check" type="checkbox" aria-label="Select invoice" value="true">
+                              </td>
+                              <td class="sort-name">
+                                <span class="avatar avatar-xs me-2" style="background-image: url({% static 'mainDash/images/avatars/005f.jpg)'%}"> </span>
+                                Dyann Escala
+                              </td>
+                              <td class="sort-city">Nóvita, Colombia</td>
+                              <td class="sort-status">
+                                <span class="badge bg-success-lt">Active</span>
+                              </td>
+                              <td class="sort-date">January 01, 2024</td>
+                              <td class="sort-tags">
+                                <div class="badges-list">
+                                  <span class="badge">QTA</span>
+                                  <span class="badge">Event</span>
+                                  <span class="badge">Tickets</span>
+                                  <span class="badge">TODO</span>
+                                </div>
+                              </td>
+                              <td class="sort-category py-0">
+                                <span class="on-unchecked"> Agencies </span>
+                                <div class="on-checked">
+                                  <div class="d-flex justify-content-end">
+                                    <a href="#" class="btn btn-2 btn-icon" aria-label="Button">
+                                      <!-- Download SVG icon from http://tabler.io/icons/icon/dots -->
+                                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-2">
+                                        <path d="M5 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path>
+                                        <path d="M12 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path>
+                                        <path d="M19 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path>
+                                      </svg>
+                                    </a>
+                                  </div>
+                                </div>
+                              </td>
+                            </tr><tr>
+                              <td>
+                                <input class="form-check-input m-0 align-middle table-selectable-check" type="checkbox" aria-label="Select invoice" value="true">
+                              </td>
+                              <td class="sort-name">
+                                <span class="avatar avatar-xs me-2" style="background-image: url({% static 'mainDash/images/avatars/006f.jpg)'%}"> </span>
+                                Avivah Mugleston
+                              </td>
+                              <td class="sort-city">Kista, Sweden</td>
+                              <td class="sort-status">
+                                <span class="badge bg-success-lt">Active</span>
+                              </td>
+                              <td class="sort-date">April 08, 2024</td>
+                              <td class="sort-tags">
+                                <div class="badges-list">
+                                  <span class="badge">QTA</span>
+                                  <span class="badge">Event</span>
+                                  <span class="badge">Tickets</span>
+                                  <span class="badge">TODO</span>
+                                </div>
+                              </td>
+                              <td class="sort-category py-0">
+                                <span class="on-unchecked"> Event </span>
+                                <div class="on-checked">
+                                  <div class="d-flex justify-content-end">
+                                    <a href="#" class="btn btn-2 btn-icon" aria-label="Button">
+                                      <!-- Download SVG icon from http://tabler.io/icons/icon/dots -->
+                                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-2">
+                                        <path d="M5 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path>
+                                        <path d="M12 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path>
+                                        <path d="M19 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path>
+                                      </svg>
+                                    </a>
+                                  </div>
+                                </div>
+                              </td>
+                            </tr><tr>
+                              <td>
+                                <input class="form-check-input m-0 align-middle table-selectable-check" type="checkbox" aria-label="Select invoice" value="true">
+                              </td>
+                              <td class="sort-name">
+                                <span class="avatar avatar-xs me-2"> AA </span>
+                                Arlie Armstead
+                              </td>
+                              <td class="sort-city">Jacobina, Brazil</td>
+                              <td class="sort-status">
+                                <span class="badge">Requested</span>
+                              </td>
+                              <td class="sort-date">January 01, 2024</td>
+                              <td class="sort-tags">
+                                <div class="badges-list">
+                                  <span class="badge">QTA</span>
+                                  <span class="badge">Event</span>
+                                </div>
+                              </td>
+                              <td class="sort-category py-0">
+                                <span class="on-unchecked"> Agencies </span>
+                                <div class="on-checked">
+                                  <div class="d-flex justify-content-end">
+                                    <a href="#" class="btn btn-2 btn-icon" aria-label="Button">
+                                      <!-- Download SVG icon from http://tabler.io/icons/icon/dots -->
+                                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-2">
+                                        <path d="M5 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path>
+                                        <path d="M12 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path>
+                                        <path d="M19 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path>
+                                      </svg>
+                                    </a>
+                                  </div>
+                                </div>
+                              </td>
+                            </tr><tr>
+                              <td>
+                                <input class="form-check-input m-0 align-middle table-selectable-check" type="checkbox" aria-label="Select invoice" value="true">
+                              </td>
+                              <td class="sort-name">
+                                <span class="avatar avatar-xs me-2" style="background-image: url({% static 'mainDash/images/avatars/008f.jpg)'%}"> </span>
+                                Tessie Curzon
+                              </td>
+                              <td class="sort-city">Hetang, China</td>
+                              <td class="sort-status">
+                                <span class="badge bg-danger-lt">Inactive</span>
+                              </td>
+                              <td class="sort-date">January 01, 2024</td>
+                              <td class="sort-tags">
+                                <div class="badges-list">
+                                  <span class="badge">QTA</span>
+                                  <span class="badge">Event</span>
+                                </div>
+                              </td>
+                              <td class="sort-category py-0">
+                                <span class="on-unchecked"> Agencies </span>
+                                <div class="on-checked">
+                                  <div class="d-flex justify-content-end">
+                                    <a href="#" class="btn btn-2 btn-icon" aria-label="Button">
+                                      <!-- Download SVG icon from http://tabler.io/icons/icon/dots -->
+                                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-2">
+                                        <path d="M5 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path>
+                                        <path d="M12 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path>
+                                        <path d="M19 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path>
+                                      </svg>
+                                    </a>
+                                  </div>
+                                </div>
+                              </td>
+                            </tr><tr>
+                              <td>
+                                <input class="form-check-input m-0 align-middle table-selectable-check" type="checkbox" aria-label="Select invoice" value="true">
+                              </td>
+                              <td class="sort-name">
+                                <span class="avatar avatar-xs me-2" style="background-image: url({% static 'mainDash/images/avatars/009f.jpg)'%}"> </span>
+                                Flossi Uttley
+                              </td>
+                              <td class="sort-city">Gaomiaoji, China</td>
+                              <td class="sort-status">
+                                <span class="badge bg-success-lt">Active</span>
+                              </td>
+                              <td class="sort-date">September 18, 2024</td>
+                              <td class="sort-tags">
+                                <div class="badges-list">
+                                  <span class="badge">QTA</span>
+                                  <span class="badge">Event</span>
+                                  <span class="badge">Tickets</span>
+                                  <span class="badge">TODO</span>
+                                </div>
+                              </td>
+                              <td class="sort-category py-0">
+                                <span class="on-unchecked"> Individual </span>
+                                <div class="on-checked">
+                                  <div class="d-flex justify-content-end">
+                                    <a href="#" class="btn btn-2 btn-icon" aria-label="Button">
+                                      <!-- Download SVG icon from http://tabler.io/icons/icon/dots -->
+                                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-2">
+                                        <path d="M5 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path>
+                                        <path d="M12 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path>
+                                        <path d="M19 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path>
+                                      </svg>
+                                    </a>
+                                  </div>
+                                </div>
+                              </td>
+                            </tr><tr>
+                              <td>
+                                <input class="form-check-input m-0 align-middle table-selectable-check" type="checkbox" aria-label="Select invoice" value="true">
+                              </td>
+                              <td class="sort-name">
+                                <span class="avatar avatar-xs me-2" style="background-image: url({% static 'mainDash/images/avatars/010f.jpg)'%}"> </span>
+                                Cesya Spritt
+                              </td>
+                              <td class="sort-city">Göteborg, Sweden</td>
+                              <td class="sort-status">
+                                <span class="badge">Requested</span>
+                              </td>
+                              <td class="sort-date">January 01, 2024</td>
+                              <td class="sort-tags">
+                                <div class="badges-list">
+                                  <span class="badge">Tickets</span>
+                                </div>
+                              </td>
+                              <td class="sort-category py-0">
+                                <span class="on-unchecked"> Agencies </span>
+                                <div class="on-checked">
+                                  <div class="d-flex justify-content-end">
+                                    <a href="#" class="btn btn-2 btn-icon" aria-label="Button">
+                                      <!-- Download SVG icon from http://tabler.io/icons/icon/dots -->
+                                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-2">
+                                        <path d="M5 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path>
+                                        <path d="M12 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path>
+                                        <path d="M19 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path>
+                                      </svg>
+                                    </a>
+                                  </div>
+                                </div>
+                              </td>
+                            </tr><tr>
+                              <td>
+                                <input class="form-check-input m-0 align-middle table-selectable-check" type="checkbox" aria-label="Select invoice" value="true">
+                              </td>
+                              <td class="sort-name">
+                                <span class="avatar avatar-xs me-2" style="background-image: url({% static 'mainDash/images/avatars/011m.jpg)'%}"> </span>
+                                Johnnie Gilby
+                              </td>
+                              <td class="sort-city">Panayagan, Indonesia</td>
+                              <td class="sort-status">
+                                <span class="badge">Requested</span>
+                              </td>
+                              <td class="sort-date">January 01, 2024</td>
+                              <td class="sort-tags">
+                                <div class="badges-list">
+                                  <span class="badge">Tickets</span>
+                                </div>
+                              </td>
+                              <td class="sort-category py-0">
+                                <span class="on-unchecked"> Agencies </span>
+                                <div class="on-checked">
+                                  <div class="d-flex justify-content-end">
+                                    <a href="#" class="btn btn-2 btn-icon" aria-label="Button">
+                                      <!-- Download SVG icon from http://tabler.io/icons/icon/dots -->
+                                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-2">
+                                        <path d="M5 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path>
+                                        <path d="M12 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path>
+                                        <path d="M19 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path>
+                                      </svg>
+                                    </a>
+                                  </div>
+                                </div>
+                              </td>
+                            </tr><tr>
+                              <td>
+                                <input class="form-check-input m-0 align-middle table-selectable-check" type="checkbox" aria-label="Select invoice" value="true">
+                              </td>
+                              <td class="sort-name">
+                                <span class="avatar avatar-xs me-2" style="background-image: url({% static 'mainDash/images/avatars/012m.jpg)'%}"> </span>
+                                Ban Rzehor
+                              </td>
+                              <td class="sort-city">Denver, United States</td>
+                              <td class="sort-status">
+                                <span class="badge bg-success-lt">Active</span>
+                              </td>
+                              <td class="sort-date">December 22, 2024</td>
+                              <td class="sort-tags">
+                                <div class="badges-list">
+                                  <span class="badge">QTA</span>
+                                  <span class="badge">Event</span>
+                                  <span class="badge">Tickets</span>
+                                  <span class="badge">TODO</span>
+                                </div>
+                              </td>
+                              <td class="sort-category py-0">
+                                <span class="on-unchecked"> Event </span>
+                                <div class="on-checked">
+                                  <div class="d-flex justify-content-end">
+                                    <a href="#" class="btn btn-2 btn-icon" aria-label="Button">
+                                      <!-- Download SVG icon from http://tabler.io/icons/icon/dots -->
+                                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-2">
+                                        <path d="M5 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path>
+                                        <path d="M12 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path>
+                                        <path d="M19 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path>
+                                      </svg>
+                                    </a>
+                                  </div>
+                                </div>
+                              </td>
+                            </tr><tr>
+                              <td>
+                                <input class="form-check-input m-0 align-middle table-selectable-check" type="checkbox" aria-label="Select invoice" value="true">
+                              </td>
+                              <td class="sort-name">
+                                <span class="avatar avatar-xs me-2" style="background-image: url({% static 'mainDash/images/avatars/011f.jpg)'%}"> </span>
+                                Carroll Erat
+                              </td>
+                              <td class="sort-city">Šentilj v Slov. Goricah, Slovenia</td>
+                              <td class="sort-status">
+                                <span class="badge bg-success-lt">Active</span>
+                              </td>
+                              <td class="sort-date">August 06, 2024</td>
+                              <td class="sort-tags">
+                                <div class="badges-list">
+                                  <span class="badge">QTA</span>
+                                  <span class="badge">Event</span>
+                                  <span class="badge">Tickets</span>
+                                  <span class="badge">TODO</span>
+                                </div>
+                              </td>
+                              <td class="sort-category py-0">
+                                <span class="on-unchecked"> Event </span>
+                                <div class="on-checked">
+                                  <div class="d-flex justify-content-end">
+                                    <a href="#" class="btn btn-2 btn-icon" aria-label="Button">
+                                      <!-- Download SVG icon from http://tabler.io/icons/icon/dots -->
+                                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-2">
+                                        <path d="M5 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path>
+                                        <path d="M12 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path>
+                                        <path d="M19 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path>
+                                      </svg>
+                                    </a>
+                                  </div>
+                                </div>
+                              </td>
+                            </tr><tr>
+                              <td>
+                                <input class="form-check-input m-0 align-middle table-selectable-check" type="checkbox" aria-label="Select invoice" value="true">
+                              </td>
+                              <td class="sort-name">
+                                <span class="avatar avatar-xs me-2" style="background-image: url({% static 'mainDash/images/avatars/012f.jpg)'%}"> </span>
+                                Marsha Labat
+                              </td>
+                              <td class="sort-city">Cabrero, Chile</td>
+                              <td class="sort-status">
+                                <span class="badge bg-success-lt">Active</span>
+                              </td>
+                              <td class="sort-date">January 01, 2024</td>
+                              <td class="sort-tags">
+                                <div class="badges-list">
+                                  <span class="badge">QTA</span>
+                                  <span class="badge">Event</span>
+                                  <span class="badge">Tickets</span>
+                                  <span class="badge">TODO</span>
+                                </div>
+                              </td>
+                              <td class="sort-category py-0">
+                                <span class="on-unchecked"> Agencies </span>
+                                <div class="on-checked">
+                                  <div class="d-flex justify-content-end">
+                                    <a href="#" class="btn btn-2 btn-icon" aria-label="Button">
+                                      <!-- Download SVG icon from http://tabler.io/icons/icon/dots -->
+                                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-2">
+                                        <path d="M5 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path>
+                                        <path d="M12 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path>
+                                        <path d="M19 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path>
+                                      </svg>
+                                    </a>
+                                  </div>
+                                </div>
+                              </td>
+                            </tr><tr>
+                              <td>
+                                <input class="form-check-input m-0 align-middle table-selectable-check" type="checkbox" aria-label="Select invoice" value="true">
+                              </td>
+                              <td class="sort-name">
+                                <span class="avatar avatar-xs me-2" style="background-image: url({% static 'mainDash/images/avatars/013m.jpg)'%}"> </span>
+                                Elston Muffett
+                              </td>
+                              <td class="sort-city">Terara, Indonesia</td>
+                              <td class="sort-status">
+                                <span class="badge">Requested</span>
+                              </td>
+                              <td class="sort-date">April 09, 2024</td>
+                              <td class="sort-tags">
+                                <div class="badges-list">
+                                  <span class="badge">Tickets</span>
+                                </div>
+                              </td>
+                              <td class="sort-category py-0">
+                                <span class="on-unchecked"> Ticket </span>
+                                <div class="on-checked">
+                                  <div class="d-flex justify-content-end">
+                                    <a href="#" class="btn btn-2 btn-icon" aria-label="Button">
+                                      <!-- Download SVG icon from http://tabler.io/icons/icon/dots -->
+                                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-2">
+                                        <path d="M5 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path>
+                                        <path d="M12 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path>
+                                        <path d="M19 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path>
+                                      </svg>
+                                    </a>
+                                  </div>
+                                </div>
+                              </td>
+                            </tr><tr>
+                              <td>
+                                <input class="form-check-input m-0 align-middle table-selectable-check" type="checkbox" aria-label="Select invoice" value="true">
+                              </td>
+                              <td class="sort-name">
+                                <span class="avatar avatar-xs me-2" style="background-image: url({% static 'mainDash/images/avatars/013f.jpg)'%}"> </span>
+                                Leigha Gorce
+                              </td>
+                              <td class="sort-city">Barrie, Canada</td>
+                              <td class="sort-status">
+                                <span class="badge bg-success-lt">Active</span>
+                              </td>
+                              <td class="sort-date">March 21, 2024</td>
+                              <td class="sort-tags">
+                                <div class="badges-list">
+                                  <span class="badge">QTA</span>
+                                  <span class="badge">Event</span>
+                                  <span class="badge">Tickets</span>
+                                  <span class="badge">TODO</span>
+                                </div>
+                              </td>
+                              <td class="sort-category py-0">
+                                <span class="on-unchecked"> Ticket </span>
+                                <div class="on-checked">
+                                  <div class="d-flex justify-content-end">
+                                    <a href="#" class="btn btn-2 btn-icon" aria-label="Button">
+                                      <!-- Download SVG icon from http://tabler.io/icons/icon/dots -->
+                                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-2">
+                                        <path d="M5 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path>
+                                        <path d="M12 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path>
+                                        <path d="M19 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path>
+                                      </svg>
+                                    </a>
+                                  </div>
+                                </div>
+                              </td>
+                            </tr><tr>
+                              <td>
+                                <input class="form-check-input m-0 align-middle table-selectable-check" type="checkbox" aria-label="Select invoice" value="true">
+                              </td>
+                              <td class="sort-name">
+                                <span class="avatar avatar-xs me-2"> TB </span>
+                                Tallie Bettis
+                              </td>
+                              <td class="sort-city">Pojan, Albania</td>
+                              <td class="sort-status">
+                                <span class="badge bg-danger-lt">Inactive</span>
+                              </td>
+                              <td class="sort-date">January 01, 2024</td>
+                              <td class="sort-tags">
+                                <div class="badges-list">
+                                  <span class="badge">QTA</span>
+                                  <span class="badge">Event</span>
+                                </div>
+                              </td>
+                              <td class="sort-category py-0">
+                                <span class="on-unchecked"> Agencies </span>
+                                <div class="on-checked">
+                                  <div class="d-flex justify-content-end">
+                                    <a href="#" class="btn btn-2 btn-icon" aria-label="Button">
+                                      <!-- Download SVG icon from http://tabler.io/icons/icon/dots -->
+                                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-2">
+                                        <path d="M5 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path>
+                                        <path d="M12 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path>
+                                        <path d="M19 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path>
+                                      </svg>
+                                    </a>
+                                  </div>
+                                </div>
+                              </td>
+                            </tr><tr>
+                              <td>
+                                <input class="form-check-input m-0 align-middle table-selectable-check" type="checkbox" aria-label="Select invoice" value="true">
+                              </td>
+                              <td class="sort-name">
+                                <span class="avatar avatar-xs me-2" style="background-image: url({% static 'mainDash/images/avatars/015f.jpg)'%}"> </span>
+                                Merrily Garforth
+                              </td>
+                              <td class="sort-city">Tupaciguara, Brazil</td>
+                              <td class="sort-status">
+                                <span class="badge bg-success-lt">Active</span>
+                              </td>
+                              <td class="sort-date">January 01, 2024</td>
+                              <td class="sort-tags">
+                                <div class="badges-list">
+                                  <span class="badge">QTA</span>
+                                  <span class="badge">Event</span>
+                                  <span class="badge">Tickets</span>
+                                  <span class="badge">TODO</span>
+                                </div>
+                              </td>
+                              <td class="sort-category py-0">
+                                <span class="on-unchecked"> Agencies </span>
+                                <div class="on-checked">
+                                  <div class="d-flex justify-content-end">
+                                    <a href="#" class="btn btn-2 btn-icon" aria-label="Button">
+                                      <!-- Download SVG icon from http://tabler.io/icons/icon/dots -->
+                                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-2">
+                                        <path d="M5 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path>
+                                        <path d="M12 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path>
+                                        <path d="M19 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path>
+                                      </svg>
+                                    </a>
+                                  </div>
+                                </div>
+                              </td>
+                            </tr><tr>
+                              <td>
+                                <input class="form-check-input m-0 align-middle table-selectable-check" type="checkbox" aria-label="Select invoice" value="true">
+                              </td>
+                              <td class="sort-name">
+                                <span class="avatar avatar-xs me-2"> EB </span>
+                                Errol Blackley
+                              </td>
+                              <td class="sort-city">Poroj, Macedonia</td>
+                              <td class="sort-status">
+                                <span class="badge">Requested</span>
+                              </td>
+                              <td class="sort-date">January 01, 2024</td>
+                              <td class="sort-tags">
+                                <div class="badges-list">
+                                  <span class="badge">Tickets</span>
+                                </div>
+                              </td>
+                              <td class="sort-category py-0">
+                                <span class="on-unchecked"> Agencies </span>
+                                <div class="on-checked">
+                                  <div class="d-flex justify-content-end">
+                                    <a href="#" class="btn btn-2 btn-icon" aria-label="Button">
+                                      <!-- Download SVG icon from http://tabler.io/icons/icon/dots -->
+                                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-2">
+                                        <path d="M5 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path>
+                                        <path d="M12 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path>
+                                        <path d="M19 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path>
+                                      </svg>
+                                    </a>
+                                  </div>
+                                </div>
+                              </td>
+                            </tr><tr>
+                              <td>
+                                <input class="form-check-input m-0 align-middle table-selectable-check" type="checkbox" aria-label="Select invoice" value="true">
+                              </td>
+                              <td class="sort-name">
+                                <span class="avatar avatar-xs me-2" style="background-image: url({% static 'mainDash/images/avatars/016f.jpg)'%}"> </span>
+                                Ninon Don
+                              </td>
+                              <td class="sort-city">Baiguo, China</td>
+                              <td class="sort-status">
+                                <span class="badge bg-success-lt">Active</span>
+                              </td>
+                              <td class="sort-date">November 09, 2024</td>
+                              <td class="sort-tags">
+                                <div class="badges-list">
+                                  <span class="badge">QTA</span>
+                                  <span class="badge">Event</span>
+                                  <span class="badge">Tickets</span>
+                                  <span class="badge">TODO</span>
+                                </div>
+                              </td>
+                              <td class="sort-category py-0">
+                                <span class="on-unchecked"> Ticket </span>
+                                <div class="on-checked">
+                                  <div class="d-flex justify-content-end">
+                                    <a href="#" class="btn btn-2 btn-icon" aria-label="Button">
+                                      <!-- Download SVG icon from http://tabler.io/icons/icon/dots -->
+                                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-2">
+                                        <path d="M5 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path>
+                                        <path d="M12 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path>
+                                        <path d="M19 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path>
+                                      </svg>
+                                    </a>
+                                  </div>
+                                </div>
+                              </td>
+                            </tr><tr>
+                              <td>
+                                <input class="form-check-input m-0 align-middle table-selectable-check" type="checkbox" aria-label="Select invoice" value="true">
+                              </td>
+                              <td class="sort-name">
+                                <span class="avatar avatar-xs me-2" style="background-image: url({% static 'mainDash/images/avatars/015m.jpg)'%}"> </span>
+                                Delaney Cairney
+                              </td>
+                              <td class="sort-city">Linhares, Portugal</td>
+                              <td class="sort-status">
+                                <span class="badge bg-danger-lt">Inactive</span>
+                              </td>
+                              <td class="sort-date">January 01, 2024</td>
+                              <td class="sort-tags">
+                                <div class="badges-list">
+                                  <span class="badge">QTA</span>
+                                  <span class="badge">Event</span>
+                                </div>
+                              </td>
+                              <td class="sort-category py-0">
+                                <span class="on-unchecked"> Agencies </span>
+                                <div class="on-checked">
+                                  <div class="d-flex justify-content-end">
+                                    <a href="#" class="btn btn-2 btn-icon" aria-label="Button">
+                                      <!-- Download SVG icon from http://tabler.io/icons/icon/dots -->
+                                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-2">
+                                        <path d="M5 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path>
+                                        <path d="M12 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path>
+                                        <path d="M19 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path>
+                                      </svg>
+                                    </a>
+                                  </div>
+                                </div>
+                              </td>
+                            </tr><tr>
+                              <td>
+                                <input class="form-check-input m-0 align-middle table-selectable-check" type="checkbox" aria-label="Select invoice" value="true">
+                              </td>
+                              <td class="sort-name">
+                                <span class="avatar avatar-xs me-2" style="background-image: url({% static 'mainDash/images/avatars/017f.jpg)'%}"> </span>
+                                Gratia Gooley
+                              </td>
+                              <td class="sort-city">Ruma, Serbia</td>
+                              <td class="sort-status">
+                                <span class="badge bg-success-lt">Active</span>
+                              </td>
+                              <td class="sort-date">January 11, 2024</td>
+                              <td class="sort-tags">
+                                <div class="badges-list">
+                                  <span class="badge">QTA</span>
+                                  <span class="badge">Event</span>
+                                  <span class="badge">Tickets</span>
+                                  <span class="badge">TODO</span>
+                                </div>
+                              </td>
+                              <td class="sort-category py-0">
+                                <span class="on-unchecked"> Event </span>
+                                <div class="on-checked">
+                                  <div class="d-flex justify-content-end">
+                                    <a href="#" class="btn btn-2 btn-icon" aria-label="Button">
+                                      <!-- Download SVG icon from http://tabler.io/icons/icon/dots -->
+                                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-2">
+                                        <path d="M5 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path>
+                                        <path d="M12 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path>
+                                        <path d="M19 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path>
+                                      </svg>
+                                    </a>
+                                  </div>
+                                </div>
+                              </td>
+                            </tr><tr>
+                              <td>
+                                <input class="form-check-input m-0 align-middle table-selectable-check" type="checkbox" aria-label="Select invoice" value="true">
+                              </td>
+                              <td class="sort-name">
+                                <span class="avatar avatar-xs me-2" style="background-image: url({% static 'mainDash/images/avatars/018f.jpg)'%}"> </span>
+                                Odelinda McCosh
+                              </td>
+                              <td class="sort-city">Chengxiang, China</td>
+                              <td class="sort-status">
+                                <span class="badge bg-success-lt">Active</span>
+                              </td>
+                              <td class="sort-date">January 01, 2024</td>
+                              <td class="sort-tags">
+                                <div class="badges-list">
+                                  <span class="badge">QTA</span>
+                                  <span class="badge">Event</span>
+                                  <span class="badge">Tickets</span>
+                                  <span class="badge">TODO</span>
+                                </div>
+                              </td>
+                              <td class="sort-category py-0">
+                                <span class="on-unchecked"> Agencies </span>
+                                <div class="on-checked">
+                                  <div class="d-flex justify-content-end">
+                                    <a href="#" class="btn btn-2 btn-icon" aria-label="Button">
+                                      <!-- Download SVG icon from http://tabler.io/icons/icon/dots -->
+                                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-2">
+                                        <path d="M5 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path>
+                                        <path d="M12 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path>
+                                        <path d="M19 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path>
+                                      </svg>
+                                    </a>
+                                  </div>
+                                </div>
+                              </td>
+                            </tr><tr>
+                              <td>
+                                <input class="form-check-input m-0 align-middle table-selectable-check" type="checkbox" aria-label="Select invoice" value="true">
+                              </td>
+                              <td class="sort-name">
+                                <span class="avatar avatar-xs me-2" style="background-image: url({% static 'mainDash/images/avatars/016m.jpg)'%}"> </span>
+                                Wilburt Siegertsz
+                              </td>
+                              <td class="sort-city">Veiga, Portugal</td>
+                              <td class="sort-status">
+                                <span class="badge">Requested</span>
+                              </td>
+                              <td class="sort-date">March 12, 2024</td>
+                              <td class="sort-tags">
+                                <div class="badges-list">
+                                  <span class="badge">Tickets</span>
+                                </div>
+                              </td>
+                              <td class="sort-category py-0">
+                                <span class="on-unchecked"> Ticket </span>
+                                <div class="on-checked">
+                                  <div class="d-flex justify-content-end">
+                                    <a href="#" class="btn btn-2 btn-icon" aria-label="Button">
+                                      <!-- Download SVG icon from http://tabler.io/icons/icon/dots -->
+                                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-2">
+                                        <path d="M5 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path>
+                                        <path d="M12 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path>
+                                        <path d="M19 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path>
+                                      </svg>
+                                    </a>
+                                  </div>
+                                </div>
+                              </td>
+                            </tr><tr>
+                              <td>
+                                <input class="form-check-input m-0 align-middle table-selectable-check" type="checkbox" aria-label="Select invoice" value="true">
+                              </td>
+                              <td class="sort-name">
+                                <span class="avatar avatar-xs me-2" style="background-image: url({% static 'mainDash/images/avatars/019f.jpg)'%}"> </span>
+                                Julietta Coke
+                              </td>
+                              <td class="sort-city">Malaga, Philippines</td>
+                              <td class="sort-status">
+                                <span class="badge bg-danger-lt">Inactive</span>
+                              </td>
+                              <td class="sort-date">January 01, 2024</td>
+                              <td class="sort-tags">
+                                <div class="badges-list">
+                                  <span class="badge">QTA</span>
+                                  <span class="badge">Event</span>
+                                </div>
+                              </td>
+                              <td class="sort-category py-0">
+                                <span class="on-unchecked"> Agencies </span>
+                                <div class="on-checked">
+                                  <div class="d-flex justify-content-end">
+                                    <a href="#" class="btn btn-2 btn-icon" aria-label="Button">
+                                      <!-- Download SVG icon from http://tabler.io/icons/icon/dots -->
+                                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-2">
+                                        <path d="M5 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path>
+                                        <path d="M12 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path>
+                                        <path d="M19 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path>
+                                      </svg>
+                                    </a>
+                                  </div>
+                                </div>
+                              </td>
+                            </tr><tr>
+                              <td>
+                                <input class="form-check-input m-0 align-middle table-selectable-check" type="checkbox" aria-label="Select invoice" value="true">
+                              </td>
+                              <td class="sort-name">
+                                <span class="avatar avatar-xs me-2" style="background-image: url({% static 'mainDash/images/avatars/017m.jpg)'%}"> </span>
+                                Portie Christou
+                              </td>
+                              <td class="sort-city">Gaoping, China</td>
+                              <td class="sort-status">
+                                <span class="badge bg-success-lt">Active</span>
+                              </td>
+                              <td class="sort-date">April 28, 2024</td>
+                              <td class="sort-tags">
+                                <div class="badges-list">
+                                  <span class="badge">Event</span>
+                                  <span class="badge">Tickets</span>
+                                </div>
+                              </td>
+                              <td class="sort-category py-0">
+                                <span class="on-unchecked"> Event </span>
+                                <div class="on-checked">
+                                  <div class="d-flex justify-content-end">
+                                    <a href="#" class="btn btn-2 btn-icon" aria-label="Button">
+                                      <!-- Download SVG icon from http://tabler.io/icons/icon/dots -->
+                                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-2">
+                                        <path d="M5 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path>
+                                        <path d="M12 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path>
+                                        <path d="M19 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path>
+                                      </svg>
+                                    </a>
+                                  </div>
+                                </div>
+                              </td>
+                            </tr><tr>
+                              <td>
+                                <input class="form-check-input m-0 align-middle table-selectable-check" type="checkbox" aria-label="Select invoice" value="true">
+                              </td>
+                              <td class="sort-name">
+                                <span class="avatar avatar-xs me-2" style="background-image: url({% static 'mainDash/images/avatars/018m.jpg)'%}"> </span>
+                                Emmott Dowsett
+                              </td>
+                              <td class="sort-city">Roanoke, United States</td>
+                              <td class="sort-status">
+                                <span class="badge bg-success-lt">Active</span>
+                              </td>
+                              <td class="sort-date">October 22, 2024</td>
+                              <td class="sort-tags">
+                                <div class="badges-list">
+                                  <span class="badge">QTA</span>
+                                  <span class="badge">Event</span>
+                                  <span class="badge">Tickets</span>
+                                  <span class="badge">TODO</span>
+                                </div>
+                              </td>
+                              <td class="sort-category py-0">
+                                <span class="on-unchecked"> Agencies </span>
+                                <div class="on-checked">
+                                  <div class="d-flex justify-content-end">
+                                    <a href="#" class="btn btn-2 btn-icon" aria-label="Button">
+                                      <!-- Download SVG icon from http://tabler.io/icons/icon/dots -->
+                                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-2">
+                                        <path d="M5 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path>
+                                        <path d="M12 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path>
+                                        <path d="M19 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path>
+                                      </svg>
+                                    </a>
+                                  </div>
+                                </div>
+                              </td>
+                            </tr><tr>
+                              <td>
+                                <input class="form-check-input m-0 align-middle table-selectable-check" type="checkbox" aria-label="Select invoice" value="true">
+                              </td>
+                              <td class="sort-name">
+                                <span class="avatar avatar-xs me-2" style="background-image: url({% static 'mainDash/images/avatars/019m.jpg)'%}"> </span>
+                                Rooney Cassy
+                              </td>
+                              <td class="sort-city">Mulan, China</td>
+                              <td class="sort-status">
+                                <span class="badge bg-success-lt">Active</span>
+                              </td>
+                              <td class="sort-date">January 01, 2024</td>
+                              <td class="sort-tags">
+                                <div class="badges-list">
+                                  <span class="badge">QTA</span>
+                                  <span class="badge">Event</span>
+                                  <span class="badge">Tickets</span>
+                                  <span class="badge">TODO</span>
+                                </div>
+                              </td>
+                              <td class="sort-category py-0">
+                                <span class="on-unchecked"> Agencies </span>
+                                <div class="on-checked">
+                                  <div class="d-flex justify-content-end">
+                                    <a href="#" class="btn btn-2 btn-icon" aria-label="Button">
+                                      <!-- Download SVG icon from http://tabler.io/icons/icon/dots -->
+                                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-2">
+                                        <path d="M5 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path>
+                                        <path d="M12 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path>
+                                        <path d="M19 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path>
+                                      </svg>
+                                    </a>
+                                  </div>
+                                </div>
+                              </td>
+                            </tr><tr>
+                              <td>
+                                <input class="form-check-input m-0 align-middle table-selectable-check" type="checkbox" aria-label="Select invoice" value="true">
+                              </td>
+                              <td class="sort-name">
+                                <span class="avatar avatar-xs me-2" style="background-image: url({% static 'mainDash/images/avatars/020m.jpg)'%}"> </span>
+                                Haze Hubbert
+                              </td>
+                              <td class="sort-city">El Arenal, Mexico</td>
+                              <td class="sort-status">
+                                <span class="badge bg-success-lt">Active</span>
+                              </td>
+                              <td class="sort-date">October 08, 2024</td>
+                              <td class="sort-tags">
+                                <div class="badges-list">
+                                  <span class="badge">QTA</span>
+                                  <span class="badge">Event</span>
+                                  <span class="badge">Tickets</span>
+                                  <span class="badge">TODO</span>
+                                </div>
+                              </td>
+                              <td class="sort-category py-0">
+                                <span class="on-unchecked"> Ticket </span>
+                                <div class="on-checked">
+                                  <div class="d-flex justify-content-end">
+                                    <a href="#" class="btn btn-2 btn-icon" aria-label="Button">
+                                      <!-- Download SVG icon from http://tabler.io/icons/icon/dots -->
+                                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-2">
+                                        <path d="M5 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path>
+                                        <path d="M12 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path>
+                                        <path d="M19 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path>
+                                      </svg>
+                                    </a>
+                                  </div>
+                                </div>
+                              </td>
+                            </tr><tr>
+                              <td>
+                                <input class="form-check-input m-0 align-middle table-selectable-check" type="checkbox" aria-label="Select invoice" value="true">
+                              </td>
+                              <td class="sort-name">
+                                <span class="avatar avatar-xs me-2" style="background-image: url({% static 'mainDash/images/avatars/021m.jpg)'%}"> </span>
+                                Mata Codlin
+                              </td>
+                              <td class="sort-city">Mar del Plata, Argentina</td>
+                              <td class="sort-status">
+                                <span class="badge bg-success-lt">Active</span>
+                              </td>
+                              <td class="sort-date">June 16, 2024</td>
+                              <td class="sort-tags">
+                                <div class="badges-list">
+                                  <span class="badge">QTA</span>
+                                  <span class="badge">Event</span>
+                                  <span class="badge">Tickets</span>
+                                  <span class="badge">TODO</span>
+                                </div>
+                              </td>
+                              <td class="sort-category py-0">
+                                <span class="on-unchecked"> Event </span>
+                                <div class="on-checked">
+                                  <div class="d-flex justify-content-end">
+                                    <a href="#" class="btn btn-2 btn-icon" aria-label="Button">
+                                      <!-- Download SVG icon from http://tabler.io/icons/icon/dots -->
+                                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-2">
+                                        <path d="M5 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path>
+                                        <path d="M12 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path>
+                                        <path d="M19 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path>
+                                      </svg>
+                                    </a>
+                                  </div>
+                                </div>
+                              </td>
+                            </tr><tr>
+                              <td>
+                                <input class="form-check-input m-0 align-middle table-selectable-check" type="checkbox" aria-label="Select invoice" value="true">
+                              </td>
+                              <td class="sort-name">
+                                <span class="avatar avatar-xs me-2" style="background-image: url({% static 'mainDash/images/avatars/022m.jpg)'%}"> </span>
+                                Parker Oaten
+                              </td>
+                              <td class="sort-city">Witzenhausen, Germany</td>
+                              <td class="sort-status">
+                                <span class="badge bg-success-lt">Active</span>
+                              </td>
+                              <td class="sort-date">May 07, 2024</td>
+                              <td class="sort-tags">
+                                <div class="badges-list">
+                                  <span class="badge">QTA</span>
+                                  <span class="badge">Event</span>
+                                  <span class="badge">Tickets</span>
+                                  <span class="badge">TODO</span>
+                                </div>
+                              </td>
+                              <td class="sort-category py-0">
+                                <span class="on-unchecked"> Individual </span>
+                                <div class="on-checked">
+                                  <div class="d-flex justify-content-end">
+                                    <a href="#" class="btn btn-2 btn-icon" aria-label="Button">
+                                      <!-- Download SVG icon from http://tabler.io/icons/icon/dots -->
+                                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-2">
+                                        <path d="M5 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path>
+                                        <path d="M12 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path>
+                                        <path d="M19 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path>
+                                      </svg>
+                                    </a>
+                                  </div>
+                                </div>
+                              </td>
+                            </tr><tr>
+                              <td>
+                                <input class="form-check-input m-0 align-middle table-selectable-check" type="checkbox" aria-label="Select invoice" value="true">
+                              </td>
+                              <td class="sort-name">
+                                <span class="avatar avatar-xs me-2" style="background-image: url({% static 'mainDash/images/avatars/023m.jpg)'%}"> </span>
+                                Johannes Paternoster
+                              </td>
+                              <td class="sort-city">Pirallahı, Azerbaijan</td>
+                              <td class="sort-status">
+                                <span class="badge bg-success-lt">Active</span>
+                              </td>
+                              <td class="sort-date">September 23, 2024</td>
+                              <td class="sort-tags">
+                                <div class="badges-list">
+                                  <span class="badge">QTA</span>
+                                  <span class="badge">Event</span>
+                                  <span class="badge">Tickets</span>
+                                  <span class="badge">TODO</span>
+                                </div>
+                              </td>
+                              <td class="sort-category py-0">
+                                <span class="on-unchecked"> Agencies </span>
+                                <div class="on-checked">
+                                  <div class="d-flex justify-content-end">
+                                    <a href="#" class="btn btn-2 btn-icon" aria-label="Button">
+                                      <!-- Download SVG icon from http://tabler.io/icons/icon/dots -->
+                                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-2">
+                                        <path d="M5 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path>
+                                        <path d="M12 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path>
+                                        <path d="M19 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path>
+                                      </svg>
+                                    </a>
+                                  </div>
+                                </div>
+                              </td>
+                            </tr><tr>
+                              <td>
+                                <input class="form-check-input m-0 align-middle table-selectable-check" type="checkbox" aria-label="Select invoice" value="true">
+                              </td>
+                              <td class="sort-name">
+                                <span class="avatar avatar-xs me-2" style="background-image: url({% static 'mainDash/images/avatars/024m.jpg)'%}"> </span>
+                                Cary Baleine
+                              </td>
+                              <td class="sort-city">Pokrovka, Kyrgyzstan</td>
+                              <td class="sort-status">
+                                <span class="badge bg-success-lt">Active</span>
+                              </td>
+                              <td class="sort-date">January 01, 2024</td>
+                              <td class="sort-tags">
+                                <div class="badges-list">
+                                  <span class="badge">QTA</span>
+                                  <span class="badge">Event</span>
+                                  <span class="badge">Tickets</span>
+                                  <span class="badge">TODO</span>
+                                </div>
+                              </td>
+                              <td class="sort-category py-0">
+                                <span class="on-unchecked"> Agencies </span>
+                                <div class="on-checked">
+                                  <div class="d-flex justify-content-end">
+                                    <a href="#" class="btn btn-2 btn-icon" aria-label="Button">
+                                      <!-- Download SVG icon from http://tabler.io/icons/icon/dots -->
+                                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-2">
+                                        <path d="M5 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path>
+                                        <path d="M12 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path>
+                                        <path d="M19 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path>
+                                      </svg>
+                                    </a>
+                                  </div>
+                                </div>
+                              </td>
+                            </tr><tr>
+                              <td>
+                                <input class="form-check-input m-0 align-middle table-selectable-check" type="checkbox" aria-label="Select invoice" value="true">
+                              </td>
+                              <td class="sort-name">
+                                <span class="avatar avatar-xs me-2" style="background-image: url({% static 'mainDash/images/avatars/020f.jpg)'%}"> </span>
+                                Riane Milward
+                              </td>
+                              <td class="sort-city">Erling, China</td>
+                              <td class="sort-status">
+                                <span class="badge bg-danger-lt">Inactive</span>
+                              </td>
+                              <td class="sort-date">February 04, 2024</td>
+                              <td class="sort-tags">
+                                <div class="badges-list">
+                                  <span class="badge">QTA</span>
+                                  <span class="badge">Event</span>
+                                </div>
+                              </td>
+                              <td class="sort-category py-0">
+                                <span class="on-unchecked"> Agencies </span>
+                                <div class="on-checked">
+                                  <div class="d-flex justify-content-end">
+                                    <a href="#" class="btn btn-2 btn-icon" aria-label="Button">
+                                      <!-- Download SVG icon from http://tabler.io/icons/icon/dots -->
+                                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-2">
+                                        <path d="M5 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path>
+                                        <path d="M12 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path>
+                                        <path d="M19 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path>
+                                      </svg>
+                                    </a>
+                                  </div>
+                                </div>
+                              </td>
+                            </tr><tr>
+                              <td>
+                                <input class="form-check-input m-0 align-middle table-selectable-check" type="checkbox" aria-label="Select invoice" value="true">
+                              </td>
+                              <td class="sort-name">
+                                <span class="avatar avatar-xs me-2" style="background-image: url({% static 'mainDash/images/avatars/025m.jpg)'%}"> </span>
+                                Reynold Indgs
+                              </td>
+                              <td class="sort-city">Huayllo, Peru</td>
+                              <td class="sort-status">
+                                <span class="badge bg-success-lt">Active</span>
+                              </td>
+                              <td class="sort-date">January 01, 2024</td>
+                              <td class="sort-tags">
+                                <div class="badges-list">
+                                  <span class="badge">QTA</span>
+                                  <span class="badge">Event</span>
+                                  <span class="badge">Tickets</span>
+                                  <span class="badge">TODO</span>
+                                </div>
+                              </td>
+                              <td class="sort-category py-0">
+                                <span class="on-unchecked"> Agencies </span>
+                                <div class="on-checked">
+                                  <div class="d-flex justify-content-end">
+                                    <a href="#" class="btn btn-2 btn-icon" aria-label="Button">
+                                      <!-- Download SVG icon from http://tabler.io/icons/icon/dots -->
+                                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-2">
+                                        <path d="M5 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path>
+                                        <path d="M12 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path>
+                                        <path d="M19 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path>
+                                      </svg>
+                                    </a>
+                                  </div>
+                                </div>
+                              </td>
+                            </tr><tr>
+                              <td>
+                                <input class="form-check-input m-0 align-middle table-selectable-check" type="checkbox" aria-label="Select invoice" value="true">
+                              </td>
+                              <td class="sort-name">
+                                <span class="avatar avatar-xs me-2" style="background-image: url({% static 'mainDash/images/avatars/026m.jpg)'%}"> </span>
+                                Parke Moneypenny
+                              </td>
+                              <td class="sort-city">Karawatung, Indonesia</td>
+                              <td class="sort-status">
+                                <span class="badge">Requested</span>
+                              </td>
+                              <td class="sort-date">June 08, 2024</td>
+                              <td class="sort-tags">
+                                <div class="badges-list">
+                                  <span class="badge">Tickets</span>
+                                </div>
+                              </td>
+                              <td class="sort-category py-0">
+                                <span class="on-unchecked"> Agencies </span>
+                                <div class="on-checked">
+                                  <div class="d-flex justify-content-end">
+                                    <a href="#" class="btn btn-2 btn-icon" aria-label="Button">
+                                      <!-- Download SVG icon from http://tabler.io/icons/icon/dots -->
+                                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-2">
+                                        <path d="M5 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path>
+                                        <path d="M12 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path>
+                                        <path d="M19 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path>
+                                      </svg>
+                                    </a>
+                                  </div>
+                                </div>
+                              </td>
+                            </tr><tr>
+                              <td>
+                                <input class="form-check-input m-0 align-middle table-selectable-check" type="checkbox" aria-label="Select invoice" value="true">
+                              </td>
+                              <td class="sort-name">
+                                <span class="avatar avatar-xs me-2" style="background-image: url({% static 'mainDash/images/avatars/021f.jpg)'%}"> </span>
+                                Sandi Keys
+                              </td>
+                              <td class="sort-city">Samannūd, Egypt</td>
+                              <td class="sort-status">
+                                <span class="badge bg-success-lt">Active</span>
+                              </td>
+                              <td class="sort-date">January 01, 2024</td>
+                              <td class="sort-tags">
+                                <div class="badges-list">
+                                  <span class="badge">QTA</span>
+                                  <span class="badge">Event</span>
+                                  <span class="badge">Tickets</span>
+                                  <span class="badge">TODO</span>
+                                </div>
+                              </td>
+                              <td class="sort-category py-0">
+                                <span class="on-unchecked"> Agencies </span>
+                                <div class="on-checked">
+                                  <div class="d-flex justify-content-end">
+                                    <a href="#" class="btn btn-2 btn-icon" aria-label="Button">
+                                      <!-- Download SVG icon from http://tabler.io/icons/icon/dots -->
+                                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-2">
+                                        <path d="M5 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path>
+                                        <path d="M12 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path>
+                                        <path d="M19 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path>
+                                      </svg>
+                                    </a>
+                                  </div>
+                                </div>
+                              </td>
+                            </tr><tr>
+                              <td>
+                                <input class="form-check-input m-0 align-middle table-selectable-check" type="checkbox" aria-label="Select invoice" value="true">
+                              </td>
+                              <td class="sort-name">
+                                <span class="avatar avatar-xs me-2" style="background-image: url({% static 'mainDash/images/avatars/022f.jpg)'%}"> </span>
+                                Peria Errichiello
+                              </td>
+                              <td class="sort-city">Xukou, China</td>
+                              <td class="sort-status">
+                                <span class="badge">Requested</span>
+                              </td>
+                              <td class="sort-date">January 01, 2024</td>
+                              <td class="sort-tags">
+                                <div class="badges-list">
+                                  <span class="badge">Tickets</span>
+                                </div>
+                              </td>
+                              <td class="sort-category py-0">
+                                <span class="on-unchecked"> Agencies </span>
+                                <div class="on-checked">
+                                  <div class="d-flex justify-content-end">
+                                    <a href="#" class="btn btn-2 btn-icon" aria-label="Button">
+                                      <!-- Download SVG icon from http://tabler.io/icons/icon/dots -->
+                                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-2">
+                                        <path d="M5 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path>
+                                        <path d="M12 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path>
+                                        <path d="M19 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path>
+                                      </svg>
+                                    </a>
+                                  </div>
+                                </div>
+                              </td>
+                            </tr></tbody>
+                        </table>
+                      </div>
+                      <div class="card-footer d-flex align-items-center">
+                        <div class="dropdown">
+                          <a class="btn dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                            <span id="page-count" class="me-1">50</span>
+                            <span>records</span>
+                          </a>
+                          <div class="dropdown-menu" style="">
+                            <a class="dropdown-item" onclick="setPageListItems(event)" data-value="10">10 records</a>
+                            <a class="dropdown-item" onclick="setPageListItems(event)" data-value="20">20 records</a>
+                            <a class="dropdown-item" onclick="setPageListItems(event)" data-value="50">50 records</a>
+                            <a class="dropdown-item" onclick="setPageListItems(event)" data-value="100">100 records</a>
+                          </div>
+                        </div>
+                        <ul class="pagination m-0 ms-auto"><li class="page-item active"><a class="page-link cursor-pointer" data-i="1" data-page="50">1</a></li><li class="page-item"><a class="page-link cursor-pointer" data-i="2" data-page="50">2</a></li><li class="page-item"><a class="page-link cursor-pointer" data-i="3" data-page="50">3</a></li></ul>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+            {% block extra_js %}
+            <script src="{% static 'mainDash/dist/libs/list.js/dist/list.min.js'%}" defer></script>
+            <script>
+                  const advancedTable = {
+                    headers: [
+                      { "data-sort": "sort-name", name: "Name" },
+                      { "data-sort": "sort-city", name: "City" },
+                      { "data-sort": "sort-status", name: "Status" },
+                      { "data-sort": "sort-date", name: "Start date" },
+                      { "data-sort": "sort-tags", name: "Tags" },
+                      { "data-sort": "sort-category", name: "Category" },
+                    ],
+                  };
+                  const setPageListItems = (e) => {
+                    window.tabler_list["advanced-table"].page = parseInt(e.target.dataset.value);
+                    window.tabler_list["advanced-table"].update();
+                    document.querySelector("#page-count").innerHTML = e.target.dataset.value;
+                  };
+                  window.tabler_list = window.tabler_list || {};
+                  document.addEventListener("DOMContentLoaded", function () {
+                    const list = (window.tabler_list["advanced-table"] = new List("advanced-table", {
+                      sortClass: "table-sort",
+                      listClass: "table-tbody",
+                      page: parseInt("20"),
+                      pagination: {
+                        item: (value) => {
+                          return `<li class="page-item"><a class="page-link cursor-pointer">${value.page}</a></li>`;
+                        },
+                        innerWindow: 1,
+                        outerWindow: 1,
+                        left: 0,
+                        right: 0,
+                      },
+                      valueNames: advancedTable.headers.map((header) => header["data-sort"]),
+                    }));
+                    const searchInput = document.querySelector("#advanced-table-search");
+                    if (searchInput) {
+                      searchInput.addEventListener("input", () => {
+                        list.search(searchInput.value);
+                      });
+                    }
+                  });
+            </script>
+            {% endblock %}
+    </div>

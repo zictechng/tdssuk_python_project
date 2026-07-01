@@ -1,0 +1,240 @@
+{% extends "mainDash/layouts/innerBaseDash.html" %}
+{% load static %}
+
+{% block body_class_attr %} class="scrollspy-page"{% endblock %}
+
+{% block title %}Quote Details{% endblock %}
+
+{% block content %}
+
+<div class="page-header d-print-none">
+  <div class="container-xl">
+    <div class="row g-2 align-items-center">
+      <div class="col">
+        <div class="page-pretitle">Quote Requests</div>
+        <h2 class="page-title">
+          {{ quote.quoteFromCountry|default:"N/A"|title }}
+          <span class="text-secondary mx-2">→</span>
+          {{ quote.quoteToCountry|default:"N/A"|title }}
+          <span class="badge bg-blue-lt text-blue ms-2" style="font-size:.75rem;">
+            {{ quote.quote_serviceType|default:"N/A"|title }}
+          </span>
+        </h2>
+      </div>
+      <div class="col-auto ms-auto d-print-none">
+        <a href="{{ request.GET.next|default:request.META.HTTP_REFERER|default:'/' }}"
+           class="btn btn-secondary btn-sm d-none d-sm-inline-block">
+          <i class="bi bi-arrow-left me-1"></i> Back to Quotes
+        </a>
+        <a href="{{ request.GET.next|default:request.META.HTTP_REFERER|default:'/' }}"
+           class="btn btn-secondary d-sm-none btn-icon">
+          <i class="bi bi-arrow-left"></i>
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="page-body">
+  <div class="container-xl">
+    <div class="row row-cards mt-3">
+
+      <!-- LEFT — Quote Message -->
+      <div class="col-lg-8">
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title">
+              <i class="bi bi-chat-quote me-2 text-muted"></i>
+              {{ quote.quote_name|title }}
+              <span class="text-secondary fw-normal ms-2">| Quote Request</span>
+            </h3>
+            <div class="card-options">
+              <span class="badge text-white
+                {% if quote.status == 'approved' %}bg-success
+                {% elif quote.status == 'rejected' %}bg-warning
+                {% elif quote.status == 'deleted' %}bg-danger
+                {% else %}bg-secondary{% endif %}">
+                {{ quote.status|title|default:"Pending" }}
+              </span>
+            </div>
+          </div>
+
+          <div class="card-body">
+            <div id="message-box"></div>
+
+            {% if quote.status != "deleted" and quote.status != "pending" %}
+            <div class="mb-3">
+              <small class="text-muted">
+                <i class="bi bi-clock me-1"></i>
+                Action taken on <strong>{{ quote.updated_at|date:"d M Y, h:i A" }}</strong>
+              </small>
+            </div>
+            {% endif %}
+
+            <p class="text-secondary" style="white-space:normal; line-height:1.7;">
+              {{ quote.quote_message }}
+            </p>
+          </div>
+
+          <div class="card-footer">
+            <div class="row g-2 align-items-center">
+              <div class="col-auto ms-auto">
+                <div class="d-flex gap-2 flex-wrap">
+
+                  {% if quote.status == "deleted" %}
+
+                    <p class="text-muted mb-0">
+                      <i class="bi bi-trash me-1 text-danger"></i>
+                      Deleted by <strong>{{ quote.updated_by_username }}</strong>
+                      on <strong>{{ quote.updated_at|date:"d M Y, h:i A" }}</strong>
+                    </p>
+
+                  {% elif quote.status == "pending" %}
+
+                    <button class="btn btn-success btn-sm d-inline-flex align-items-center gap-2 js-htmx-action"
+                            hx-get="{% url 'update_quote_status' quote.uuid 'approved' %}?next={{ request.GET.next }}"
+                            hx-target="#toast-container" hx-swap="innerHTML">
+                      <i class="bi bi-check2-circle"></i> Approve
+                    </button>
+                    <button class="btn btn-warning btn-sm d-inline-flex align-items-center gap-2 js-htmx-action"
+                            hx-get="{% url 'update_quote_status' quote.uuid 'rejected' %}?next={{ request.GET.next }}"
+                            hx-target="#toast-container" hx-swap="innerHTML">
+                      <i class="bi bi-x-circle"></i> Reject
+                    </button>
+                    <button class="btn btn-danger btn-sm d-inline-flex align-items-center gap-2 js-htmx-action"
+                            hx-get="{% url 'update_quote_status' quote.uuid 'deleted' %}?next={{ request.GET.next }}"
+                            hx-target="#toast-container" hx-swap="innerHTML"
+                            onclick="return confirm('Are you sure you want to delete this request?')">
+                      <i class="bi bi-trash"></i> Delete
+                    </button>
+
+                  {% elif quote.status == "approved" %}
+
+                    <button class="btn btn-warning btn-sm d-inline-flex align-items-center gap-2 js-htmx-action"
+                            hx-get="{% url 'update_quote_status' quote.uuid 'rejected' %}?next={{ request.GET.next }}"
+                            hx-target="#toast-container" hx-swap="innerHTML">
+                      <i class="bi bi-x-circle"></i> Reject
+                    </button>
+                    <button class="btn btn-danger btn-sm d-inline-flex align-items-center gap-2 js-htmx-action"
+                            hx-get="{% url 'update_quote_status' quote.uuid 'deleted' %}?next={{ request.GET.next }}"
+                            hx-target="#toast-container" hx-swap="innerHTML"
+                            onclick="return confirm('Are you sure?')">
+                      <i class="bi bi-trash"></i> Delete
+                    </button>
+
+                  {% elif quote.status == "rejected" %}
+
+                    <button class="btn btn-success btn-sm d-inline-flex align-items-center gap-2 js-htmx-action"
+                            hx-get="{% url 'update_quote_status' quote.uuid 'approved' %}?next={{ request.GET.next }}"
+                            hx-target="#toast-container" hx-swap="innerHTML">
+                      <i class="bi bi-check2-circle"></i> Approve
+                    </button>
+                    <button class="btn btn-danger btn-sm d-inline-flex align-items-center gap-2 js-htmx-action"
+                            hx-get="{% url 'update_quote_status' quote.uuid 'deleted' %}?next={{ request.GET.next }}"
+                            hx-target="#toast-container" hx-swap="innerHTML"
+                            onclick="return confirm('Are you sure?')">
+                      <i class="bi bi-trash"></i> Delete
+                    </button>
+
+                  {% endif %}
+
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT — Quote Details -->
+      <div class="col-lg-4">
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title">
+              <i class="bi bi-info-circle me-2 text-muted"></i> Quote Details
+            </h3>
+          </div>
+          <div class="list-group list-group-flush">
+            <div class="list-group-item">
+              <div class="row align-items-center">
+                <div class="col text-secondary">From</div>
+                <div class="col-auto fw-medium">{{ quote.quoteFromCountry|default:"—"|title }}</div>
+              </div>
+            </div>
+            <div class="list-group-item">
+              <div class="row align-items-center">
+                <div class="col text-secondary">To</div>
+                <div class="col-auto fw-medium">{{ quote.quoteToCountry|default:"—"|title }}</div>
+              </div>
+            </div>
+            <div class="list-group-item">
+              <div class="row align-items-center">
+                <div class="col text-secondary">Service Type</div>
+                <div class="col-auto fw-medium">{{ quote.quote_serviceType|default:"—"|title }}</div>
+              </div>
+            </div>
+            <div class="list-group-item">
+              <div class="row align-items-center">
+                <div class="col text-secondary">Submitted By</div>
+                <div class="col-auto fw-medium">{{ quote.quote_name|default:"—"|title }}</div>
+              </div>
+            </div>
+            <div class="list-group-item">
+              <div class="row align-items-center">
+                <div class="col text-secondary">Status</div>
+                <div class="col-auto">
+                  <span class="badge text-white
+                    {% if quote.status == 'approved' %}bg-success
+                    {% elif quote.status == 'rejected' %}bg-warning
+                    {% elif quote.status == 'deleted' %}bg-danger
+                    {% else %}bg-secondary{% endif %}">
+                    {{ quote.status|title|default:"Pending" }}
+                  </span>
+                </div>
+              </div>
+            </div>
+            {% if quote.status != "pending" and quote.status != "deleted" %}
+            <div class="list-group-item">
+              <div class="row align-items-center">
+                <div class="col text-secondary">Action Date</div>
+                <div class="col-auto text-secondary">
+                  {{ quote.updated_at|date:"d M Y, h:i A" }}
+                </div>
+              </div>
+            </div>
+            {% endif %}
+            {% if quote.status == "deleted" %}
+            <div class="list-group-item">
+              <div class="row align-items-center">
+                <div class="col text-secondary">Deleted By</div>
+                <div class="col-auto fw-medium text-danger">
+                  {{ quote.updated_by_username|default:"—" }}
+                </div>
+              </div>
+            </div>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.body.addEventListener('htmx:beforeRequest', function (evt) {
+  var el = evt.detail.elt;
+  if (el.classList.contains('js-htmx-action')) {
+    el.disabled = true;
+  }
+});
+document.body.addEventListener('htmx:afterRequest', function (evt) {
+  var el = evt.detail.elt;
+  if (el.classList.contains('js-htmx-action')) {
+    el.disabled = false;
+  }
+});
+</script>
+{% endblock %}

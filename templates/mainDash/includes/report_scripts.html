@@ -1,0 +1,36 @@
+
+<script>
+(function () {
+  function initReportDatepickers() {
+    ['report-date-from', 'report-date-to'].forEach(function (id) {
+      var el = document.getElementById(id);
+      if (!el) return;
+      if (el.litepicker) { el.litepicker.destroy(); el.litepicker = null; }
+      var picker = new Litepicker({
+        element: el,
+        format: 'YYYY-MM-DD',
+        buttonText: {
+          previousMonth: '<i class="bi bi-chevron-left"></i>',
+          nextMonth:     '<i class="bi bi-chevron-right"></i>',
+        },
+      });
+      el.litepicker = picker;
+    });
+  }
+
+  document.addEventListener('DOMContentLoaded', function () {
+    //initReportDatepickers();
+
+    document.getElementById('report-filter-btn').addEventListener('click', function () {
+      var from = document.getElementById('report-date-from').value;
+      var to   = document.getElementById('report-date-to').value;
+      var url  = window.location.pathname + '?date_from=' + from + '&date_to=' + to;
+      htmx.ajax('GET', url, {
+        target: '#report-container',
+        swap:   'innerHTML',
+        pushURL: true,
+      });
+    });
+  });
+})();
+</script>

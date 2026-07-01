@@ -1,0 +1,218 @@
+
+{% extends "mainDash/layouts/baseDash.html" %}
+{% load static %}
+
+{% block title %}Backup & Restore{% endblock %}
+
+{% block content %}
+
+<div class="page-header d-print-none">
+  <div class="container-xl">
+    <div class="row g-2 align-items-center">
+      <div class="col">
+        <div class="page-pretitle">System Administration</div>
+        <h2 class="page-title">Backup & Restore</h2>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="page-body">
+  <div class="container-xl">
+    <div class="row row-deck row-cards mt-3">
+
+      <!-- Create Backup -->
+      <div class="col-lg-4">
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title">Create Backup</h3>
+          </div>
+          <div class="card-body">
+            <p class="text-muted">
+              Creates a full snapshot of the current database and stores it in
+              <code>media/backups/</code>.
+            </p>
+            <div class="alert alert-warning d-flex gap-2 align-items-start">
+              <i class="bi bi-exclamation-triangle-fill mt-1"></i>
+              <div class="small">Always backup before making major changes or migrations.</div>
+            </div>
+          </div>
+          <div class="card-footer">
+            <button type="button"
+                    class="btn btn-primary w-100"
+                    data-bs-toggle="modal"
+                    data-bs-target="#confirm-backup-modal">
+              <i class="bi bi-download me-1"></i> Create Backup Now
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Backup History -->
+      <div class="col-lg-8">
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title">Backup History</h3>
+            <div class="card-options">
+              <small class="text-muted">
+                {{ backup_logs|length }} backup{{ backup_logs|length|pluralize }}
+              </small>
+            </div>
+          </div>
+
+          {% if backup_logs %}
+          <div class="table-responsive">
+            <table class="table table-vcenter table-hover card-table text-nowrap">
+              <thead>
+                <tr>
+                  <th>Filename</th>
+                  <th>Size</th>
+                  <th>Created By</th>
+                  <th>Date</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for b in backup_logs %}
+                <tr>
+                  <td class="fw-medium small">
+                    <i class="bi bi-file-earmark-zip me-1 text-muted"></i>
+                    {{ b.filename }}
+                  </td>
+                  <td class="text-secondary">{{ b.size_kb }} KB</td>
+                  <td class="text-secondary">
+                    {{ b.created_by.get_full_name|default:b.created_by.username|default:"System" }}
+                  </td>
+                  <td class="text-secondary">{{ b.created_at|date:"d M Y, H:i" }}</td>
+                  <td class="text-end">
+                    <button type="button"
+                            class="btn btn-sm btn-ghost-danger"
+                            data-bs-toggle="modal"
+                            data-bs-target="#confirm-delete-{{ forloop.counter }}">
+                      <i class="bi bi-trash"></i>
+                    </button>
+                  </td>
+                </tr>
+
+                <!-- Delete Confirm Modal per backup -->
+                <div class="modal modal-blur fade"
+                     id="confirm-delete-{{ forloop.counter }}"
+                     tabindex="-1" role="dialog" aria-hidden="true">
+                  <div class="modal-dialog modal-sm modal-dialog-centered" role="document">
+                    <div class="modal-content">
+                      <div class="modal-body">
+                        <div class="modal-title">Delete this backup?</div>
+                        <div class="text-muted mt-1">
+                          <strong>{{ b.filename }}</strong> will be permanently removed.
+                          This cannot be undone.
+                        </div>
+                      </div>
+                      <div class="modal-footer">
+                        <button type="button"
+                                class="btn btn-link link-secondary me-auto"
+                                data-bs-dismiss="modal">Cancel</button>
+                        <form hx-post="{% url 'backup_restore' %}"
+                              hx-target="#toast-container"
+                              hx-swap="innerHTML">
+                          {% csrf_token %}
+                          <input type="hidden" name="action"   value="delete_backup">
+                          <input type="hidden" name="filename" value="{{ b.filename }}">
+                          <button type="submit"
+                                  class="btn btn-danger"
+                                  data-bs-dismiss="modal">
+                            Yes, Delete
+                          </button>
+                        </form>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+          {% else %}
+          <div class="text-center py-5 text-secondary">
+            <i class="bi bi-archive fs-2 d-block mb-2 opacity-50"></i>
+            <h4 class="mb-1">No backups yet</h4>
+            <small>Click "Create Backup Now" to get started.</small>
+          </div>
+          {% endif %}
+
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- Confirm Backup Modal -->
+<div class="modal modal-blur fade" id="confirm-backup-modal" tabindex="-1" role="dialog" aria-hidden="true">
+  <div class="modal-dialog modal-sm modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-body">
+        <div class="modal-title">Create a database backup?</div>
+        <div class="text-muted mt-1">
+          A snapshot of the current database will be saved to <code>media/backups/</code>.
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-link link-secondary me-auto"
+                data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-primary" id="confirm-backup-btn">
+          <span id="confirm-backup-label">Yes, Backup</span>
+          <span id="confirm-backup-spinner"
+                class="spinner-border spinner-border-sm ms-2"
+                style="display:none;" role="status" aria-hidden="true"></span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+
+  document.getElementById('confirm-backup-btn').addEventListener('click', function () {
+    var btn     = this;
+    var label   = document.getElementById('confirm-backup-label');
+    var spinner = document.getElementById('confirm-backup-spinner');
+
+    btn.disabled          = true;
+    label.textContent     = 'Creating...';
+    spinner.style.display = 'inline-block';
+
+    var formData = new FormData();
+    formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+    formData.append('action', 'backup');
+
+    fetch('{% url "backup_restore" %}', {
+      method: 'POST', body: formData,
+      headers: { 'HX-Request': 'true' }
+    })
+    .then(function (res) { return res.text(); })
+    .then(function (html) {
+      var doc     = new DOMParser().parseFromString(html, 'text/html');
+      var toastEl = doc.querySelector('.toast');
+      if (toastEl) {
+        document.querySelector('#confirm-backup-modal [data-bs-dismiss="modal"]').click();
+        document.getElementById('toast-container').innerHTML = toastEl.outerHTML;
+        var liveToast = document.querySelector('#toast-container .toast');
+        tabler.Toast.getOrCreateInstance(liveToast).show();
+        // Reload page after short delay to refresh backup list
+        setTimeout(function () { window.location.reload(); }, 1800);
+      }
+    })
+    .catch(function (err) { console.error(err); })
+    .finally(function () {
+      btn.disabled          = false;
+      label.textContent     = 'Yes, Backup';
+      spinner.style.display = 'none';
+    });
+  });
+
+});
+</script>
+
+{% endblock %}

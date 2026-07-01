@@ -1,0 +1,66 @@
+
+
+<!-- Table -->
+<div class="card">
+  <div class="card-header">
+    <h3 class="card-title">Audit Events</h3>
+    <div class="card-options">
+      <small class="text-muted">{{ logs.paginator.count }} event{{ logs.paginator.count|pluralize }}</small>
+    </div>
+  </div>
+
+  {% if logs.paginator.count > 0 %}
+  <div class="table-responsive">
+    <table class="table table-vcenter table-hover card-table text-nowrap">
+      <thead>
+        <tr>
+          <th>User</th><th>Action</th><th>Model</th>
+          <th>Record</th><th>Description</th><th>Date & Time</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for log in logs %}
+        <tr>
+          <td class="fw-medium">
+            {{ log.user.get_full_name|default:log.user.username|default:"System" }}
+          </td>
+          <td>
+            <span class="badge text-white
+              {% if log.action == 'deleted' %}bg-danger
+              {% elif log.action == 'login_failed' %}bg-warning
+              {% elif log.action == 'restored' %}bg-success
+              {% else %}bg-secondary{% endif %}">
+              {{ log.action|title }}
+            </span>
+          </td>
+          <td class="text-secondary">{{ log.model_name }}</td>
+          <td class="text-secondary">{{ log.object_repr }}</td>
+          <td class="text-secondary" style="max-width:300px; white-space:normal;">
+            {{ log.description|default:"—" }}
+          </td>
+          <td class="text-secondary">{{ log.timestamp|date:"d M Y, H:i" }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+    {% include "mainDash/includes/report_pagination.html" with page_obj=logs hx_target="#audit-container" %}
+  {% else %}
+  <div class="text-center py-5 text-secondary">
+    <i class="bi bi-shield-check fs-2 d-block mb-2 opacity-50"></i>
+    <h4 class="mb-1">No audit events found</h4>
+    <small>Try adjusting your filters.</small>
+  </div>
+  {% endif %}
+</div>
+
+<script>
+(function () {
+  var input = document.getElementById('audit-search');
+  var clear = document.getElementById('audit-search-clear');
+  if (!input) return;
+  input.addEventListener('input', function () { clear.style.display = input.value ? 'block' : 'none'; });
+  clear.addEventListener('click', function () { input.value = ''; clear.style.display = 'none'; htmx.trigger(input, 'search'); });
+
+})();
+</script>

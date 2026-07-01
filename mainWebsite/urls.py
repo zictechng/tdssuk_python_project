@@ -19,8 +19,6 @@ urlpatterns = [
     path('privacy-policy', views.privacyPolicy, name='privacyPolicy'),
     path('track-shipment', views.trackShipment, name='trackShipment'),
     
-    
-    
     path(
         'newsletter/subscribe/',
         views.newsletter_subscribe,

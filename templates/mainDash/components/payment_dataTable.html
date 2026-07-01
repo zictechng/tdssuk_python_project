@@ -1,0 +1,141 @@
+
+{% load static %}
+<div class="col-12">
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">Payment Records</h3>
+            <div class="card-options">
+                <small class="text-muted">
+                    {{ payments_page.paginator.count }} payment{{ payments_page.paginator.count|pluralize }}
+                </small>
+            </div>
+        </div>
+
+        {% if payments_page.paginator.count > 0 %}
+        <div class="table-responsive">
+            <table class="table card-table table-vcenter text-nowrap">
+                <thead>
+                    <tr>
+                        <th class="w-1"><input class="form-check-input m-0 align-middle" type="checkbox" id="select-all" aria-label="Select all payments" /></th>
+                        <th>Invoice</th>
+                        <th>Customer</th>
+                        <th>Method</th>
+                        <th>Reference</th>
+                        <th>Amount</th>
+                        <th>Paid On</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for payment in payments_page %}
+                    <tr id="payment-row-{{ payment.pk }}">
+                        <td><input class="form-check-input m-0 align-middle table-selectable-check" type="checkbox" value="{{ payment.pk }}" aria-label="Select payment" /></td>
+                        <td>
+                            <a href="{% url 'invoice_detail' payment.invoice.uuid %}" class="text-reset fw-medium">
+                                {{ payment.invoice.invoice_number }}
+                            </a>
+                        </td>
+                        <td>
+                            <div><strong>{{ payment.invoice.customer_name }}</strong></div>
+                            {% if payment.invoice.customer_email %}
+                            <div class="text-muted small">{{ payment.invoice.customer_email }}</div>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <span class="badge bg-blue-lt">{{ payment.get_method_display }}</span>
+                        </td>
+                        <td class="text-secondary">{{ payment.reference|default:"—" }}</td>
+                        <td>
+                            <strong>{{ payment.invoice.currency }} {{ payment.amount|floatformat:2 }}</strong>
+                        </td>
+                        <td class="text-secondary">{{ payment.paid_on|date:"d/m/Y" }}</td>
+                        <td class="text-end">
+                            <button type="button"
+                                    class="btn btn-sm js-delete-payment btn-ghost-danger"
+                                    data-payment-id="{{ payment.pk }}">
+                                Delete
+                            </button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="card-footer d-flex align-items-center">
+            <p class="m-0 text-secondary">
+                Showing <strong>{{ payments_page.start_index }}–{{ payments_page.end_index }}</strong>
+                of <strong>{{ payments_page.paginator.count }}</strong>
+            </p>
+            <ul class="pagination m-0 ms-auto">
+                <li class="page-item {% if not payments_page.has_previous %}disabled{% endif %}">
+                    <a class="page-link" href="#"
+                       hx-get="{% url 'payment_list' %}?page={% if payments_page.has_previous %}{{ payments_page.previous_page_number }}{% else %}1{% endif %}&search={{ search_query }}&method={{ method_filter }}"
+                       hx-target="#payment-table-container" hx-swap="innerHTML" hx-push-url="true">←</a>
+                </li>
+                {% for num in payments_page.paginator.page_range %}
+                <li class="page-item {% if payments_page.number == num %}active{% endif %}">
+                    <a class="page-link" href="#"
+                       hx-get="{% url 'payment_list' %}?page={{ num }}&search={{ search_query }}&method={{ method_filter }}"
+                       hx-target="#payment-table-container" hx-swap="innerHTML" hx-push-url="true">{{ num }}</a>
+                </li>
+                {% endfor %}
+                <li class="page-item {% if not payments_page.has_next %}disabled{% endif %}">
+                    <a class="page-link" href="#"
+                       hx-get="{% url 'payment_list' %}?page={% if payments_page.has_next %}{{ payments_page.next_page_number }}{% else %}{{ payments_page.paginator.num_pages }}{% endif %}&search={{ search_query }}&method={{ method_filter }}"
+                       hx-target="#payment-table-container" hx-swap="innerHTML" hx-push-url="true">→</a>
+                </li>
+            </ul>
+        </div>
+
+        {% else %}
+        <div class="text-center py-5 text-secondary">
+            <i class="bi bi-cash-coin fs-2 d-block mb-2 opacity-50"></i>
+            <h4 class="mb-1">No payments found</h4>
+            <small>Try adjusting your search or filters.</small>
+        </div>
+        {% endif %}
+
+    </div>
+</div>
+
+{% include "mainDash/includes/confirm_delete_modal.html" %}
+<script>
+document.querySelectorAll('.js-delete-payment').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+        var paymentId = btn.getAttribute('data-payment-id');
+        var deleteUrl = "{% url 'payment_delete' 0 %}".replace('/0/', '/' + paymentId + '/');
+
+        confirmDelete({
+            url: deleteUrl,
+            title: 'Delete this payment?',
+            message: 'Invoice balance and status will be updated automatically.',
+            csrfToken: '{{ csrf_token }}',
+            onSuccess: function () {
+                var row = document.getElementById('payment-row-' + paymentId);
+                if (row) row.remove();
+            },
+            onError: function (data) {
+                alert(data.error || 'Delete failed.');
+            },
+        });
+    });
+});
+
+(function () {
+    function initSelectAll() {
+        var selectAll = document.getElementById('select-all');
+        if (!selectAll) return;
+        selectAll.addEventListener('change', function () {
+            document.querySelectorAll('.table-selectable-check').forEach(function (cb) {
+                cb.checked = selectAll.checked;
+            });
+        });
+    }
+        initSelectAll();
+        var container = document.getElementById('users-table-container');
+        if (container) {
+            container.addEventListener('htmx:afterSwap', initSelectAll);
+        }
+})();
+</script>

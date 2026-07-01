@@ -4,11 +4,17 @@ from django.shortcuts import redirect, render
 from django.core.validators import validate_email
 from django.core.exceptions import ValidationError
 from django_countries import countries
-from .models import ContactMessage, Newsletter, QuoteRequest
-from .helpers import validation_error, success_message, error_message
+
+from dashboard.forms.form_details import User
+from dashboard.utils.file_handler import encode_pk
+from .models import ContactMessage, Newsletter, QuoteRequest, Shipment, ShipmentTrackingEvent, SupportTicket
+from .helpers import notify, validation_error, success_message, error_message
 from django.core.mail import EmailMultiAlternatives
 from django.conf import settings
 from django.template.loader import render_to_string
+from django.db.models import Q, Prefetch
+
+from mainWebsite import models
 
 
 # Create your views here.
@@ -90,6 +96,33 @@ def contact(request):
                 sender_message=contactMessage,
                 )
             contact.save()
+
+             # Auto-create support ticket
+            ticket = SupportTicket.objects.create(
+                submitter_name  = contact.sender_name,
+                submitter_email = contact.sender_email,
+                subject         = contact.sender_subject,
+                description     = contact.sender_message,
+                priority        = 'medium',
+                status          = 'open',
+                submitted_by    = None,  # guest user
+            )
+
+            # Link contact to ticket
+            contact.ticket = ticket
+            contact.save(update_fields=['ticket'])
+
+            # Notify all staff
+            staff_users = User.objects.filter(is_staff=True)
+            for staff in staff_users:
+                notify(
+                    user       = staff,
+                    title      = f'New Contact: {ticket.ticket_number}',
+                    message    = f'{contact.sender_name} sent a message: {contact.sender_subject}',
+                    notif_type = 'ticket',
+                    url        = f'/dashboard/tickets/{encode_pk(ticket.pk)}/',
+                )
+            
             # success message
             messages.success(
                     request,
@@ -114,26 +147,6 @@ def privacyPolicy(request):
 
 def trackShipment(request):
     return render(request, 'mainWebsite/trackOrder.html');
-
-# newsletter
-# def newsletter_subscribe(request):
-#     if request.method == "POST":
-#         email = request.POST.get("news_letterEmail")
-
-#         if not email:
-#             messages.error(request, "Email address is required.")
-#             return redirect(request.META.get('HTTP_REFERER', '/'))
-
-#         if Newsletter.objects.filter(subscriber_email=email).exists():
-#             messages.warning(request, "You are already subscribed.")
-#         else:
-#             Newsletter.objects.create(
-#                 subscriber_email=email
-#             )
-#             messages.success(request, "Thank you for subscribing.")
-
-#     return redirect(request.META.get('HTTP_REFERER', '/'))
-
 
 def newsletter_subscribe(request):
     # Testing only
@@ -225,8 +238,6 @@ def newsletter_subscribe(request):
             "clear_input": True
         }
     )
-
-
 
 # quote request process here
 def quote_submission(request):
@@ -336,20 +347,83 @@ def quote_submission(request):
 
 # tracking parcel
 def trackParcel(request):
-    time.sleep(1)
 
-    tracking_id = request.POST.get('track_number', '').strip()
+    tracking_id = request.POST.get('track_number', '').strip().upper()
+
     if not tracking_id:
-       return validation_error(request, "Please, enter tracking number.")
-    try:
-        # query the db for result here
+        return error_message(
+                request,
+                f"Error! Please enter a tracking number OR shipment number . ",
+                alert_type="warning"
+            )
 
-        # success message
-        return success_message(
-            request,
-            f"{'Hello Customer'}, we currently do not have any new update about your shipment for your tracking ID:  {tracking_id}! Try again later."
+    try:
+        tracking_qs = (
+            ShipmentTrackingEvent.objects
+            .select_related('recorded_by')
+            .order_by('created_at')
         )
-    
-        # Error message
+
+        shipment_qs = (
+            Shipment.objects
+            .select_related('order', 'created_by')
+            .prefetch_related(
+                Prefetch('tracking_events', queryset=tracking_qs),
+                'order__images',
+            )
+        )
+
+        shipment = (
+            shipment_qs
+            .filter(
+                Q(order__tracking_number=tracking_id) |
+                Q(order__order_number=tracking_id)    |
+                Q(shipment_number=tracking_id)
+            )
+            .order_by('-created_at')
+            .first()
+        )
+
+        if not shipment:
+            return error_message(
+                request,
+                f"No shipment found for {tracking_id}. "
+                f"Please check your tracking number and try again.",
+                alert_type="danger"
+            )
+
+        order = shipment.order
+
+        return render(request, 'mainWebsite/components/trackResult.html', {
+            'shipment': shipment,
+            'order':    order,
+            'query':    tracking_id,
+        })
+
     except Exception as e:
-        return error_message(request, "Sorry, an error occurred while processing your request! Try again.") 
+        return error_message(
+            request,
+            "Sorry, an error occurred while processing your request. Please try again.",
+            alert_type="warning"
+        )
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

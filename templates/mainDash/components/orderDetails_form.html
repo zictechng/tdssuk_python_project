@@ -1,0 +1,366 @@
+        
+         {% load static %}
+        {% load humanize %}
+        <div class="page-body">
+            <div class="container-xl">
+                <div class="row row-deck row-cards">
+
+                    {# --- Order Status Banner --- #}
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-body">
+                                <div class="row align-items-center">
+                                    <div class="col">
+                                        <h3 class="mb-1">{{ order.order_number }}</h3>
+                                        <div class="text-muted">Tracking: <strong>{{ order.tracking_number }}</strong></div>
+                                    </div>
+                                    <div class="col-auto">
+                                        <span class="badge bg-{% if order.status == 'new' %}blue{% elif order.status == 'completed' %}green{% elif order.status == 'in_transit' %}cyan{% elif order.status == 'returned' %}orange{% elif order.status == 'deleted' %}red{% elif order.status == 'cancelled' or order.status == 'rejected' %}red{% elif order.status == 'processing' %}yellow{% else %}secondary{% endif %} {% if order.status == 'processing' %}text-dark{% else %}text-white{% endif %} fw-bold fs-5 px-3 py-2">
+                                            {{ order.get_status_display }}
+                                        </span>
+                                    </div>
+                                    <div class="col-auto text-muted">
+                                        Created {{ order.created_at|date:"d/m/Y H:i" }}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {# --- Customer Details --- #}
+                    <div class="col-md-4">
+                        <div class="card h-100">
+                            <div class="card-header">
+                                <h3 class="card-title">Customer Details</h3>
+                            </div>
+                            <div class="card-body">
+                                <dl class="row">
+                                    <dt class="col-5 text-muted">Name</dt>
+                                    <dd class="col-7">{{ order.customer_name }}</dd>
+
+                                    <dt class="col-5 text-muted">Phone</dt>
+                                    <dd class="col-7">{{ order.customer_phone }}</dd>
+
+                                    <dt class="col-5 text-muted">Email</dt>
+                                    <dd class="col-7">{{ order.customer_email|default:"—" }}</dd>
+                                </dl>
+                            </div>
+                        </div>
+                    </div>
+
+                    {# --- Sender Details --- #}
+                    <div class="col-md-4">
+                        <div class="card h-100">
+                            <div class="card-header">
+                                <h3 class="card-title">Sender Details <span class="text-muted fs-5">(Pickup)</span></h3>
+                            </div>
+                            <div class="card-body">
+                                <dl class="row">
+                                    <dt class="col-5 text-muted">Name</dt>
+                                    <dd class="col-7">{{ order.sender_name|default:"—" }}</dd>
+
+                                    <dt class="col-5 text-muted">Phone</dt>
+                                    <dd class="col-7">{{ order.sender_phone|default:"—" }}</dd>
+
+                                    <dt class="col-5 text-muted">Email</dt>
+                                    <dd class="col-7">{{ order.sender_email|default:"—" }}</dd>
+
+                                    <dt class="col-5 text-muted">City</dt>
+                                    <dd class="col-7">{{ order.sender_city|default:"—" }}</dd>
+
+                                    <dt class="col-5 text-muted">Country</dt>
+                                    <dd class="col-7">{{ order.sender_country|default:"—" }}</dd>
+
+                                    <dt class="col-5 text-muted">Address</dt>
+                                    <dd class="col-7">{{ order.sender_address|default:"—" }}</dd>
+                                </dl>
+                            </div>
+                        </div>
+                    </div>
+
+                    {# --- Receiver Details --- #}
+                    <div class="col-md-4">
+                        <div class="card h-100">
+                            <div class="card-header">
+                                <h3 class="card-title">Receiver Details <span class="text-muted fs-5">(Delivery)</span></h3>
+                            </div>
+                            <div class="card-body">
+                                <dl class="row">
+                                    <dt class="col-5 text-muted">Name</dt>
+                                    <dd class="col-7">{{ order.receiver_name|default:"—" }}</dd>
+
+                                    <dt class="col-5 text-muted">Phone</dt>
+                                    <dd class="col-7">{{ order.receiver_phone|default:"—" }}</dd>
+
+                                    <dt class="col-5 text-muted">Email</dt>
+                                    <dd class="col-7">{{ order.receiver_email|default:"—" }}</dd>
+
+                                    <dt class="col-5 text-muted">City</dt>
+                                    <dd class="col-7">{{ order.receiver_city|default:"—" }}</dd>
+
+                                    <dt class="col-5 text-muted">Country</dt>
+                                    <dd class="col-7">{{ order.receiver_country|default:"—" }}</dd>
+
+                                    <dt class="col-5 text-muted">Address</dt>
+                                    <dd class="col-7">{{ order.receiver_address|default:"—" }}</dd>
+                                </dl>
+                            </div>
+                        </div>
+                    </div>
+
+                    {# --- Order Details --- #}
+                    <div class="col-md-8">
+                        <div class="card h-100">
+                            <div class="card-header">
+                                <h3 class="card-title">Order Details</h3>
+                            </div>
+                            <div class="card-body">
+                                <dl class="row">
+                                    <dt class="col-5 text-muted">Order Type</dt>
+                                    <dd class="col-7">{{ order.order_type.name|default:"—" }}</dd>
+
+                                    <dt class="col-5 text-muted">Category</dt>
+                                    <dd class="col-7">{{ order.category.name|default:"—" }}</dd>
+
+                                    <dt class="col-5 text-muted">Quantity</dt>
+                                    <dd class="col-7">{{ order.quantity }}</dd>
+
+                                    <dt class="col-5 text-muted">Weight</dt>
+                                    <dd class="col-7">{{ order.weight }} kg</dd>
+
+                                    <dt class="col-5 text-muted">Origin Country</dt>
+                                    <dd class="col-7">{{ order.order_origin_country|default:"—" }}</dd>
+
+                                    <dt class="col-5 text-muted">Destination Country</dt>
+                                    <dd class="col-7">{{ order.order_destination_country|default:"—" }}</dd>
+
+                                    <dt class="col-5 text-muted">Reference No</dt>
+                                    <dd class="col-7">{{ order.reference_number|default:"—" }}</dd>
+
+                                    <dt class="col-5 text-muted">Expected Delivery</dt>
+                                    <dd class="col-7">{{ order.expected_delivery_date|date:"d/m/Y"|default:"—" }}</dd>
+                                </dl>
+                            </div>
+                        </div>
+                    </div>
+
+                    {# --- Payment Summary --- #}
+                    <div class="col-md-4">
+                        <div class="card h-100">
+                            <div class="card-header">
+                                <h3 class="card-title">Payment Summary</h3>
+                            </div>
+                            <div class="card-body">
+                                <dl class="row">
+                                    <dt class="col-6 text-muted">Shipping Cost</dt>
+                                    <dd class="col-6">£{{ order.shipping_cost|floatformat:2|intcomma }}</dd>
+
+                                    <dt class="col-6 text-muted">Total Amount</dt>
+                                    <dd class="col-6"><strong>£{{ order.total_amount|floatformat:2|intcomma }}</strong></dd>
+                                </dl>
+                            </div>
+                            {% if order.status == 'completed' %}
+                                <div class="card-footer d-flex align-items-center text-success">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon me-2">
+                                        <path d="M5 12l5 5l10 -10"></path>
+                                    </svg>
+                                    <small>Payment confirmed for this order shipment</small>
+                                </div>
+                                {% else %}
+                                <div class="card-footer d-flex align-items-center text-warning">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon me-2">
+                                        <path d="M12 9v4"></path>
+                                        <path d="M10.363 3.591l-8.106 13.534a1.914 1.914 0 0 0 1.636 2.871h16.214a1.914 1.914 0 0 0 1.636 -2.87l-8.106 -13.536a1.914 1.914 0 0 0 -3.274 0z"></path>
+                                        <path d="M12 16h.01"></path>
+                                    </svg>
+                                    <small>Waiting payment confirmation on this order shipment</small>
+                                </div>
+                                {% endif %}
+                        </div>
+                    </div>
+
+                    {# --- Notes --- #}
+                    {% if order.notes %}
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header">
+                                <h3 class="card-title">Additional Notes</h3>
+                            </div>
+                            <div class="card-body">
+                                {{ order.notes }}
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                </div>
+            </div>
+        </div>
+
+
+<script>
+    window.addEventListener('load', function () {
+
+    // --- TomSelect helpers ---
+    function destroyTomSelects() {
+        document.querySelectorAll('select[data-search="on"]').forEach(function (el) {
+            if (el.tomselect) el.tomselect.destroy();
+        });
+    }
+
+    function initTomSelects() {
+        document.querySelectorAll('select[data-search="on"]').forEach(function (el) {
+            if (!el.tomselect) new TomSelect(el, { placeholder: "Select country" });
+        });
+    }
+
+    function syncTomSelectValues() {
+        document.querySelectorAll('select[data-search="on"]').forEach(function (el) {
+            if (el.tomselect) el.value = el.tomselect.getValue();
+        });
+    }
+
+    // --- Mark TomSelect wrappers with is-invalid + clear on change ---
+    function markTomSelectErrors() {
+        document.querySelectorAll('select.is-invalid').forEach(function (el) {
+            if (el.tomselect) {
+                // ✅ Add is-invalid to the visible TomSelect wrapper div
+                el.tomselect.wrapper.classList.add('is-invalid');
+
+                // ✅ Clear error when user picks a value
+                el.tomselect.on('change', function () {
+                    el.tomselect.wrapper.classList.remove('is-invalid');
+                    el.classList.remove('is-invalid');
+                    var feedback = el.closest('.mb-3').querySelector('.invalid-feedback');
+                    if (feedback) feedback.remove();
+                });
+            }
+        });
+    }
+
+    // --- Clear errors on regular inputs/textareas ---
+    function bindInputErrors() {
+        document.querySelectorAll('input.is-invalid, textarea.is-invalid').forEach(function (el) {
+            el.addEventListener('input', function () {
+                el.classList.remove('is-invalid');
+                var feedback = el.closest('.mb-3').querySelector('.invalid-feedback');
+                if (feedback) feedback.remove();
+            }, { once: true });
+        });
+    }
+
+    // --- Handle toast display and redirect ---
+    function handleToastAndRedirect(toastEl) {
+        if (!toastEl) return;
+        var redirectUrl = toastEl.getAttribute('data-redirect-url');
+        tabler.Toast.getOrCreateInstance(toastEl).show();
+        if (redirectUrl) {
+            setTimeout(function () {
+                window.location.href = redirectUrl;
+            }, 1500);
+        }
+    }
+
+    // --- Reinitialize Litepicker datepickers ---
+    function reinitDatepickers() {
+    var pickers = document.querySelectorAll('.datepicker');
+    
+    pickers.forEach(function (el) {
+        if (el.litepicker) {
+            el.litepicker.destroy();
+            el.litepicker = null;
+        }
+
+        var minDate = el.dataset.minDate === 'today' ? new Date()
+                    : el.dataset.minDate ? new Date(el.dataset.minDate)
+                    : null;
+
+        var picker = new Litepicker({
+            element: el,
+            minDate: minDate,
+            format: 'YYYY-MM-DD',
+            buttonText: {
+                previousMonth: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-1"><path d="M15 6l-6 6l6 6" /></svg>`,
+                nextMonth: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-1"><path d="M9 6l6 6l-6 6" /></svg>`,
+            },
+        });
+
+        el.litepicker = picker;
+        });
+    }
+
+    // --- Main submit handler ---
+    document.getElementById('confirm-submit-btn').addEventListener('click', function () {
+        // 1. Sync TomSelect values to hidden selects
+        syncTomSelectValues();
+
+        var form = document.getElementById('order-form');
+        var formData = new FormData(form);
+
+        // 2. Destroy TomSelects before DOM changes
+        destroyTomSelects();
+
+        // 3. POST the form
+        fetch(form.getAttribute('hx-post'), {
+            method: 'POST',
+            body: formData,
+            headers: { 'HX-Request': 'true' }
+        })
+        .then(function (res) { return res.text(); })
+        .then(function (html) {
+            var parser = new DOMParser();
+            var doc = parser.parseFromString(html, 'text/html');
+
+            // 4. Apply OOB swaps (accordion panels with errors)
+            doc.querySelectorAll('[hx-swap-oob]').forEach(function (oobEl) {
+                var target = document.getElementById(oobEl.id);
+                if (target) target.outerHTML = oobEl.outerHTML;
+            });
+
+            // 5. Inject and show toast
+            var toast = doc.querySelector('.toast');
+            if (toast) {
+                document.getElementById('toast-container').innerHTML = toast.outerHTML;
+                var toastEl = document.querySelector('#toast-container .toast');
+                handleToastAndRedirect(toastEl);
+            }
+
+            // 6. Reinitialize TomSelect on updated DOM
+            initTomSelects();
+
+            // 6b. 
+            reinitDatepickers();
+
+            // 7. Push is-invalid onto TomSelect visible wrappers
+            markTomSelectErrors();
+
+            // 8. Bind clear-on-input for text fields
+            bindInputErrors();
+
+            // 9. Open accordion panels that have errors
+            setTimeout(function () {
+                document.querySelectorAll('.accordion-collapse').forEach(function (panel) {
+                    var hasError = panel.querySelector('.is-invalid, .invalid-feedback');
+                    if (hasError) {
+                        panel.classList.add('show');
+                        // Also update the button aria state
+                        var panelId = panel.getAttribute('id');
+                        var btn = document.querySelector('[data-bs-target="#' + panelId + '"]');
+                        if (btn) {
+                            btn.classList.remove('collapsed');
+                            btn.setAttribute('aria-expanded', 'true');
+                        }
+                    }
+                });
+            }, 100); 
+        })
+        .catch(function (err) { console.error('Submit error:', err); });
+    });
+
+});
+</script>
+            
+
+
+                
+      

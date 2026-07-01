@@ -1,0 +1,186 @@
+
+<script>
+(function () {
+    var dropzone = document.getElementById('image-dropzone');
+    var input = document.getElementById('image-input');
+    var previewRow = document.getElementById('image-preview-row');
+    var gallery = document.getElementById('image-gallery');
+    var galleryLabel = document.getElementById('gallery-label');
+    var actionBar = document.getElementById('upload-action-bar');
+    var submitBtn = document.getElementById('upload-submit-btn');
+    var submitSpinner = document.getElementById('upload-submit-spinner');
+    var submitLabel = document.getElementById('upload-submit-label');
+    var clearBtn = document.getElementById('clear-queue-btn');
+    var uploadUrl = "{% url 'order_image_upload' order.uuid %}";
+
+    var queue = []; // { file, cardEl }
+
+    function csrfToken() {
+        var el = document.querySelector('[name=csrfmiddlewaretoken]');
+        return el ? el.value : '';
+    }
+
+    function updateActionBar() {
+        actionBar.style.display = queue.length ? 'flex' : 'none';
+    }
+
+    function addToQueue(files) {
+        Array.prototype.forEach.call(files, function (file) {
+            if (!file.type.startsWith('image/')) return;
+
+            var col = document.createElement('div');
+            col.className = 'col-6 col-md-3';
+
+            var reader = new FileReader();
+            reader.onload = function (e) {
+                col.innerHTML =
+                    '<div class="card image-preview-card is-done">' +
+                        '<img src="' + e.target.result + '" class="card-img-top image-preview-thumb" alt="Preview">' +
+                        '<button type="button" class="btn btn-icon btn-sm image-remove-btn queue-remove-btn" title="Remove">' +
+                            '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon">' +
+                                '<path d="M18 6l-12 12"></path><path d="M6 6l12 12"></path>' +
+                            '</svg>' +
+                        '</button>' +
+                    '</div>';
+
+                col.querySelector('.queue-remove-btn').addEventListener('click', function () {
+                    queue = queue.filter(function (q) { return q.cardEl !== col; });
+                    col.remove();
+                    updateActionBar();
+                });
+            };
+            reader.readAsDataURL(file);
+
+            previewRow.appendChild(col);
+            queue.push({ file: file, cardEl: col });
+        });
+
+        updateActionBar();
+    }
+
+    function buildGalleryCard(img) {
+        var col = document.createElement('div');
+        col.className = 'col-6 col-md-3';
+        col.id = 'image-card-' + img.id;
+        col.innerHTML =
+            '<div class="card image-card">' +
+                '<a href="' + img.url + '" target="_blank">' +
+                    '<img src="' + img.url + '" class="card-img-top image-thumb" alt="Order image">' +
+                '</a>' +
+                '<button type="button" class="btn btn-icon btn-sm image-remove-btn" data-image-id="' + img.id + '" title="Remove image">' +
+                    '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon">' +
+                        '<path d="M18 6l-12 12"></path><path d="M6 6l12 12"></path>' +
+                    '</svg>' +
+                '</button>' +
+            '</div>';
+        gallery.prepend(col);
+        bindRemove(col.querySelector('.image-remove-btn'));
+        galleryLabel.style.display = '';
+    }
+
+    function showInlineError(message) {
+        var alert = document.createElement('div');
+        alert.className = 'alert alert-danger mt-2 mb-0';
+        alert.textContent = message;
+        actionBar.after(alert);
+        setTimeout(function () { alert.remove(); }, 4000);
+    }
+
+    function bindRemove(btn) {
+        btn.addEventListener('click', function () {
+            var imageId = btn.getAttribute('data-image-id');
+            var card = document.getElementById('image-card-' + imageId);
+            btn.disabled = true;
+
+            fetch('/dashboard/order/image/' + imageId + '/delete/', {
+                method: 'POST',
+                headers: { 'X-CSRFToken': csrfToken() },
+            })
+            .then(function (res) { return res.json(); })
+            .then(function (data) {
+                if (data.success && card) {
+                    card.remove();
+                    if (!gallery.children.length) {
+                        galleryLabel.style.display = 'none';
+                    }
+                }
+            });
+        });
+    }
+
+    document.querySelectorAll('.image-remove-btn').forEach(bindRemove);
+
+    // --- Open file picker ---
+    dropzone.addEventListener('click', function () { input.click(); });
+    input.addEventListener('change', function () {
+        addToQueue(input.files);
+        input.value = '';
+    });
+
+    // --- Drag and drop ---
+    ['dragenter', 'dragover'].forEach(function (evt) {
+        dropzone.addEventListener(evt, function (e) {
+            e.preventDefault();
+            dropzone.classList.add('dz-dragover');
+        });
+    });
+    ['dragleave', 'drop'].forEach(function (evt) {
+        dropzone.addEventListener(evt, function (e) {
+            e.preventDefault();
+            dropzone.classList.remove('dz-dragover');
+        });
+    });
+    dropzone.addEventListener('drop', function (e) {
+        if (e.dataTransfer.files.length) addToQueue(e.dataTransfer.files);
+    });
+
+    // --- Clear queue ---
+    clearBtn.addEventListener('click', function () {
+        queue = [];
+        previewRow.innerHTML = '';
+        updateActionBar();
+    });
+
+    // --- Submit queued files ---
+    submitBtn.addEventListener('click', function () {
+        if (!queue.length) return;
+
+        submitBtn.disabled = true;
+        clearBtn.disabled = true;
+        submitSpinner.style.display = '';
+        submitLabel.textContent = 'Uploading...';
+
+        var formData = new FormData();
+        queue.forEach(function (q) { formData.append('images', q.file); });
+
+        fetch(uploadUrl, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-CSRFToken': csrfToken(),
+                'HX-Request': 'true',
+            },
+        })
+        .then(function (res) { return res.json(); })
+        .then(function (data) {
+            if (data.success) {
+                data.images.forEach(buildGalleryCard);
+            } else {
+                showInlineError(data.error || 'Upload failed. Please try again.');
+            }
+        })
+        .catch(function () {
+            showInlineError('Upload failed. Please check your connection and try again.');
+        })
+        .finally(function () {
+            queue = [];
+            previewRow.innerHTML = '';
+            updateActionBar();
+            submitBtn.disabled = false;
+            clearBtn.disabled = false;
+            submitSpinner.style.display = 'none';
+            submitLabel.textContent = 'Upload Images';
+        });
+    });
+})();
+</script>

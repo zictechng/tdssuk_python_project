@@ -1,0 +1,179 @@
+{% load static %}
+    <div class="col-11 mt-3">
+            <form class="card" id="vehicle-form">
+                {% csrf_token %}
+
+                <div class="card-header">
+                    <h3 class="card-title">Add Vehicle</h3>
+                </div>
+                <div class="card-body">
+                    <div class="row row-cards">
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label class="form-label">Ownership Type</label>
+                                <select name="ownership_type" id="id_ownership_type" class="form-select" required>
+                                    <option value="in_house">In-House</option>
+                                    <option value="third_party">Third-Party Carrier</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label class="form-label">Vehicle Name</label>
+                                <input type="text" name="name" class="form-control" placeholder="e.g. Van 4, DHL Express" required>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label class="form-label">Vehicle Type</label>
+                                <input type="text" name="vehicle_type" class="form-control" placeholder="e.g. Van, Truck, Motorbike">
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label class="form-label">Status</label>
+                                <select name="status" class="form-select">
+                                    <option value="available">Available</option>
+                                    <option value="on_route">On Route</option>
+                                    <option value="maintenance">Under Maintenance</option>
+                                    <option value="out_of_service">Out of Service</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    {# --- In-house only fields --- #}
+                    <div id="in-house-fields">
+                        <hr>
+                        <div class="row row-cards">
+                            <div class="col-md-3">
+                                <div class="mb-3">
+                                    <label class="form-label">License Plate</label>
+                                    <input type="text" name="license_plate" class="form-control">
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="mb-3">
+                                    <label class="form-label">Make</label>
+                                    <input type="text" name="make" class="form-control">
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="mb-3">
+                                    <label class="form-label">Model</label>
+                                    <input type="text" name="model" class="form-control">
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="mb-3">
+                                    <label class="form-label">Year</label>
+                                    <input type="number" name="year" class="form-control">
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="mb-3">
+                                    <label class="form-label">Mileage (km)</label>
+                                    <input type="number" name="mileage" class="form-control" value="0">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Assigned Driver</label>
+                                    <input type="text" name="assigned_driver_name" class="form-control" placeholder="Driver name (optional)">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {# --- Third-party only fields --- #}
+                    <div id="third-party-fields" style="display: none;">
+                        <hr>
+                        <div class="row row-cards">
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label class="form-label">Carrier Company Name</label>
+                                    <input type="text" name="carrier_company_name" class="form-control" placeholder="e.g. DHL, FedEx">
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label class="form-label">Contact Phone</label>
+                                    <input type="text" name="carrier_contact_phone" class="form-control">
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label class="form-label">Contact Email</label>
+                                    <input type="email" name="carrier_contact_email" class="form-control">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-0 mt-3">
+                        <label class="form-label">Notes</label>
+                        <textarea name="notes" rows="3" class="form-control"></textarea>
+                    </div>
+                </div>
+
+                <div class="card-footer text-end">
+                    <button type="button"
+                            class="btn btn-primary btn-sm"
+                            data-bs-toggle="modal"
+                            data-bs-target="#confirm-vehicle-modal">
+                        Add Vehicle
+                    </button>
+                </div>
+            </form>
+
+    {# --- Confirmation Modal --- #}
+    <div class="modal modal-blur fade" id="confirm-vehicle-modal" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-sm modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-body">
+                    <div class="modal-title">Add this vehicle?</div>
+                    <div class="text-muted mt-1">The vehicle will be saved to your fleet.</div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-link link-secondary me-auto" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="confirm-vehicle-btn">
+                        <span id="confirm-vehicle-label">Yes, Add Vehicle</span>
+                        <span id="confirm-vehicle-spinner" class="spinner-border spinner-border-sm ms-2" style="display:none;" role="status" aria-hidden="true"></span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    // Ownership toggle
+    document.getElementById('id_ownership_type').addEventListener('change', function () {
+        var isInHouse = this.value === 'in_house';
+        document.getElementById('in-house-fields').style.display = isInHouse ? '' : 'none';
+        document.getElementById('third-party-fields').style.display = isInHouse ? 'none' : '';
+    });
+
+    // On confirm: show spinner, submit form via HTMX
+    document.getElementById('confirm-vehicle-btn').addEventListener('click', function () {
+        const btn = this;
+        const label = document.getElementById('confirm-vehicle-label');
+        const spinner = document.getElementById('confirm-vehicle-spinner');
+
+        btn.disabled = true;
+        label.textContent = 'Adding...';
+        spinner.style.display = 'inline-block';
+
+        htmx.ajax('POST', '{% url "vehicle_create" %}', {
+            source: '#vehicle-form',
+            target: '#toast-container',
+            swap: 'innerHTML',
+        }).then(function () {
+            btn.disabled = false;
+            label.textContent = 'Yes, Add Vehicle';
+            spinner.style.display = 'none';
+            bootstrap.Modal.getInstance(document.getElementById('confirm-vehicle-modal')).hide();
+        });
+    });
+</script>

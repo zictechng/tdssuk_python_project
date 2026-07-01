@@ -1,0 +1,240 @@
+{% extends "mainDash/layouts/baseDash.html" %}
+{% load static %}
+
+{% block title %}{{ vehicle.name }} — Vehicle Detail{% endblock %}
+
+{% block content %}
+
+<div class="page-header d-print-none">
+    <div class="container-xl">
+        <div class="row g-2 align-items-center">
+            <div class="col">
+                <div class="page-pretitle">
+                    <a href="{% url 'vehicle_list' %}" class="text-secondary">Fleet — All Vehicles</a>
+                </div>
+                <h2 class="page-title">{{ vehicle.name }}</h2>
+            </div>
+            
+             <!-- Action buttons -->
+
+            <div class="col-auto ms-auto d-print-none">
+                <div class="btn-list">
+                  <a href="{% url 'vehicle_list'%}?next=/dashboard/shipments/" class="btn btn-secondary btn-sm d-none d-sm-inline-block">
+                    <i class="bi bi-arrow-left"></i>
+                    Back
+                  </a>
+                  {% if order.status != 'deleted'%}
+                  <div class="col-auto">
+                      <a href="{% url 'vehicle_edit' vehicle.uuid %}" class="btn btn-warning btn-sm d-none d-sm-inline-block">
+                        <i class="bi bi-pencil me-1"></i> Edit Order</a>
+                  </div>
+                  {%endif%}
+                  
+                  <a href="{% url 'vehicle_list'%}"
+                    class="btn btn-secondary btn-6 d-sm-none btn-icon"
+                    aria-label="Create new report">
+                   <i class="bi bi-arrow-left"></i>
+                  </a>
+
+                  <a href="{% url 'vehicle_edit' vehicle.uuid %}"
+                    class="btn btn-secondary btn-6 d-sm-none btn-icon"
+                    aria-label="Create new report">
+                   <i class="bi bi-pencil me-1"></i>
+                  </a>
+                </div>
+            </div>
+           
+        </div>
+    </div>
+</div>
+
+<div class="page-body">
+    <div class="container-xl">
+        <div class="row g-3">
+
+            {# --- Status & Overview Card --- #}
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="row align-items-center">
+                            <div class="col-auto">
+                                <span class="avatar avatar-lg bg-blue-lt rounded">
+                                    <i class="bi bi-truck fs-2"></i>
+                                </span>
+                            </div>
+                            <div class="col">
+                                <div class="d-flex align-items-center gap-2 mb-1">
+                                    <h3 class="mb-0">{{ vehicle.name }}</h3>
+                                    <span class="badge bg-{% if vehicle.ownership_type == 'in_house' %}blue{% else %}purple{% endif %}-lt">
+                                        {{ vehicle.get_ownership_type_display }}
+                                    </span>
+                                    <span class="badge bg-{% if vehicle.status == 'available' %}green{% elif vehicle.status == 'on_route' %}cyan{% elif vehicle.status == 'maintenance' %}yellow text-dark{% else %}red{% endif %}-lt">
+                                        {{ vehicle.get_status_display }}
+                                    </span>
+                                </div>
+                                <div class="text-secondary">
+                                    {{ vehicle.vehicle_type|default:"No type specified" }}
+                                    {% if vehicle.year %} &middot; {{ vehicle.year }}{% endif %}
+                                </div>
+                            </div>
+                            <div class="col-auto text-secondary small">
+                                Added {{ vehicle.created_at|date:"M d, Y" }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {# --- Left Column --- #}
+            <div class="col-md-6">
+
+                {# Vehicle Info #}
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            {% if vehicle.ownership_type == 'in_house' %}
+                                Vehicle Information
+                            {% else %}
+                                Carrier Information
+                            {% endif %}
+                        </h3>
+                    </div>
+                    <div class="card-body">
+                        <dl class="row mb-0">
+                            {% if vehicle.ownership_type == 'in_house' %}
+                                <dt class="col-5 text-secondary fw-normal">License Plate</dt>
+                                <dd class="col-7">{{ vehicle.license_plate|default:"—" }}</dd>
+
+                                <dt class="col-5 text-secondary fw-normal">Make</dt>
+                                <dd class="col-7">{{ vehicle.make|default:"—" }}</dd>
+
+                                <dt class="col-5 text-secondary fw-normal">Model</dt>
+                                <dd class="col-7">{{ vehicle.model|default:"—" }}</dd>
+
+                                <dt class="col-5 text-secondary fw-normal">Year</dt>
+                                <dd class="col-7">{{ vehicle.year|default:"—" }}</dd>
+
+                                <dt class="col-5 text-secondary fw-normal">Mileage</dt>
+                                <dd class="col-7">{{ vehicle.mileage|default:"0" }} km</dd>
+
+                                <dt class="col-5 text-secondary fw-normal">Assigned Driver</dt>
+                                <dd class="col-7">{{ vehicle.assigned_driver_name|default:"—" }}</dd>
+                            {% else %}
+                                <dt class="col-5 text-secondary fw-normal">Company</dt>
+                                <dd class="col-7">{{ vehicle.carrier_company_name|default:"—" }}</dd>
+
+                                <dt class="col-5 text-secondary fw-normal">Contact Phone</dt>
+                                <dd class="col-7">{{ vehicle.carrier_contact_phone|default:"—" }}</dd>
+
+                                <dt class="col-5 text-secondary fw-normal">Contact Email</dt>
+                                <dd class="col-7">{{ vehicle.carrier_contact_email|default:"—" }}</dd>
+                            {% endif %}
+                        </dl>
+                    </div>
+                </div>
+
+                {# Notes #}
+                {% if vehicle.notes %}
+                <div class="card mt-3">
+                    <div class="card-header">
+                        <h3 class="card-title">Notes</h3>
+                    </div>
+                    <div class="card-body">
+                        <p class="text-secondary mb-0">{{ vehicle.notes }}</p>
+                    </div>
+                </div>
+                {% endif %}
+
+            </div>
+
+            {# --- Right Column --- #}
+            <div class="col-md-6">
+
+                {# Recent Maintenance #}
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Recent Maintenance</h3>
+                        <div class="card-options">
+                            <a href="{% url 'maintenance_list' %}?vehicle={{ vehicle.pk }}" class="btn btn-sm btn-ghost-secondary">View All</a>
+                        </div>
+                    </div>
+                    {% if maintenance_records %}
+                    <div class="table-responsive">
+                        <table class="table card-table table-vcenter">
+                            <thead>
+                                <tr>
+                                    <th>Service</th>
+                                    <th>Date</th>
+                                    <th>Cost</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for record in maintenance_records %}
+                                <tr>
+                                    <td>
+                                        <div>{{ record.service_type }}</div>
+                                        {% if record.performed_by %}
+                                        <div class="text-secondary small">{{ record.performed_by }}</div>
+                                        {% endif %}
+                                    </td>
+                                    <td class="text-secondary">{{ record.service_date|date:"M d, Y" }}</td>
+                                    <td>${{ record.cost }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="card-body text-center text-secondary py-4">
+                        <i class="bi bi-tools fs-2 d-block mb-2 opacity-50"></i>
+                        No maintenance records yet.
+                    </div>
+                    {% endif %}
+                </div>
+
+                {# Recent Fuel Records #}
+                <div class="card mt-3">
+                    <div class="card-header">
+                        <h3 class="card-title">Recent Fuel Records</h3>
+                        <div class="card-options">
+                            <a href="{% url 'fuel_list' %}?vehicle={{ vehicle.pk }}" class="btn btn-sm btn-ghost-secondary">View All</a>
+                        </div>
+                    </div>
+                    {% if fuel_records %}
+                    <div class="table-responsive">
+                        <table class="table card-table table-vcenter">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Liters</th>
+                                    <th>Cost</th>
+                                    <th>Odometer</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for record in fuel_records %}
+                                <tr>
+                                    <td class="text-secondary">{{ record.fuel_date|date:"M d, Y" }}</td>
+                                    <td>{{ record.liters }}L</td>
+                                    <td>${{ record.cost }}</td>
+                                    <td class="text-secondary">{{ record.odometer_reading|default:"—" }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="card-body text-center text-secondary py-4">
+                        <i class="bi bi-fuel-pump fs-2 d-block mb-2 opacity-50"></i>
+                        No fuel records yet.
+                    </div>
+                    {% endif %}
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+</div>
+
+{% endblock %}

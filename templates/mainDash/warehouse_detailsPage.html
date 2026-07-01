@@ -1,0 +1,320 @@
+{% extends "mainDash/layouts/baseDash.html" %}
+{% load static %}
+{% load humanize %}
+
+{% block title %}{{ warehouse.name }} — Warehouse Detail{% endblock %}
+
+{% block content %}
+
+{# --- Page Header --- #}
+<div class="page-header d-print-none" aria-label="Page header">
+    <div class="container-xl">
+        <div class="row g-2 align-items-center">
+            <div class="col">
+                <h2 class="page-title">{{ warehouse.name }}</h2>
+                <div class="page-pretitle">
+                    {{ warehouse.city }}, {{ warehouse.country }}
+                    &nbsp;·&nbsp;
+                    <span class="badge bg-{% if warehouse.is_active %}green{% else %}red{% endif %}-lt">
+                        {% if warehouse.is_active %}Active{% else %}Inactive{% endif %}
+                    </span>
+                </div>
+            </div>
+            <div class="col-auto ms-auto d-print-none">
+                <div class="btn-list">
+                    <a href="{% url 'warehouse_edit' warehouse.uuid %}"
+                       class="btn btn-secondary btn-sm d-none d-sm-inline-block">
+                        <i class="bi bi-pencil me-1"></i> Edit
+                    </a>
+                    <a href="{% url 'warehouse_list' %}"
+                       class="btn btn-outline-secondary btn-sm d-none d-sm-inline-block">
+                        <i class="bi bi-arrow-left me-1"></i> Back
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="page-body">
+    <div class="container-xl">
+        <div class="row row-deck row-cards">
+
+            {# --- Stats Row --- #}
+            <div class="col-sm-6 col-lg-3">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center">
+                            <div class="subheader">Total Items</div>
+                        </div>
+                        <div class="h1 mb-3">{{ total_items }}</div>
+                        <div class="d-flex mb-2">
+                            <div>All items in this warehouse</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-sm-6 col-lg-3">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="subheader">In Stock</div>
+                        <div class="h1 mb-3 text-green">{{ in_stock }}</div>
+                        <div class="progress mb-2" style="height: 4px;">
+                            <div class="progress-bar bg-green"
+                                 style="width: {% if total_items %}{% widthratio in_stock total_items 100 %}{% else %}0{% endif %}%">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-sm-6 col-lg-3">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="subheader">Dispatched</div>
+                        <div class="h1 mb-3 text-blue">{{ dispatched }}</div>
+                        <div class="progress mb-2" style="height: 4px;">
+                            <div class="progress-bar bg-blue"
+                                 style="width: {% if total_items %}{% widthratio dispatched total_items 100 %}{% else %}0{% endif %}%">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-sm-6 col-lg-3">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="subheader">On Hold</div>
+                        <div class="h1 mb-3 text-yellow">{{ on_hold }}</div>
+                        <div class="progress mb-2" style="height: 4px;">
+                            <div class="progress-bar bg-yellow"
+                                 style="width: {% if total_items %}{% widthratio on_hold total_items 100 %}{% else %}0{% endif %}%">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {# --- Warehouse Info + Storage Locations --- #}
+            <div class="col-md-4">
+                <div class="card h-100">
+                    <div class="card-header">
+                        <h3 class="card-title">Warehouse Info</h3>
+                    </div>
+                    <div class="card-body">
+                        <dl class="row">
+                            <dt class="col-5 text-muted">Name</dt>
+                            <dd class="col-7">{{ warehouse.name }}</dd>
+
+                            <dt class="col-5 text-muted">Address</dt>
+                            <dd class="col-7">{{ warehouse.address }}</dd>
+
+                            <dt class="col-5 text-muted">City</dt>
+                            <dd class="col-7">{{ warehouse.city }}</dd>
+
+                            <dt class="col-5 text-muted">Country</dt>
+                            <dd class="col-7">{{ warehouse.country }}</dd>
+
+                            <dt class="col-5 text-muted">Capacity</dt>
+                            <dd class="col-7">{{ warehouse.capacity|intcomma }} units</dd>
+
+                            <dt class="col-5 text-muted">Utilisation</dt>
+                            <dd class="col-7">
+                                {% if warehouse.capacity %}
+                                    {% widthratio in_stock warehouse.capacity 100 as utilisation %}
+                                    <div class="d-flex align-items-center gap-2">
+                                        <div class="progress flex-fill" style="height: 6px;">
+                                            <div class="progress-bar {% if utilisation|add:0 > 90 %}bg-red{% elif utilisation|add:0 > 70 %}bg-yellow{% else %}bg-green{% endif %}"
+                                                 style="width: {{ utilisation }}%"></div>
+                                        </div>
+                                        <small class="text-muted text-nowrap">{{ utilisation }}%</small>
+                                    </div>
+                                {% else %}
+                                    —
+                                {% endif %}
+                            </dd>
+
+                            <dt class="col-5 text-muted">Status</dt>
+                            <dd class="col-7">
+                                <span class="badge bg-{% if warehouse.is_active %}green{% else %}red{% endif %}-lt">
+                                    {% if warehouse.is_active %}Active{% else %}Inactive{% endif %}
+                                </span>
+                            </dd>
+
+                            <dt class="col-5 text-muted">Created</dt>
+                            <dd class="col-7">{{ warehouse.created_at|date:"d/m/Y" }}</dd>
+                        </dl>
+
+                        {% if warehouse.notes %}
+                        <hr>
+                        <small class="text-muted">{{ warehouse.notes }}</small>
+                        {% endif %}
+                    </div>
+                    <div class="card-footer">
+                        <a href="{% url 'warehouse_edit' warehouse.uuid %}"
+                           class="btn btn-sm btn-outline-secondary w-100">
+                            <i class="bi bi-pencil me-1"></i> Edit Warehouse Details
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            {# --- Storage Locations --- #}
+            <div class="col-md-8">
+                <div class="card h-100">
+                    <div class="card-header d-flex align-items-center justify-content-between">
+                        <h3 class="card-title mb-0">Storage Locations</h3>
+                        <a href="{% url 'storage_location_create' %}?warehouse={{ warehouse.pk }}"
+                           class="btn btn-sm btn-primary">
+                            <i class="bi bi-plus-lg me-1"></i> Add Location
+                        </a>
+                    </div>
+                    <div class="card-body p-0">
+                        {% if locations %}
+                        <div class="table-responsive">
+                            <table class="table card-table table-vcenter text-nowrap mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>Zone</th>
+                                        <th>Shelf</th>
+                                        <th>Description</th>
+                                        <th>Occupied</th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for loc in locations %}
+                                    <tr id="location-row-{{ loc.pk }}">
+                                        <td><strong>{{ loc.zone }}</strong></td>
+                                        <td>{{ loc.shelf|default:"—" }}</td>
+                                        <td class="text-secondary">{{ loc.description|default:"—" }}</td>
+                                        <td>
+                                            <span class="badge bg-{% if loc.is_occupied %}red{% else %}green{% endif %}-lt">
+                                                {% if loc.is_occupied %}Occupied{% else %}Free{% endif %}
+                                            </span>
+                                        </td>
+                                        <td class="text-end">
+                                            <button type="button"
+                                                    class="btn btn-sm btn-link text-danger p-0 js-delete-location"
+                                                    data-location-id="{{ loc.pk }}">
+                                                Delete
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        {% else %}
+                        <div class="text-center py-4 text-secondary">
+                            <i class="bi bi-grid fs-2 d-block mb-2 opacity-50"></i>
+                            <small>No storage locations added yet.</small>
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% if locations %}
+                    <div class="card-footer text-end">
+                        <a href="{% url 'storage_location_list' %}?warehouse={{ warehouse.pk }}"
+                           class="text-muted small">View all locations →</a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            {# --- Recent Inventory Items --- #}
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header d-flex align-items-center justify-content-between">
+                        <h3 class="card-title mb-0">Recent Inventory Items</h3>
+                        <a href="{% url 'inventory_create' %}?warehouse={{ warehouse.pk }}"
+                           class="btn btn-sm btn-primary">
+                            <i class="bi bi-plus-lg me-1"></i> Add Item
+                        </a>
+                    </div>
+
+                    {% if recent_items %}
+                    <div class="table-responsive">
+                        <table class="table card-table table-vcenter text-nowrap">
+                            <thead>
+                                <tr>
+                                    <th>Customer</th>
+                                    <th>Description</th>
+                                    <th>Category</th>
+                                    <th>Qty</th>
+                                    <th>Weight</th>
+                                    <th>Destination</th>
+                                    <th>Status</th>
+                                    <th>Received</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in recent_items %}
+                                <tr>
+                                    <td><strong>{{ item.customer_name }}</strong></td>
+                                    <td class="text-secondary">{{ item.description|truncatechars:40 }}</td>
+                                    <td>{{ item.get_category_display }}</td>
+                                    <td>{{ item.quantity }}</td>
+                                    <td>{{ item.weight_kg|default:"—" }} kg</td>
+                                    <td>{{ item.destination_country }}</td>
+                                    <td>
+                                        <span class="badge bg-{% if item.status == 'in_stock' %}green{% elif item.status == 'dispatched' %}blue{% else %}yellow{% endif %}-lt">
+                                            {{ item.get_status_display }}
+                                        </span>
+                                    </td>
+                                    <td>{{ item.received_date|date:"d/m/Y" }}</td>
+                                    <td class="text-end">
+                                        <a href="{% url 'inventory_detail' item.uuid %}"
+                                           class="badge bg-secondary text-orange-fg">View</a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="card-footer text-end">
+                        <a href="{% url 'inventory_list' %}?warehouse={{ warehouse.pk }}"
+                           class="text-muted small">View all inventory for this warehouse →</a>
+                    </div>
+
+                    {% else %}
+                    <div class="text-center py-5 text-secondary">
+                        <i class="bi bi-box-seam fs-2 d-block mb-2 opacity-50"></i>
+                        <h4 class="mb-1">No items yet</h4>
+                        <small>Add inventory items to this warehouse to see them here.</small>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+{# Delete location — uses global confirmDelete() #}
+<script>
+document.querySelectorAll('.js-delete-location').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+        var locationId = btn.getAttribute('data-location-id');
+        var deleteUrl = "{% url 'storage_location_delete' 0 %}".replace('/0/', '/' + locationId + '/');
+
+        confirmDelete({
+            url: deleteUrl,
+            title: 'Delete this storage location?',
+            message: 'This will permanently remove the location. Items assigned to it will become unassigned.',
+            csrfToken: '{{ csrf_token }}',
+            onSuccess: function () {
+                var row = document.getElementById('location-row-' + locationId);
+                if (row) row.remove();
+            },
+            onError: function (data) {
+                alert(data.error || 'Delete failed.');
+            },
+        });
+    });
+});
+</script>
+
+{% endblock %}

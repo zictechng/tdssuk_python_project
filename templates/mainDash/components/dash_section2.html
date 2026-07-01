@@ -1,0 +1,90 @@
+{% load static %}
+
+<div class="col-sm-6 col-lg-3">
+    <div class="card">
+        <div class="card-body">
+            <div class="d-flex align-items-center">
+                <div class="subheader">Completed Deliveries</div>
+            </div>
+            <div class="h1 mb-3">{{ delivery_rate }}%</div>
+            <div class="d-flex mb-2">
+                <div class="text-secondary">All time delivery success rate</div>
+            </div>
+            <div class="progress progress-sm">
+                <div class="progress-bar bg-primary"
+                    style="width: {{ delivery_rate }}%"
+                    role="progressbar"
+                    aria-valuenow="{{ delivery_rate }}"
+                    aria-valuemin="0"
+                    aria-valuemax="100">
+                    <span class="visually-hidden">{{ delivery_rate }}% Complete</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="col-sm-6 col-lg-3">
+    <div class="card">
+        <div class="card-body">
+            <div class="d-flex align-items-center">
+                <div class="subheader">Revenue</div>
+            </div>
+            <div class="d-flex align-items-baseline">
+                <div class="h1 mb-0 me-2">£{{ revenue_this_month|floatformat:2 }}</div>
+                <div class="me-auto">
+                    {% if revenue_growth_positive %}
+                    <span class="text-green d-inline-flex align-items-center lh-1">
+                        {{ revenue_growth }}%
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                            fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                            stroke-linejoin="round" class="icon ms-1 icon-2">
+                            <path d="M3 17l6 -6l4 4l8 -8" />
+                            <path d="M14 7l7 0l0 7" />
+                        </svg>
+                    </span>
+                    {% else %}
+                    <span class="text-red d-inline-flex align-items-center lh-1">
+                        {{ revenue_growth }}%
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                            fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                            stroke-linejoin="round" class="icon ms-1 icon-2">
+                            <path d="M3 7l6 6l4 -4l8 8" />
+                            <path d="M21 10l0 7l-7 0" />
+                        </svg>
+                    </span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        <div id="chart-revenue-bg" class="position-relative rounded-bottom chart-sm"></div>
+    </div>
+</div>
+
+<div class="col-sm-6 col-lg-3">
+    <div class="card">
+        <div class="card-body">
+            <div class="d-flex align-items-center">
+                <div class="subheader">Total Active Users</div>
+            </div>
+            <div class="d-flex align-items-baseline">
+                <div class="h1 mb-3 me-2">{{ total_users }}</div>
+            </div>
+            <div class="text-secondary">Registered active staff accounts.</div>
+        </div>
+    </div>
+</div>
+
+<div class="col-sm-6 col-lg-3">
+    <div class="card">
+        <div class="card-body">
+            <div class="d-flex align-items-center">
+                <div class="subheader">Total Orders</div>
+            </div>
+            <div class="d-flex align-items-baseline">
+                <div class="h1 mb-3 me-2">{{ total_orders_this_month }}</div>
+            </div>
+            <div class="text-secondary">New orders placed this month.</div>
+        </div>
+    </div>
+</div>

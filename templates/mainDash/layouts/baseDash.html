@@ -1,0 +1,153 @@
+{% load static %}
+
+<html lang="en">
+
+<head>
+    <meta http-equiv="content-type" content="text/html;charset=utf-8" />
+      <meta charset="utf-8" />
+      <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+      <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+      <title>{% block title %}{{ setting.company_name|default:"TDSS UK" }}{% endblock %}</title>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="description" content="{% block meta_description %}{{ setting.company_name|default:'TDSS UK' }} — logistics, warehouse, shipment, and courier management dashboard.{% endblock %}">
+    <meta name="theme-color" content="#E73130">
+
+    <link rel="canonical" href="{% block canonical_url %}{{ request.build_absolute_uri }}{% endblock %}">
+
+    <link rel="icon" href="{% static 'mainDash/images/tdssuk_favicon.png'%}" type="image/x-icon" />
+    <link rel="shortcut icon" href="{% static 'mainDash/images/tdssuk_favicon.png'%}" type="image/x-icon" />
+
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="{{ setting.company_name|default:'TDSS UK' }}">
+    <meta property="og:title" content="{% block og_title %}{{ setting.company_name|default:'TDSS UK' }}{% endblock %}">
+    <meta property="og:description" content="{% block og_description %}{{ setting.company_name|default:'TDSS UK' }} — logistics, warehouse, shipment, and courier management dashboard.{% endblock %}">
+    <meta property="og:url" content="{% block og_url %}{{ request.build_absolute_uri }}{% endblock %}">
+    <meta property="og:image" content="{% block og_image %}{% if setting and setting.company_logo %}{{ request.scheme }}://{{ request.get_host }}{{ setting.company_logo.url }}{% else %}{% static 'mainDash/images/og11.png' %}{% endif %}{% endblock %}">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:site" content="@tdssuk">
+    <meta name="twitter:title" content="{% block twitter_title %}{{ setting.company_name|default:'TDSS UK' }}{% endblock %}">
+    <meta name="twitter:description" content="{% block twitter_description %}{{ setting.company_name|default:'TDSS UK' }} — logistics, warehouse, shipment, and courier management dashboard.{% endblock %}">
+    <meta name="twitter:image" content="{% block twitter_image %}{% if setting and setting.company_logo %}{{ request.scheme }}://{{ request.get_host }}{{ setting.company_logo.url }}{% else %}{% static 'mainDash/images/og11.png' %}{% endif %}{% endblock %}">
+    <!-- BEGIN PAGE LEVEL STYLES -->
+    {% include "mainDash/includes/global_cssFiles.html" %}
+    
+    {% block extra_css %}{% endblock %}
+    <!-- END CUSTOM FONT -->
+  </head>
+
+  <body>
+    <!-- BEGIN GLOBAL THEME SCRIPT -->
+    <script src="{% static 'mainDash/dist/js/tabler-theme.min.js'%}" integrity="sha384-SoDJmj40r6f9Rfxi6Fq+bNS8ofhlZMyxHk9dq9Y8e1M17PZGkBRN/XUpx8swn0i5"></script>
+    <!-- END GLOBAL THEME SCRIPT -->
+        <div class="page">
+        <!-- BEGIN NAVBAR  -->
+              <div class="sticky-top">
+                  
+                {% include "mainDash/components/topBar.html" %}
+                
+              </div>
+
+              {% include "mainDash/components/sideBar.html" %}
+
+              <div class="page-wrapper">
+
+                  {% block content %}
+
+
+                  {% endblock %}
+
+                  <footer class="footer footer-transparent d-print-none">
+                    {% include "mainDash/components/footer.html" %}
+                  </footer>
+              </div>
+        </div>
+
+        <div id="toast-container"
+          class="toast-container position-fixed bottom-0 end-0 p-3">
+        </div>
+        
+        
+     {% include "mainDash/includes/searchModal.html" %}   
+             
+    <!-- END PAGE MODALS -->
+   
+     {% include "mainDash/includes/global_javascript.html" %}
+     <script src="{% static 'mainDash/dist/js/confirm_delete.js' %}"></script>
+     <script src="{% static 'mainDash/dist/js/confirm_action.js' %}"></script>
+     
+     
+    {% block extra_js %}{% endblock %}
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+
+    var modal       = document.getElementById('modal-report');
+    var searchInput = document.getElementById('quick-search-input');
+    var resultsBox  = document.getElementById('quick-search-results');
+    var pendingHref = null;
+
+    // Auto focus + re-process HTMX when modal opens
+    modal.addEventListener('shown.bs.modal', function () {
+        htmx.process(searchInput);
+        searchInput.focus();
+    });
+
+    // Reset when modal closes — but only if NOT redirecting
+    modal.addEventListener('hidden.bs.modal', function () {
+        if (pendingHref) {
+            window.location.href = pendingHref;
+            pendingHref = null;
+            return;
+        }
+        searchInput.value    = '';
+        resultsBox.innerHTML = `
+            <div class="text-center text-muted py-4">
+                <i class="bi bi-search fs-2 d-block mb-2 opacity-50"></i>
+                <small>Enter a tracking ID, order number, name, email or phone.</small>
+            </div>`;
+    });
+
+    // Attach to document.body — survives HTMX innerHTML replacement
+      document.body.addEventListener('click', function (e) {
+          var link = e.target.closest('.qs-result-link');
+          if (!link) return;
+          e.preventDefault();
+          e.stopPropagation();
+
+          var href = link.getAttribute('href');
+
+          // Close modal using Tabler's built-in Bootstrap instance
+          var modalEl  = document.getElementById('modal-report');
+          var bsModal  = tabler.Modal.getInstance
+                        ? tabler.Modal.getInstance(modalEl)
+                        : modalEl._modal || null;
+
+          if (bsModal) {
+              modalEl.addEventListener('hidden.bs.modal', function () {
+                  window.location.href = href;
+              }, { once: true });
+              bsModal.hide();
+          } else {
+              // Fallback — just hide manually and redirect
+              modalEl.classList.remove('show');
+              modalEl.style.display = 'none';
+              document.body.classList.remove('modal-open');
+              var backdrop = document.querySelector('.modal-backdrop');
+              if (backdrop) backdrop.remove();
+              window.location.href = href;
+          }
+      });
+
+});
+</script>
+
+    </body>
+</html>
+
+  
+

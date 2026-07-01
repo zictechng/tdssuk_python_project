@@ -1,0 +1,186 @@
+        
+         {% load static %}
+        <div class="col-12 mt-5">
+            
+            <div class="card">
+                <div class="card-header">
+                <h3 class="card-title">Recent approved quotes request</h3>
+                </div>
+                <div class="card-body border-bottom py-3">
+                <div class="d-flex">
+                    
+                    <div class="ms-auto text-secondary">
+                    Search:
+                    <div class="ms-2 d-inline-block">
+                       <div class="col-md-auto col-sm-12">
+                            <form method="GET" class="d-flex gap-2">
+                                <div class="ms-auto d-flex flex-wrap btn-list">
+
+                                <!-- SEARCH -->
+                                <div class="input-group input-group-flat w-auto">
+                                    {% if search_query %}
+                                    <a href="{% url 'approvedQuote_request' %}" class="input-group-text text-danger">
+                                    <i class="bi bi-x"></i>
+                                    </a>
+                                {% endif %}
+                                <input
+                                    id="advanced-table-search"
+                                    type="text"
+                                    name="search"
+                                    value="{{ search_query }}"
+                                    class="form-control"
+                                    placeholder="Search email, phone or name"
+                                    autocomplete="off">
+                                    <span class="input-group-text">
+                                        <button type="submit" class="input-group-text p-0">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                                                viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                                                class="icon icon-1">
+                                            <path d="M10 10m-7 0a7 7 0 1 0 14 0a7 7 0 1 0 -14 0"></path>
+                                            <path d="M21 21l-6 -6"></path>
+                                            </svg>
+                                        </button>
+                                    </span>
+                                </div>
+
+                                </div>
+
+                            </form>
+                        </div>
+                    </div>
+                    </div>
+                </div>
+                </div>
+                {% if quoteApproved_request.paginator.count > 0 %}
+                    <div class="table-responsive">
+                        <table class="table table-selectable card-table table-vcenter text-nowrap datatable">
+                            <thead>
+                            <tr>
+                                <th class="w-1"><input class="form-check-input m-0 align-middle" type="checkbox" id="select-all" aria-label="Select all quote" /></th>
+                                
+                                <th>Sender Name</th>
+                                <th>Email</th>
+                                <th>Type</th>
+                                <th>From</th>
+                                <th>To</th>
+                                <th>Action By</th>
+                                <th>Create Date</th>
+                                <th></th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                                {% for quote_requests in quoteApproved_request %}
+                                    <tr>
+                                        <td><input class="form-check-input m-0 align-middle table-selectable-check" type="checkbox" value="{{ quote_requests.uuid }}" /></td>
+                                        <td><span class="text-secondary">{{ quote_requests.quote_name }}</span></td>
+                                        <td><a href="#" class="text-reset">{{ quote_requests.quote_email }}</a></td>
+                                        <td>{{ quote_requests.quote_serviceType }}</td>
+                                        <td>{{ quote_requests.quoteFromCountry }}</td>
+                                        <td>{{ quote_requests.quoteToCountry }}</td>
+                                        <td>{{ quote_requests.updated_by_username|default:"User" }}</td>
+                                        <td>{{ quote_requests.created_at|date:"d/m/Y" }}</td>
+                                        <td class="text-end">
+                                            <a href="{% url 'viewQuoteDetails' quote_requests.uuid %}?next=/dashboard/approved-quote/"
+                                                class="btn btn-sm btn-ghost-secondary">
+                                                View <i class="bi bi-arrow-right ms-1"></i>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                     <div class="card-footer">
+                        <div class="row g-2 justify-content-center justify-content-sm-between">
+                            <div class="col-auto d-flex align-items-center">
+                                <p class="m-0 text-secondary">
+                                    Showing
+                                    <strong>{{ quoteApproved_request.start_index }} to {{ quoteApproved_request.end_index }}</strong>
+                                    of
+                                    <strong>{{ quoteApproved_request.paginator.count }}</strong>
+                                    entries
+                                </p>
+                            </div>
+
+                            <div class="col-auto">
+                                <ul class="pagination m-0 ms-auto">
+
+                                    <!-- Previous -->
+                                    <li class="page-item {% if not quoteApproved_request.has_previous %}disabled{% endif %}">
+                                        <a class="page-link"
+                                        href="?page={% if quoteApproved_request.has_previous %}{{ quoteApproved_request.previous_page_number }}{% endif %}{% if query_string %}&{{ query_string }}{% endif %}">
+                                            ←
+                                        </a>
+                                    </li>
+
+                                    <!-- First page -->
+                                    {% if 1 not in page_range %}
+                                        <li class="page-item">
+                                            <a class="page-link" href="?page=1{% if query_string %}&{{ query_string }}{% endif %}">1</a>
+                                        </li>
+                                        <li class="page-item disabled"><span class="page-link">…</span></li>
+                                    {% endif %}
+
+                                    <!-- Page window -->
+                                    {% for num in page_range %}
+                                        <li class="page-item {% if quoteApproved_request.number == num %}active{% endif %}">
+                                            <a class="page-link" href="?page={{ num }}{% if query_string %}&{{ query_string }}{% endif %}">
+                                                {{ num }}
+                                            </a>
+                                        </li>
+                                    {% endfor %}
+
+                                    <!-- Last page -->
+                                    {% if quoteApproved_request.paginator.num_pages not in page_range %}
+                                        <li class="page-item disabled"><span class="page-link">…</span></li>
+                                        <li class="page-item">
+                                            <a class="page-link"
+                                            href="?page={{ quoteApproved_request.paginator.num_pages }}{% if query_string %}&{{ query_string }}{% endif %}">
+                                                {{ quoteApproved_request.paginator.num_pages }}
+                                            </a>
+                                        </li>
+                                    {% endif %}
+
+                                    <!-- Next -->
+                                    <li class="page-item {% if not quoteApproved_request.has_next %}disabled{% endif %}">
+                                        <a class="page-link"
+                                        href="?page={% if quoteApproved_request.has_next %}{{ quoteApproved_request.next_page_number }}{% endif %}{% if query_string %}&{{ query_string }}{% endif %}">
+                                            →
+                                        </a>
+                                    </li>
+
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                {% else %}
+                    <div class="text-center py-5">
+                        <div class="text-secondary">
+                            <h4 class="mb-1">No approved quotes found</h4>
+                            <small>There is currently no data to display at the moment.</small>
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+            </div>
+        </div>
+
+<script>
+    (function () {
+        function initSelectAll() {
+            var selectAll = document.getElementById('select-all');
+            if (!selectAll) return;
+            selectAll.addEventListener('change', function () {
+                document.querySelectorAll('.table-selectable-check').forEach(function (cb) {
+                    cb.checked = selectAll.checked;
+                });
+            });
+        }
+            initSelectAll();
+            var container = document.getElementById('users-table-container');
+            if (container) {
+                container.addEventListener('htmx:afterSwap', initSelectAll);
+            }
+    })();
+</script>

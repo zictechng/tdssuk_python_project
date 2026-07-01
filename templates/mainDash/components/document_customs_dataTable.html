@@ -1,0 +1,120 @@
+{% load humanize %}
+
+<div class="col-12">
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">Customs Documents</h3>
+            <div class="card-options">
+                <small class="text-muted">
+                    {{ customs.paginator.count }} document{{ customs.paginator.count|pluralize }}
+                </small>
+            </div>
+        </div>
+
+        {% if customs.paginator.count > 0 %}
+        <div class="table-responsive">
+            <table class="table card-table table-vcenter text-nowrap">
+                <thead>
+                    <tr>
+                        <th>Document #</th>
+                        <th>Type</th>
+                        <th>Shipment / Item</th>
+                        <th>Status</th>
+                        <th>Issued</th>
+                        <th>Expiry</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for doc in customs %}
+                    <tr>
+                        <td class="fw-medium">
+                            <i class="bi bi-file-earmark-text me-1 text-blue"></i>
+                            <a href="{% url 'customs_document_detail' doc.uuid %}">
+                                {{ doc.document_number|default:"— No Ref" }}
+                            </a>
+                        </td>
+                        <td class="text-secondary">{{ doc.get_document_type_display }}</td>
+                        <td>
+                            {% if doc.shipment %}
+                                <p class="mb-0 fw-medium">{{ doc.shipment.shipment_number }}</p>
+                                {% if doc.shipment.order %}
+                                <small class="text-muted">{{ doc.shipment.order.order_number }}</small>
+                                {% endif %}
+                            {% elif doc.item %}
+                                <p class="mb-0 fw-medium">{{ doc.item.customer_name }}</p>
+                                <small class="text-muted">{{ doc.item.description|truncatechars:40 }}</small>
+                            {% else %}
+                                <span class="text-muted">—</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <span class="badge fs-6 mb-2
+                                {% if doc.status == 'approved' %}bg-success text-white
+                                {% elif doc.status == 'rejected' %}bg-danger text-white
+                                {% elif doc.status == 'submitted' %}bg-primary text-white
+                                {% else %}bg-warning text-dark
+                                {% endif %}">
+                                {{ doc.get_status_display }}
+                            </span>
+                        </td>
+                        <td class="text-secondary">
+                            {{ doc.issued_date|date:"d/m/Y"|default:"—" }}
+                        </td>
+                        <td class="text-secondary">
+                            {{ doc.expiry_date|date:"d/m/Y"|default:"—" }}
+                        </td>
+                        <td class="text-end">
+                            <a href="{% url 'customs_document_detail' doc.uuid %}"
+                               class="btn btn-sm btn-ghost-secondary">
+                                View
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="card-footer d-flex align-items-center">
+            <p class="m-0 text-secondary">
+                Showing <strong>{{ customs.start_index }}–{{ customs.end_index }}</strong>
+                of <strong>{{ customs.paginator.count }}</strong>
+            </p>
+            <ul class="pagination m-0 ms-auto">
+                <li class="page-item {% if not customs.has_previous %}disabled{% endif %}">
+                    <a class="page-link"
+                       hx-get="{% url 'document_customs_list' %}?page={% if customs.has_previous %}{{ customs.previous_page_number }}{% else %}1{% endif %}&search={{ search }}&status={{ status_filter }}&document_type={{ type_filter }}"
+                       hx-target="#customs-table-container"
+                       hx-swap="innerHTML"
+                       hx-push-url="true">←</a>
+                </li>
+                {% for num in customs.paginator.page_range %}
+                <li class="page-item {% if customs.number == num %}active{% endif %}">
+                    <a class="page-link"
+                       hx-get="{% url 'document_customs_list' %}?page={{ num }}&search={{ search }}&status={{ status_filter }}&document_type={{ type_filter }}"
+                       hx-target="#customs-table-container"
+                       hx-swap="innerHTML"
+                       hx-push-url="true">{{ num }}</a>
+                </li>
+                {% endfor %}
+                <li class="page-item {% if not customs.has_next %}disabled{% endif %}">
+                    <a class="page-link"
+                       hx-get="{% url 'document_customs_list' %}?page={% if customs.has_next %}{{ customs.next_page_number }}{% else %}{{ customs.paginator.num_pages }}{% endif %}&search={{ search }}&status={{ status_filter }}&document_type={{ type_filter }}"
+                       hx-target="#customs-table-container"
+                       hx-swap="innerHTML"
+                       hx-push-url="true">→</a>
+                </li>
+            </ul>
+        </div>
+
+        {% else %}
+        <div class="text-center py-5 text-secondary">
+            <i class="bi bi-file-earmark-text fs-2 d-block mb-2 opacity-50"></i>
+            <h4 class="mb-1">No customs documents found</h4>
+            <small>Try adjusting your search or filter.</small>
+        </div>
+        {% endif %}
+
+    </div>
+</div>

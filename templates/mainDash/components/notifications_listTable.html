@@ -1,0 +1,57 @@
+
+<div class="card">
+  <div class="list-group list-group-flush list-group-hoverable">
+    {% for notif in notifications %}
+    <div class="list-group-item {% if not notif.is_read %}bg-blue-lt{% endif %}"
+         id="notif-{{ notif.pk }}">
+      <div class="row align-items-center">
+        <div class="col-auto">
+          <span class="{% if not notif.is_read %}status-dot status-dot-animated bg-blue{% else %}status-dot{% endif %} d-block"></span>
+        </div>
+        <div class="col">
+          <div class="d-flex align-items-center gap-2">
+            <span class="badge
+              {% if notif.notif_type == 'shipment' %}bg-blue-lt text-blue
+              {% elif notif.notif_type == 'ticket' %}bg-orange-lt text-orange
+              {% elif notif.notif_type == 'order' %}bg-green-lt text-green
+              {% else %}bg-secondary-lt text-secondary{% endif %}">
+              {{ notif.get_notif_type_display }}
+            </span>
+            <span class="fw-medium">{{ notif.title }}</span>
+          </div>
+          <div class="text-secondary mt-1">{{ notif.message }}</div>
+          <small class="text-muted">{{ notif.created_at|date:"d M Y, H:i" }}</small>
+        </div>
+        <div class="col-auto d-flex gap-2">
+          {% if notif.url %}
+          <a href="{{ notif.url }}" class="btn btn-sm btn-ghost-secondary">
+            <i class="bi bi-arrow-right"></i>
+          </a>
+          {% endif %}
+          {% if not notif.is_read %}
+          <form method="post" action="{% url 'notification_mark_read' notif.pk %}">
+            {% csrf_token %}
+            <input type="hidden" name="next" value="{% url 'notifications_list' %}">
+            <button type="submit" class="btn btn-sm btn-ghost-secondary" title="Mark as read">
+              <i class="bi bi-check2"></i>
+            </button>
+          </form>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+    {% empty %}
+    <div class="list-group-item">
+      <div class="text-center py-5 text-secondary">
+        <i class="bi bi-bell-slash fs-2 d-block mb-2 opacity-50"></i>
+        <h5 class="mb-1">No notifications</h5>
+        <small>You're all caught up!</small>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+  <!-- Pagination -->
+     {% include "mainDash/includes/report_pagination.html" with page_obj=notifications hx_target="#notif-container" %}
+
+</div>

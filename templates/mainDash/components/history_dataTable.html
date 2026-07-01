@@ -1,0 +1,107 @@
+
+{% load humanize %}
+
+<div class="col-12">
+  <div class="card">
+    <div class="card-header">
+      <h3 class="card-title">Tracking Events</h3>
+      <div class="card-options">
+        <small class="text-muted">
+          {{ events.paginator.count }} event{{ events.paginator.count|pluralize }}
+        </small>
+      </div>
+    </div>
+
+    {% if events.paginator.count > 0 %}
+    <div class="table-responsive">
+      <table class="table table-vcenter table-hover card-table text-nowrap">
+        <thead>
+          <tr>
+            <th>Shipment</th>
+            <th>Order / TRK</th>
+            <th>Status</th>
+            <th>Location</th>
+            <th>Description</th>
+            <th>Recorded By</th>
+            <th>Date & Time</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for event in events %}
+          <tr>
+            <td class="fw-medium">{{ event.shipment.shipment_number }}</td>
+            <td>
+              <p class="mb-0">{{ event.shipment.order.order_number }}</p>
+              <small class="text-muted">{{ event.shipment.order.tracking_number }}</small>
+            </td>
+            <td>
+              <span class="badge text-white
+                {% if event.status == 'delivered' %}bg-success
+                {% elif event.status == 'in_transit' %}bg-primary
+                {% elif event.status == 'cancelled' %}bg-danger
+                {% elif event.status == 'returned' %}bg-warning
+                {% else %}bg-secondary{% endif %}">
+                {{ event.get_status_display }}
+              </span>
+            </td>
+            <td class="text-secondary">{{ event.location|default:"—" }}</td>
+            <td class="text-secondary">{{ event.description|default:"—" }}</td>
+            <td class="text-secondary">
+              {{ event.recorded_by.get_full_name|default:event.recorded_by.username|default:"System" }}
+            </td>
+            <td class="text-secondary">{{ event.created_at|date:"d M Y, H:i" }}</td>
+            <td class="text-end">
+              <a href="{% url 'staff_tracking' %}?query={{ event.shipment.shipment_number }}"
+                 class="btn btn-sm btn-ghost-secondary">
+                 View
+              </a>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <div class="card-footer d-flex align-items-center">
+      <p class="m-0 text-secondary">
+        Showing <strong>{{ events.start_index }}–{{ events.end_index }}</strong>
+        of <strong>{{ events.paginator.count }}</strong>
+      </p>
+      <ul class="pagination m-0 ms-auto">
+        <li class="page-item {% if not events.has_previous %}disabled{% endif %}">
+          <a class="page-link"
+             hx-get="{% url 'tracking_history' %}?page={% if events.has_previous %}{{ events.previous_page_number }}{% else %}1{% endif %}&q={{ q }}&status={{ status }}&date_from={{ date_from }}&date_to={{ date_to }}"
+             hx-target="#history-table-container"
+             hx-swap="innerHTML"
+             hx-push-url="true">←</a>
+        </li>
+        {% for num in events.paginator.page_range %}
+        <li class="page-item {% if events.number == num %}active{% endif %}">
+          <a class="page-link"
+             hx-get="{% url 'tracking_history' %}?page={{ num }}&q={{ q }}&status={{ status }}&date_from={{ date_from }}&date_to={{ date_to }}"
+             hx-target="#history-table-container"
+             hx-swap="innerHTML"
+             hx-push-url="true">{{ num }}</a>
+        </li>
+        {% endfor %}
+        <li class="page-item {% if not events.has_next %}disabled{% endif %}">
+          <a class="page-link"
+             hx-get="{% url 'tracking_history' %}?page={% if events.has_next %}{{ events.next_page_number }}{% else %}{{ events.paginator.num_pages }}{% endif %}&q={{ q }}&status={{ status }}&date_from={{ date_from }}&date_to={{ date_to }}"
+             hx-target="#history-table-container"
+             hx-swap="innerHTML"
+             hx-push-url="true">→</a>
+        </li>
+      </ul>
+    </div>
+
+    {% else %}
+    <div class="text-center py-5 text-secondary">
+      <i class="bi bi-clock-history fs-2 d-block mb-2 opacity-50"></i>
+      <h4 class="mb-1">No tracking events found</h4>
+      <small>Try adjusting your search or filters.</small>
+    </div>
+    {% endif %}
+
+  </div>
+</div>

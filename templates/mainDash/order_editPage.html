@@ -1,0 +1,50 @@
+
+{% extends "mainDash/layouts/baseDash.html" %}
+    {% load static %}
+    
+        {% block title %}
+            Order Shipment Details
+        {% endblock %}
+
+    {% block content %}
+
+        <div class="page-header d-print-none" aria-label="Page header">
+          <div class="container-xl">
+            <div class="row g-2 align-items-center">
+              <div class="col">
+                <!-- Page pre-title -->
+                 <h2 class="page-title">Edit Order Details | <div class="text-muted">Order Number: <strong>{{ order.order_number}}</strong></div></h2>
+                <div class="page-pretitle">Manage the order details here</div>
+                
+              </div>
+              <!-- Action buttons -->
+              <div class="col-auto ms-auto d-print-none">
+                <div class="btn-list">
+                  
+                  <a href="{% url 'viewOrderDetail' order.uuid %}" class="btn btn-secondary btn-sm d-none d-sm-inline-block">
+                    <i class="bi bi-arrow-left"></i>
+                    Back
+                  </a>
+                  <a href="#"
+                    class="btn btn-secondary btn-6 d-sm-none btn-icon"
+                    aria-label="Create new report">
+                   <i class="bi bi-arrow-left"></i>
+                  </a>
+                </div>
+              </div>
+             </div>
+          </div>
+      </div>
+
+    <div class="page-body">
+        <div class="container-xl">
+        <div class="row row-deck row-cards">
+
+            {% include "mainDash/components/orderEdit_form.html" %}
+        </div>
+    </div>
+
+    {% endblock %}
+  
+    <!-- BEGIN PAGE MODALS -->
+    

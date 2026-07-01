@@ -1,0 +1,131 @@
+{% extends "mainDash/layouts/baseDash.html" %}
+{% load static %}
+
+{% block title %}Finance — Invoices{% endblock %}
+
+{% block content %}
+
+<div class="page-header d-print-none" aria-label="Page header">
+    <div class="container-xl">
+        <div class="row g-2 align-items-center">
+            <div class="col">
+                <h2 class="page-title">Customer Invoices</h2>
+                <div class="page-pretitle">Manage all customer invoices</div>
+            </div>
+            <div class="col-auto ms-auto d-print-none">
+                <div class="btn-list">
+                    <a href="{% url 'invoice_create' %}" class="btn btn-primary btn-sm d-none d-sm-inline-block">
+                        <i class="bi bi-plus-lg me-1"></i> New Invoice
+                    </a>
+                    <a href="{% url 'invoice_create' %}" class="btn btn-primary d-sm-none btn-icon">
+                        <i class="bi bi-plus-lg"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="page-body">
+    <div class="container-xl">
+
+        <div class="row mb-3">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body py-3">
+                        <div class="row g-2 align-items-center">
+                            <div class="col-auto text-secondary">Filters:</div>
+                            <div class="col ms-auto d-flex flex-wrap gap-2 justify-content-end">
+
+                                <div class="position-relative" style="max-width: 240px;">
+                                    <input
+                                        type="text"
+                                        id="invoice-search-input"
+                                        name="search"
+                                        class="form-control pe-4"
+                                        placeholder="Search invoice, customer..."
+                                        value="{{ search_query }}"
+                                        hx-get="{% url 'invoice_list' %}"
+                                        hx-trigger="keyup changed delay:400ms, search"
+                                        hx-target="#invoice-table-container"
+                                        hx-swap="innerHTML"
+                                        hx-push-url="true"
+                                        hx-include="#invoice-status-filter, #invoice-currency-filter"
+                                    />
+                                    <button type="button" id="invoice-search-clear"
+                                            class="p-0 text-secondary"
+                                            style="display:{% if search_query %}block{% else %}none{% endif %};
+                                                   position:absolute; right:8px; top:50%;
+                                                   transform:translateY(-50%); line-height:1;
+                                                   background:none; border:none; cursor:pointer;"
+                                            aria-label="Clear search">
+                                        <i class="bi bi-x-lg" style="font-size:0.75rem;"></i>
+                                    </button>
+                                </div>
+
+                                <select id="invoice-status-filter" name="status"
+                                        class="form-select" style="max-width: 180px;"
+                                        hx-get="{% url 'invoice_list' %}"
+                                        hx-trigger="change"
+                                        hx-target="#invoice-table-container"
+                                        hx-swap="innerHTML"
+                                        hx-push-url="true"
+                                        hx-include="#invoice-search-input, #invoice-currency-filter">
+                                    <option value="">All Status</option>
+                                    {% for value, label in status_choices %}
+                                    <option value="{{ value }}" {% if status_filter == value %}selected{% endif %}>
+                                        {{ label }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+
+                                <select id="invoice-currency-filter" name="currency"
+                                        class="form-select" style="max-width: 180px;"
+                                        hx-get="{% url 'invoice_list' %}"
+                                        hx-trigger="change"
+                                        hx-target="#invoice-table-container"
+                                        hx-swap="innerHTML"
+                                        hx-push-url="true"
+                                        hx-include="#invoice-search-input, #invoice-status-filter">
+                                    <option value="">All Currencies</option>
+                                    {% for value, label in currency_choices %}
+                                    <option value="{{ value }}" {% if currency_filter == value %}selected{% endif %}>
+                                        {{ label }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row" id="invoice-table-container">
+            {% include "mainDash/components/invoice_dataTable.html" %}
+        </div>
+
+    </div>
+</div>
+
+<script>
+(function () {
+    var input = document.getElementById('invoice-search-input');
+    var clearBtn = document.getElementById('invoice-search-clear');
+
+    function toggleClear() {
+        clearBtn.style.display = input.value ? 'block' : 'none';
+    }
+
+    input.addEventListener('input', toggleClear);
+
+    clearBtn.addEventListener('click', function () {
+        input.value = '';
+        toggleClear();
+        htmx.trigger(input, 'search');
+    });
+})();
+</script>
+
+{% endblock %}

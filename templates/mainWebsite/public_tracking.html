@@ -1,0 +1,140 @@
+
+{% extends "mainWebsite/base.html" %}
+{% load static %}
+
+{% block title %}Track Your Shipment{% endblock %}
+
+{% block content %}
+
+<section class="py-5">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-lg-7">
+
+        <div class="text-center mb-4">
+          <h2 class="fw-bold">Track Your Shipment</h2>
+          <p class="text-muted">Enter your tracking number to get real-time updates</p>
+        </div>
+
+        <!-- Search -->
+        <form method="get" class="mb-4">
+          <div class="input-group input-group-lg">
+            {{ form.query }}
+            <button class="btn btn-primary px-4" type="submit">
+              <i class="bi bi-search me-1"></i> Track
+            </button>
+          </div>
+        </form>
+
+        {% if not_found %}
+        <div class="alert alert-warning d-flex align-items-center gap-2">
+          <i class="bi bi-exclamation-triangle-fill"></i>
+          <div>No shipment found for that number. Please check and try again.</div>
+        </div>
+        {% endif %}
+
+        {% if shipment and order %}
+
+        <!-- Summary Card -->
+        <div class="card mb-4 shadow-sm">
+          <div class="card-header d-flex justify-content-between align-items-center">
+            <span class="fw-bold">{{ order.tracking_number }}</span>
+            <span class="badge
+              {% if shipment.status == 'delivered' %}bg-success
+              {% elif shipment.status == 'in_transit' %}bg-primary
+              {% elif shipment.status == 'cancelled' %}bg-danger
+              {% elif shipment.status == 'returned' %}bg-warning
+              {% else %}bg-secondary{% endif %}">
+              {{ shipment.get_status_display }}
+            </span>
+          </div>
+          <div class="card-body">
+            <div class="row g-3">
+              <div class="col-sm-6">
+                <p class="text-muted small mb-1">Customer</p>
+                <p class="fw-semibold mb-0">{{ order.customer_name }}</p>
+              </div>
+              <div class="col-sm-6">
+                <p class="text-muted small mb-1">Destination</p>
+                <p class="fw-semibold mb-0">{{ order.receiver_country }}</p>
+              </div>
+              <div class="col-sm-6">
+                <p class="text-muted small mb-1">Origin</p>
+                <p class="fw-semibold mb-0">{{ order.sender_country|default:"—" }}</p>
+              </div>
+              {% if shipment.expected_delivery_date %}
+              <div class="col-sm-6">
+                <p class="text-muted small mb-1">Expected Delivery</p>
+                <p class="fw-semibold mb-0">{{ shipment.expected_delivery_date|date:"d M Y" }}</p>
+              </div>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+
+        <!-- Images -->
+        {% with images=order.images.all %}
+        {% if images %}
+        <div class="card mb-4 shadow-sm">
+          <div class="card-header">Shipment Images</div>
+          <div class="card-body">
+            <div class="row g-2">
+              {% for img in images %}
+              <div class="col-6 col-md-4">
+                <img src="{{ img.image.url }}" class="img-fluid rounded border" alt="Shipment image">
+              </div>
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+        {% endif %}
+        {% endwith %}
+
+        <!-- Timeline -->
+        <div class="card shadow-sm">
+          <div class="card-header fw-semibold">Tracking Timeline</div>
+          <div class="card-body">
+            {% with events=shipment.tracking_events.all %}
+            {% if events %}
+            <ul class="list-unstyled mb-0">
+              {% for event in events %}
+              <li class="d-flex gap-3 mb-3 {% if not forloop.last %}pb-3 border-bottom{% endif %}">
+                <div class="flex-shrink-0 mt-1">
+                  <span class="badge rounded-circle p-2
+                    {% if event.status == 'delivered' %}bg-success
+                    {% elif event.status == 'in_transit' %}bg-primary
+                    {% elif event.status == 'cancelled' %}bg-danger
+                    {% elif event.status == 'returned' %}bg-warning
+                    {% else %}bg-secondary{% endif %}">
+                  </span>
+                </div>
+                <div>
+                  <p class="mb-0 fw-semibold">
+                    {{ event.get_status_display }}
+                    {% if event.location %}
+                    <span class="text-muted fw-normal">— {{ event.location }}</span>
+                    {% endif %}
+                  </p>
+                  {% if event.description %}
+                  <p class="mb-0 text-muted small">{{ event.description }}</p>
+                  {% endif %}
+                  <p class="mb-0 text-muted small">{{ event.created_at|date:"d M Y, H:i" }}</p>
+                </div>
+              </li>
+              {% endfor %}
+            </ul>
+            {% else %}
+            <p class="text-muted mb-0">No tracking updates yet. Check back soon.</p>
+            {% endif %}
+            {% endwith %}
+          </div>
+        </div>
+
+        {% endif %}
+
+      </div>
+    </div>
+  </div>
+</section>
+
+{% endblock %}

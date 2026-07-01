@@ -1,0 +1,42 @@
+{% load static %}
+<div class="modal modal-blur fade" id="modal-report" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="bi bi-search me-2 text-muted"></i>Quick Search
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-0">
+                <div class="p-3 border-bottom">
+                    <input type="text"
+                           id="quick-search-input"
+                           class="form-control form-control-lg"
+                           placeholder="Tracking ID, Order No., Name, Email, Phone..."
+                           autocomplete="off"
+                           hx-get="{% url 'quick_search' %}"
+                           hx-trigger="keyup changed delay:400ms"
+                           hx-target="#quick-search-results"
+                           hx-swap="innerHTML"
+                           name="q" />
+                </div>
+                <div id="quick-search-results" class="px-3 py-3" style="min-height:160px; max-height:480px; overflow-y:auto;">
+                    <div class="text-center text-muted py-4">
+                        <i class="bi bi-search fs-2 d-block mb-2 opacity-50"></i>
+                        <small>Enter a tracking ID, order number, name, email or phone.</small>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button"
+                        class="btn btn-link link-secondary"
+                        data-bs-dismiss="modal">
+                    Close
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+

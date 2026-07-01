@@ -1,0 +1,138 @@
+{% load static %}
+<div class="col-12">
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">Routes</h3>
+        </div>
+
+        {% if routes_page.paginator.count > 0 %}
+        <div class="table-responsive">
+            <table class="table card-table table-vcenter text-nowrap">
+                <thead>
+                    <tr>
+                        <th class="w-1"><input class="form-check-input m-0 align-middle" type="checkbox" id="select-all" aria-label="Select all route fleet" /></th>
+                        <th>Route Name</th>
+                        <th>Vehicle</th>
+                        <th>From</th>
+                        <th>To</th>
+                        <th>Planned Date</th>
+                        <th>Status</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for route in routes_page %}
+                    <tr id="route-row-{{ route.pk }}">
+                        <td><input class="form-check-input m-0 align-middle table-selectable-check" type="checkbox" value="{{ route.pk }}" aria-label="Select route fleet" /></td>
+                        <td>
+                            <a href="{% url 'route_detail' route.uuid %}" class="text-reset fw-medium">
+                                {{ route.route_name }}
+                            </a>
+                        </td>
+                        <td>
+                            {% if route.vehicle %}
+                                <a href="{% url 'vehicle_detail' route.vehicle.uuid %}" class="text-reset">
+                                    {{ route.vehicle.name }}
+                                </a>
+                            {% else %}
+                                <span class="text-secondary">—</span>
+                            {% endif %}
+                        </td>
+                        <td class="text-secondary">{{ route.start_location }}</td>
+                        <td class="text-secondary">{{ route.end_location }}</td>
+                        <td class="text-secondary">{{ route.planned_date|date:"M d, Y" }}</td>
+                        <td>
+                            <span class="badge bg-{% if route.status == 'planned' %}blue{% elif route.status == 'active' %}green{% elif route.status == 'completed' %}secondary{% else %}red{% endif %}-lt">
+                                {{ route.get_status_display }}
+                            </span>
+                            
+                        </td>
+                        <td class="text-end">
+                            <a href="{% url 'route_detail' route.uuid %}" class="btn btn-sm btn-ghost-secondary">View</a>
+                            <button type="button" class="btn btn-sm js-delete-route btn-ghost-danger"
+                                    data-route-id="{{ route.pk }}">
+                                Delete
+                            </button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="card-footer d-flex align-items-center">
+            <p class="m-0 text-secondary">
+                Showing <strong>{{ routes_page.start_index }}–{{ routes_page.end_index }}</strong>
+                of <strong>{{ routes_page.paginator.count }}</strong>
+            </p>
+            <ul class="pagination m-0 ms-auto">
+                <li class="page-item {% if not routes_page.has_previous %}disabled{% endif %}">
+                    <a class="page-link" href="#"
+                       hx-get="{% url 'route_list' %}?page={% if routes_page.has_previous %}{{ routes_page.previous_page_number }}{% else %}1{% endif %}&status={{ status_filter }}"
+                       hx-target="#route-table-container" hx-swap="innerHTML" hx-push-url="true">←</a>
+                </li>
+                {% for num in routes_page.paginator.page_range %}
+                <li class="page-item {% if routes_page.number == num %}active{% endif %}">
+                    <a class="page-link" href="#"
+                       hx-get="{% url 'route_list' %}?page={{ num }}&status={{ status_filter }}"
+                       hx-target="#route-table-container" hx-swap="innerHTML" hx-push-url="true">{{ num }}</a>
+                </li>
+                {% endfor %}
+                <li class="page-item {% if not routes_page.has_next %}disabled{% endif %}">
+                    <a class="page-link" href="#"
+                       hx-get="{% url 'route_list' %}?page={% if routes_page.has_next %}{{ routes_page.next_page_number }}{% else %}{{ routes_page.paginator.num_pages }}{% endif %}&status={{ status_filter }}"
+                       hx-target="#route-table-container" hx-swap="innerHTML" hx-push-url="true">→</a>
+                </li>
+            </ul>
+        </div>
+
+        {% else %}
+        <div class="text-center py-5 text-secondary">
+            <i class="bi bi-signpost-split fs-2 d-block mb-2 opacity-50"></i>
+            <h4 class="mb-1">No routes found</h4>
+            <small>Try adjusting your filter or add a new route.</small>
+        </div>
+        {% endif %}
+
+    </div>
+</div>
+
+{% include "mainDash/includes/confirm_delete_modal.html" %}
+<script>
+    document.querySelectorAll('.js-delete-route').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            var routeId = btn.getAttribute('data-route-id');
+            var deleteUrl = "{% url 'route_delete' 0 %}".replace('/0/', '/' + routeId + '/');
+
+            confirmDelete({
+                url: deleteUrl,
+                title: 'Delete this route?',
+                message: 'This will permanently remove the route.',
+                csrfToken: '{{ csrf_token }}',
+                onSuccess: function () {
+                    var row = document.getElementById('route-row-' + routeId);
+                    if (row) row.remove();
+                },
+                onError: function (data) {
+                    alert(data.error || 'Delete failed.');
+                },
+            });
+        });
+    });
+    (function () {
+    function initSelectAll() {
+        var selectAll = document.getElementById('select-all');
+        if (!selectAll) return;
+        selectAll.addEventListener('change', function () {
+            document.querySelectorAll('.table-selectable-check').forEach(function (cb) {
+                cb.checked = selectAll.checked;
+            });
+        });
+    }
+        initSelectAll();
+        var container = document.getElementById('users-table-container');
+        if (container) {
+            container.addEventListener('htmx:afterSwap', initSelectAll);
+        }
+})();
+</script>

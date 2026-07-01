@@ -1,0 +1,36 @@
+
+{% extends "mainDash/layouts/baseDash.html" %}
+    {% load static %}
+    
+        {% block title %}
+            Completed Order Shipment Request
+        {% endblock %}
+
+    {% block content %}
+
+        <div class="page-header d-print-none" aria-label="Page header">
+          <div class="container-xl">
+            <div class="row g-2 align-items-center">
+              <div class="col">
+                <!-- Page pre-title -->
+                 <h2 class="page-title">Completed Order Shipment</h2>
+                <div class="page-pretitle">Details of all completed shipment orders</div>
+              </div>
+              <!-- Action buttons -->
+              
+             </div>
+          </div>
+      </div>
+
+    <div class="page-body">
+        <div class="container-xl">
+        <div class="row row-deck row-cards">
+
+            {% include "mainDash/components/orderShipmentCompleted_dataTable.html" %}
+        </div>
+    </div>
+
+    {% endblock %}
+  
+    <!-- BEGIN PAGE MODALS -->
+    

@@ -1,0 +1,184 @@
+{% extends "mainDash/layouts/baseDash.html" %}
+{% load static %}
+
+{% block title %}Fleet — Add Route{% endblock %}
+
+{% block content %}
+
+<div class="page-header d-print-none">
+    <div class="container-xl">
+        <div class="row g-2 align-items-center">
+            <div class="col">
+                <div class="page-pretitle">
+                    <a href="{% url 'route_list' %}" class="text-secondary">
+                        <i class="bi bi-arrow-left me-1"></i> Back to Routes
+                    </a>
+                </div>
+                <h2 class="page-title">Add Route</h2>
+            </div>
+            <div class="col-auto ms-auto d-print-none">
+                <div class="btn-list">
+                  <a href="{% url 'route_list' %}" class="btn btn-secondary btn-sm d-none d-sm-inline-block">
+                    <i class="bi bi-arrow-left"></i>
+                    Back
+                  </a>
+                 
+                  <a href="{% url 'route_list' %}"
+                    class="btn btn-secondary btn-6 d-sm-none btn-icon"
+                    aria-label="Create new report">
+                   <i class="bi bi-arrow-left"></i>
+                  </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="page-body">
+    <div class="container-xl">
+        <div class="row justify-content-center">
+            <div class="col-12 mt-3">
+                <form class="card" id="route-form">
+                    {% csrf_token %}
+
+                    <div class="card-header">
+                        <h3 class="card-title">Route Details</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="row row-cards">
+
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label required">Route Name</label>
+                                    <input type="text" name="route_name" class="form-control" placeholder="e.g. Lagos — Abuja Express" required>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Assigned Vehicle</label>
+                                    <select name="vehicle" class="form-select">
+                                        <option value="">— Select Vehicle (optional) —</option>
+                                        {% for v in form.vehicle.field.queryset %}
+                                        <option value="{{ v.pk }}">{{ v.name }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label required">Start Location</label>
+                                    <input type="text" name="start_location" class="form-control" placeholder="e.g. Lagos" required>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label required">End Location</label>
+                                    <input type="text" name="end_location" class="form-control" placeholder="e.g. Abuja" required>
+                                </div>
+                            </div>
+
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label class="form-label required">Planned Date</label>
+                                    <input name="planned_date" placeholder="Select a date" class="form-control datepicker" required>
+                                </div>
+                            </div>
+
+                            <div class="col-12">
+                                <div class="mb-0">
+                                    <label class="form-label">Notes</label>
+                                    <textarea name="notes" rows="3" class="form-control" placeholder="Any additional details about this route..."></textarea>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <div class="card-footer text-end">
+                        <a href="{% url 'route_list' %}" class="btn btn-secondary btn-sm me-2">Cancel</a>
+                        <button type="button"
+                                class="btn btn-primary btn-sm"
+                                data-bs-toggle="modal"
+                                data-bs-target="#confirm-route-modal">
+                            Save Route
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+{# --- Confirmation Modal --- #}
+<div class="modal modal-blur fade" id="confirm-route-modal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-sm modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-body">
+                <div class="modal-title">Save this route?</div>
+                <div class="text-muted mt-1">The route will be added to your fleet plan.</div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-link link-secondary me-auto" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="confirm-route-btn">
+                    <span id="confirm-route-label">Yes, Save</span>
+                    <span id="confirm-route-spinner" class="spinner-border spinner-border-sm ms-2" style="display:none;" role="status" aria-hidden="true"></span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+  // --- Reinitialize Litepicker datepickers ---
+    function reinitDatepickers() {
+    var pickers = document.querySelectorAll('.datepicker');
+    
+    pickers.forEach(function (el) {
+        if (el.litepicker) {
+            el.litepicker.destroy();
+            el.litepicker = null;
+        }
+
+        var minDate = el.dataset.minDate === 'today' ? new Date()
+                    : el.dataset.minDate ? new Date(el.dataset.minDate)
+                    : null;
+
+        var picker = new Litepicker({
+            element: el,
+            minDate: minDate,
+            format: 'YYYY-MM-DD',
+            buttonText: {
+                previousMonth: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-1"><path d="M15 6l-6 6l6 6" /></svg>`,
+                nextMonth: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-1"><path d="M9 6l6 6l-6 6" /></svg>`,
+            },
+        });
+
+        el.litepicker = picker;
+        });
+    }
+    document.getElementById('confirm-route-btn').addEventListener('click', function () {
+        const btn = this;
+        const label = document.getElementById('confirm-route-label');
+        const spinner = document.getElementById('confirm-route-spinner');
+
+        btn.disabled = true;
+        label.textContent = 'Saving...';
+        spinner.style.display = 'inline-block';
+
+        htmx.ajax('POST', '{% url "route_create" %}', {
+            source: '#route-form',
+            target: '#toast-container',
+            swap: 'innerHTML',
+        }).then(function () {
+            btn.disabled = false;
+            label.textContent = 'Yes, Save';
+            spinner.style.display = 'none';
+            bootstrap.Modal.getInstance(document.getElementById('confirm-route-modal')).hide();
+        });
+    });
+</script>
+
+{% endblock %}

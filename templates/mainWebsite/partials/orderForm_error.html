@@ -1,0 +1,71 @@
+
+
+{% for panel_id, fields in error_panels.items %}
+    <div id="{{ panel_id }}"
+        class="accordion-collapse collapse show"
+        data-bs-parent="#accordion-default"
+        hx-swap-oob="outerHTML:#{{ panel_id }}">
+        <div class="accordion-body">
+            <div class="row row-cards">
+
+            {% for field in fields %}
+            <div class="{{ field.col_class }}">
+                <div class="mb-3">
+                <label class="form-label">{{ field.label }}</label>
+
+                {% if field.type == "select" %}
+                    {# wrapper div carries the error so JS can find it after TomSelect rebuilds #}
+                    <div class="tomselect-wrapper {% if field.errors %}has-error{% endif %}">
+                        <select name="{{ field.html_name|default:field.name }}"
+                                class="form-select {% if field.errors %}is-invalid{% endif %}"
+                                data-search="on">
+                        <option value="">{{ field.placeholder }}</option>
+                        {% for val, display in field.choices %}
+                            <option value="{{ val }}" {% if field.value == val|stringformat:"s" %}selected{% endif %}>
+                            {{ display }}
+                            </option>
+                        {% endfor %}
+                        </select>
+                    </div>
+
+                {% elif field.type == "textarea" %}
+                    <textarea name="{{ field.html_name|default:field.name }}"
+                            rows="5"
+                            class="form-control {% if field.errors %}is-invalid{% endif %}"
+                            placeholder="{{ field.placeholder }}">{{ field.value|default:'' }}</textarea>
+                
+                {% elif field.type == "date" %}
+                    <input type="text"
+                        name="{{ field.html_name|default:field.name }}"
+                        class="form-control mb-2 datepicker {% if field.errors %}is-invalid{% endif %}"
+                        data-min-date="today"
+                        placeholder="{{ field.placeholder }}"
+                        value="{{ field.value|default:'' }}">
+
+                {% else %}
+                    <input type="{{ field.type|default:'text' }}"
+                        name="{{ field.html_name|default:field.name }}"
+                        class="form-control {% if field.errors %}is-invalid{% endif %}"
+                        placeholder="{{ field.placeholder }}"
+                        value="{{ field.value|default:'' }}"
+                        {% if field.required %}required{% endif %}>
+                {% endif %}
+
+                {% if field.errors %}
+                    {% for error in field.errors %}
+                    <div class="invalid-feedback d-block">{{ error }}</div>
+                    {% endfor %}
+                {% endif %}
+
+                {% if field.hint %}
+                    <small class="form-hint">{{ field.hint }}</small>
+                {% endif %}
+
+                </div>
+            </div>
+            {% endfor %}
+
+            </div>
+        </div>
+    </div>
+{% endfor %}

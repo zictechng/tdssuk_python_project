@@ -1,0 +1,64 @@
+{% extends "mainDash/layouts/baseDash.html" %}
+{% load static %}
+{% block title %}Notifications{% endblock %}
+{% block content %}
+
+<div class="page-header d-print-none">
+  <div class="container-xl">
+    <div class="row g-2 align-items-center">
+      <div class="col">
+        <h2 class="page-title">Notifications</h2>
+        <div class="page-pretitle">
+          {{ unread_count }} unread notification{{ unread_count|pluralize }}
+        </div>
+      </div>
+      <div class="col-auto ms-auto">
+        {% if unread_count > 0 %}
+        <form method="post" action="{% url 'notifications_mark_all_read' %}" id="mark-all-form">
+          {% csrf_token %}
+          <button type="button" class="btn btn-secondary btn-sm" id="mark-all-btn">
+            <i class="bi bi-check2-all me-1"></i> Mark All as Read
+          </button>
+        </form>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="page-body">
+  <div class="container-xl">
+    <div class="row row-deck row-cards mt-3">
+      <div class="col-12" id="notif-container">
+        {% include "mainDash/components/notifications_listTable.html" %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var markAllBtn = document.getElementById('mark-all-btn');
+  if (markAllBtn) {
+    markAllBtn.addEventListener('click', function () {
+      var formData = new FormData(document.getElementById('mark-all-form'));
+      fetch('{% url "notifications_mark_all_read" %}', {
+        method: 'POST', body: formData,
+        headers: { 'HX-Request': 'true' }
+      })
+      .then(function (res) { return res.text(); })
+      .then(function (html) {
+        var doc     = new DOMParser().parseFromString(html, 'text/html');
+        var toastEl = doc.querySelector('.toast');
+        if (toastEl) {
+          document.getElementById('toast-container').innerHTML = toastEl.outerHTML;
+          tabler.Toast.getOrCreateInstance(document.querySelector('#toast-container .toast')).show();
+          setTimeout(function () { window.location.reload(); }, 1000);
+        }
+      });
+    });
+  }
+});
+</script>
+
+{% endblock %}

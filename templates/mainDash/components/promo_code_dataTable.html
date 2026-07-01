@@ -1,0 +1,124 @@
+
+<div class="card">
+  <div class="table-responsive">
+    <table class="table table-vcenter table-hover card-table">
+      <thead>
+        <tr>
+          <th>Code</th>
+          <th>Type</th>
+          <th>Value</th>
+          <th>Uses</th>
+          <th>Valid Until</th>
+          <th>Status</th>
+          <th>Created By</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for code in codes %}
+        <tr>
+          <td>
+            <span class="fw-medium font-monospace">{{ code.code }}</span>
+          </td>
+          <td class="text-secondary">{{ code.get_discount_type_display }}</td>
+          <td class="fw-medium">
+            {% if code.discount_type == 'percentage' %}
+              {{ code.discount_value }}%
+            {% else %}
+              £{{ code.discount_value }}
+            {% endif %}
+          </td>
+          <td>
+            <div class="d-flex align-items-center gap-2">
+              <span class="text-secondary">{{ code.used_count }}</span>
+              {% if code.max_uses %}
+              <span class="text-muted">/ {{ code.max_uses }}</span>
+              {% else %}
+              <span class="text-muted">/ ∞</span>
+              {% endif %}
+            </div>
+          </td>
+          <td class="text-secondary">
+            {% if code.valid_until %}
+              {% if code.is_expired %}
+                <span class="text-danger">
+                  <i class="bi bi-exclamation-circle me-1"></i>
+                  {{ code.valid_until|date:"d M Y" }}
+                </span>
+              {% else %}
+                {{ code.valid_until|date:"d M Y" }}
+              {% endif %}
+            {% else %}
+              <span class="text-muted">No expiry</span>
+            {% endif %}
+          </td>
+          <td>
+            <span class="badge text-white
+              {% if code.is_expired %}bg-danger
+              {% elif code.is_fully_used %}bg-secondary
+              {% elif code.status == 'active' %}bg-success
+              {% elif code.status == 'inactive' %}bg-secondary
+              {% else %}bg-warning{% endif %}">
+              {% if code.is_expired %}Expired
+              {% elif code.is_fully_used %}Fully Used
+              {% else %}{{ code.get_status_display }}{% endif %}
+            </span>
+          </td>
+          <td class="text-secondary">
+            {{ code.created_by.get_full_name|default:code.created_by.username|default:"—" }}
+          </td>
+          <td>
+            <div class="d-flex gap-1">
+              <a href="{% url 'promo_code_edit' code.token %}"
+                 class="btn btn-sm btn-ghost-warning">
+                 Edit
+              </a>
+              <button type="button"
+                      class="btn btn-sm btn-ghost-danger js-confirm-delete"
+                      data-delete-url="{% url 'promo_code_delete' code.token %}"
+                      data-item-name="promo code {{ code.code }}">
+                 Delete
+              </button>
+            </div>
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="8" class="text-center py-5 text-secondary">
+            <i class="bi bi-tag fs-2 d-block mb-2 opacity-50"></i>
+            <h5 class="mb-1">No promo codes found</h5>
+            <small>Create your first promo code to get started.</small>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% include "mainDash/includes/report_pagination.html" with page_obj=codes hx_target="#promo-container" %}
+</div>
+
+
+{% include "mainDash/includes/confirm_delete_modal.html" %}
+
+<script>
+document.querySelectorAll('.js-confirm-delete').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+        var deleteUrl = btn.getAttribute('data-delete-url');
+        var itemName  = btn.getAttribute('data-item-name');
+
+        confirmDelete({
+            url:       deleteUrl,
+            title:     'Delete ' + itemName + '?',
+            message:   'This action cannot be undone.',
+            csrfToken: '{{ csrf_token }}',
+            onSuccess: function () {
+                var row = btn.closest('tr');
+                if (row) row.remove();
+            },
+            onError: function (data) {
+                alert(data.error || 'Delete failed.');
+            },
+        });
+    });
+});
+</script>

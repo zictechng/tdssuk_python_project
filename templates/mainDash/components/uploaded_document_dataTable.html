@@ -1,0 +1,159 @@
+
+{% load humanize %}
+
+<div class="col-12">
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">Uploaded Documents</h3>
+            <div class="card-options">
+                <small class="text-muted">
+                    {{ documents.paginator.count }} document{{ documents.paginator.count|pluralize }}
+                </small>
+            </div>
+        </div>
+
+        {% if documents.paginator.count > 0 %}
+        <div class="table-responsive">
+            <table class="table card-table table-vcenter text-nowrap">
+                <thead>
+                    <tr>
+                        <th>Title</th>
+                        <th>Type</th>
+                        <th>Linked To</th>
+                        <th>Status</th>
+                        <th>File Size</th>
+                        <th>Uploaded By</th>
+                        <th>Date</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for doc in documents %}
+                    <tr id="uploaded-doc-row-{{ doc.uuid }}">
+                        <td class="fw-medium">
+                            <i class="bi bi-file-earmark me-1 text-blue"></i>
+                            {{ doc.title }}
+                        </td>
+                        <td>
+                            <span class="badge bg-blue-lt">
+                                {{ doc.get_document_type_display }}
+                            </span>
+                        </td>
+                        <td>
+                            {% if doc.shipment %}
+                                <a href="{% url 'viewShipmentDetail' doc.shipment.uuid %}" class="text-reset">
+                                    <i class="bi bi-box-seam me-1 text-blue"></i>
+                                    {{ doc.shipment.tracking_number }}
+                                </a>
+                            {% elif doc.order %}
+                                <a href="{% url 'viewOrderDetail' doc.order.uuid %}" class="text-reset">
+                                    <i class="bi bi-bag me-1 text-green"></i>
+                                    {{ doc.order.order_number }}
+                                </a>
+                            {% elif doc.invoice %}
+                                <a href="{% url 'document_invoice_detail' doc.invoice.uuid %}" class="text-reset">
+                                    <i class="bi bi-receipt me-1 text-yellow"></i>
+                                    {{ doc.invoice.invoice_number }}
+                                </a>
+                            {% else %}
+                                <span class="text-muted">—</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <span class="badge bg-{% if doc.status == 'approved' %}green{% elif doc.status == 'rejected' %}red{% else %}yellow{% endif %}-lt">
+                                {{ doc.get_status_display }}
+                            </span>
+                        </td>
+                        <td class="text-secondary">
+                            {% if doc.file_size %}
+                                {{ doc.file_size|filesizeformat }}
+                            {% else %}—{% endif %}
+                        </td>
+                        <td class="text-secondary">
+                            {{ doc.uploaded_by.get_full_name|default:doc.uploaded_by.username }}
+                        </td>
+                        <td class="text-secondary">{{ doc.created_at|date:"d/m/Y H:i" }}</td>
+                        <td class="text-end">
+                            <a href="{% url 'uploaded_document_detail' doc.uuid %}"
+                               class="btn btn-sm btn-ghost-secondary">View</a>
+                            <a href="{{ doc.file.url }}" target="_blank"
+                               class="btn btn-sm btn-ghost-secondary">Download</a>
+                            <button type="button"
+                                    class="btn btn-sm btn-ghost-danger js-delete-uploaded-doc"
+                                    data-doc-id="{{ doc.uuid }}">
+                                Delete
+                            </button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="card-footer d-flex align-items-center">
+            <p class="m-0 text-secondary">
+                Showing <strong>{{ documents.start_index }}–{{ documents.end_index }}</strong>
+                of <strong>{{ documents.paginator.count }}</strong>
+            </p>
+            <ul class="pagination m-0 ms-auto">
+                <li class="page-item {% if not documents.has_previous %}disabled{% endif %}">
+                    <a class="page-link"
+                       hx-get="{% url 'uploaded_document_list' %}?page={% if documents.has_previous %}{{ documents.previous_page_number }}{% else %}1{% endif %}&search={{ search }}&document_type={{ type_filter }}&status={{ status }}"
+                       hx-target="#uploaded-docs-table-container"
+                       hx-swap="innerHTML"
+                       hx-push-url="true">←</a>
+                </li>
+                {% for num in documents.paginator.page_range %}
+                <li class="page-item {% if documents.number == num %}active{% endif %}">
+                    <a class="page-link"
+                       hx-get="{% url 'uploaded_document_list' %}?page={{ num }}&search={{ search }}&document_type={{ type_filter }}&status={{ status }}"
+                       hx-target="#uploaded-docs-table-container"
+                       hx-swap="innerHTML"
+                       hx-push-url="true">{{ num }}</a>
+                </li>
+                {% endfor %}
+                <li class="page-item {% if not documents.has_next %}disabled{% endif %}">
+                    <a class="page-link"
+                       hx-get="{% url 'uploaded_document_list' %}?page={% if documents.has_next %}{{ documents.next_page_number }}{% else %}{{ documents.paginator.num_pages }}{% endif %}&search={{ search }}&document_type={{ type_filter }}&status={{ status }}"
+                       hx-target="#uploaded-docs-table-container"
+                       hx-swap="innerHTML"
+                       hx-push-url="true">→</a>
+                </li>
+            </ul>
+        </div>
+
+        {% else %}
+        <div class="text-center py-5 text-secondary">
+            <i class="bi bi-file-earmark fs-2 d-block mb-2 opacity-50"></i>
+            <h4 class="mb-1">No documents found</h4>
+            <small>Try adjusting your filters or upload a new document.</small>
+        </div>
+        {% endif %}
+
+    </div>
+</div>
+
+
+{% include "mainDash/includes/confirm_delete_modal.html" %}
+<script>
+document.querySelectorAll('.js-delete-uploaded-doc').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+
+        var docId = btn.getAttribute('data-doc-id');
+        var deleteUrl = "{% url 'uploaded_document_delete' '00000000-0000-0000-0000-000000000000' %}".replace('00000000-0000-0000-0000-000000000000', docId);
+        confirmDelete({
+            url: deleteUrl,
+            title: 'Delete this document?',
+            message: 'This will permanently remove the document and its uploaded file.',
+            csrfToken: '{{ csrf_token }}',
+            onSuccess: function () {
+                var row = document.getElementById('uploaded-doc-row-' + docId);
+                if (row) row.remove();
+            },
+            onError: function (data) {
+                alert(data.error || 'Delete failed.');
+            },
+        });
+    });
+});
+</script>

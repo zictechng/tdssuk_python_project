@@ -1,0 +1,82 @@
+
+{% extends "mainDash/layouts/baseDash.html" %}
+{% load static %}
+
+{% block title %}Tracking Updates{% endblock %}
+
+{% block content %}
+
+<div class="page-header d-print-none">
+  <div class="container-xl">
+    <div class="row g-2 align-items-center">
+      <div class="col">
+        <h2 class="page-title">Tracking Updates</h2>
+        <div class="page-pretitle">Search a shipment and post a new status update</div>
+      </div>
+            <div class="col-auto ms-auto d-print-none">
+                <div class="btn-list">
+                    <a href="{% url 'tracking_history' %}"
+                       class="btn btn-secondary btn-sm d-none d-sm-inline-block">
+                        <i class="bi bi-arrow-left me-1"></i> Back
+                    </a>
+                    <a href="{% url 'tracking_history' %}"
+                       class="btn btn-secondary d-sm-none btn-icon">
+                        <i class="bi bi-arrow-left"></i>
+                    </a>
+                    
+                </div>
+            </div>
+    </div>
+  </div>
+</div>
+
+<div class="page-body">
+  <div class="container-xl">
+
+    <!-- Search -->
+    <div class="row mb-3">
+      <div class="col-12">
+        <div class="card">
+          <div class="card-body py-3">
+            <div class="row g-2 align-items-center">
+              <div class="col-auto text-secondary">Find Shipment:</div>
+              <div class="col ms-auto d-flex justify-content-end">
+                <div class="position-relative" style="max-width:400px; width:100%;">
+                  <input type="text"
+                         id="update-search-input"
+                         class="form-control pe-4"
+                         placeholder="Enter TRK-... or SHP-..."
+                         value="{{ request.GET.query }}"
+                         hx-get="{% url 'tracking_updates' %}"
+                         hx-trigger="keyup changed delay:500ms, search"
+                         hx-target="#update-result-container"
+                         hx-swap="innerHTML"
+                         hx-push-url="true"
+                         name="query" />
+                  <button type="button"
+                          id="update-search-clear"
+                          class="p-0 text-secondary"
+                          style="display:{% if request.GET.query %}block{% else %}none{% endif %};
+                                 position:absolute; right:8px; top:50%;
+                                 transform:translateY(-50%); background:none;
+                                 border:none; cursor:pointer;"
+                          aria-label="Clear">
+                    <i class="bi bi-x-lg" style="font-size:0.75rem;"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Result -->
+    <div class="row row-deck row-cards" id="update-result-container">
+      {% include "mainDash/components/update_result.html" %}
+    </div>
+
+  </div>
+</div>
+
+{% endblock %}

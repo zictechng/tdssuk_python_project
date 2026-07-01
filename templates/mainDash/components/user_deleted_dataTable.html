@@ -1,0 +1,170 @@
+{% load humanize %}
+
+<div class="col-12">
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">Deleted Users</h3>
+            <div class="card-options">
+                <small class="text-muted">
+                    {{ users.paginator.count }} user{{ users.paginator.count|pluralize }}
+                </small>
+            </div>
+        </div>
+
+        {% if users.paginator.count > 0 %}
+        <div class="table-responsive">
+            <table class="table card-table table-vcenter text-nowrap">
+                <thead>
+                    <tr>
+                        <th class="w-1">
+                                <input class="form-check-input m-0 align-middle"
+                                    type="checkbox" id="select-all"
+                                    aria-label="Select all users" />
+                            </th>
+                        <th>User</th>
+                        <th>Phone</th>
+                        <th>Role</th>
+                        <th>Deleted On</th>
+                       <th class="w-1"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for u in users %}
+                    <tr id="user-row-{{ u.pk }}">
+                        <td>
+                            <input class="form-check-input m-0 align-middle table-selectable-check"
+                                   type="checkbox" value="{{ u.pk }}"
+                                   aria-label="Select user" />
+                        </td>
+                        <td>
+                            <div class="d-flex align-items-center gap-2">
+                                {% if u.profile.profile_image %}
+                                <span class="avatar avatar-sm"
+                                      style="background-image: url('{{ u.profile.profile_image.url }}')"></span>
+                                {% else %}
+                                <span class="avatar avatar-sm bg-red-lt text-red fw-bold">
+                                    {{ u.first_name|slice:":1" }}{{ u.last_name|slice:":1" }}
+                                </span>
+                                {% endif %}
+                                <div>
+                                    <p class="mb-0 fw-medium text-muted">{{ u.get_full_name }}</p>
+                                    <small class="text-muted">{{ u.email }}</small>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="text-secondary">{{ u.profile.phone|default:"—" }}</td>
+                        <td>
+                            {% for group in u.groups.all %}
+                            <span class="badge bg-blue-lt text-blue me-1">{{ group.name }}</span>
+                            {% empty %}
+                            <span class="text-muted small">No role</span>
+                            {% endfor %}
+                        </td>
+                        <td class="text-secondary">
+                            {{ u.profile.deleted_at|date:"d/m/Y H:i"|default:"—" }}
+                        </td>
+                        <td class="text-end">
+                            
+                            <button type="button"
+                                    class="btn btn-sm btn-ghost-success js-restore-user"
+                                    data-restore-url="{% url 'user_restore' u.profile.uuid %}"
+                                    data-user-pk="{{ u.pk }}"
+                                    data-user-name="{{ u.get_full_name }}">
+                                <i class="bi bi-arrow-counterclockwise me-1"></i> Restore
+                            </button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="card-footer d-flex align-items-center">
+            <p class="m-0 text-secondary">
+                Showing <strong>{{ users.start_index }}–{{ users.end_index }}</strong>
+                of <strong>{{ users.paginator.count }}</strong>
+            </p>
+            <ul class="pagination m-0 ms-auto">
+                <li class="page-item {% if not users.has_previous %}disabled{% endif %}">
+                    <a class="page-link"
+                       hx-get="{% url 'user_deleted_list' %}?page={% if users.has_previous %}{{ users.previous_page_number }}{% else %}1{% endif %}&search={{ search }}"
+                       hx-target="#users-deleted-table-container"
+                       hx-swap="innerHTML"
+                       hx-push-url="true">←</a>
+                </li>
+                {% for num in users.paginator.page_range %}
+                <li class="page-item {% if users.number == num %}active{% endif %}">
+                    <a class="page-link"
+                       hx-get="{% url 'user_deleted_list' %}?page={{ num }}&search={{ search }}"
+                       hx-target="#users-deleted-table-container"
+                       hx-swap="innerHTML"
+                       hx-push-url="true">{{ num }}</a>
+                </li>
+                {% endfor %}
+                <li class="page-item {% if not users.has_next %}disabled{% endif %}">
+                    <a class="page-link"
+                       hx-get="{% url 'user_deleted_list' %}?page={% if users.has_next %}{{ users.next_page_number }}{% else %}{{ users.paginator.num_pages }}{% endif %}&search={{ search }}"
+                       hx-target="#users-deleted-table-container"
+                       hx-swap="innerHTML"
+                       hx-push-url="true">→</a>
+                </li>
+            </ul>
+        </div>
+
+        {% else %}
+        <div class="text-center py-5 text-secondary">
+            <i class="bi bi-people fs-2 d-block mb-2 opacity-50"></i>
+            <h4 class="mb-1">No deleted users found</h4>
+            <small>All users are currently active.</small>
+        </div>
+        {% endif %}
+
+    </div>
+</div>
+
+{% include "mainDash/includes/confirm_action_modal.html" %}
+
+<script>
+document.querySelectorAll('.js-restore-user').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+        var restoreUrl = btn.getAttribute('data-restore-url');
+        var userPk     = btn.getAttribute('data-user-pk');
+        var userName   = btn.getAttribute('data-user-name');
+
+        confirmAction({
+            url:              restoreUrl,
+            title:            'Restore ' + userName + '?',
+            message:          'This will reactivate their account and allow them to log in again.',
+            confirmLabel:     'Yes, Restore',
+            processingLabel:  'Restoring...',
+            btnClass:         'btn-success',
+            csrfToken:        '{{ csrf_token }}',
+            onSuccess: function () {
+                var row = document.getElementById('user-row-' + userPk);
+                if (row) row.remove();
+            },
+            onError: function (data) {
+                alert(data.error || 'Restore failed.');
+            },
+        });
+    });
+});
+
+(function () {
+    function initSelectAll() {
+        var selectAll = document.getElementById('select-all');
+        if (!selectAll) return;
+        selectAll.addEventListener('change', function () {
+            document.querySelectorAll('.table-selectable-check').forEach(function (cb) {
+                cb.checked = selectAll.checked;
+            });
+        });
+    }
+        initSelectAll();
+        var container = document.getElementById('users-table-container');
+        if (container) {
+            container.addEventListener('htmx:afterSwap', initSelectAll);
+        }
+})();
+
+</script>

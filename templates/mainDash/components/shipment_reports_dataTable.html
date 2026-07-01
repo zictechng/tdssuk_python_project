@@ -1,0 +1,197 @@
+
+{% load humanize %}
+{% include "mainDash/includes/filter_bar.html" %}
+
+<!-- Stats Cards -->
+<div class="row row-deck row-cards mb-4">
+  <div class="col-sm-6 col-lg-3">
+    <div class="card">
+      <div class="card-body">
+        <div class="d-flex align-items-center mb-3">
+          <div class="subheader">Total Shipments</div>
+        </div>
+        <div class="h1 mb-3">{{ total }}</div>
+        <div class="d-flex gap-2">
+          <span class="badge bg-blue-lt">{{ outbound }} Outbound</span>
+          <span class="badge bg-purple-lt">{{ inbound }} Inbound</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-sm-6 col-lg-3">
+    <div class="card">
+      <div class="card-body">
+        <div class="subheader mb-3">Delivered</div>
+        <div class="h1 mb-3 text-success">{{ delivered }}</div>
+        <div class="progress progress-sm">
+          <div class="progress-bar bg-success"
+               style="width:{% if total %}{% widthratio delivered total 100 %}{% else %}0{% endif %}%"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-sm-6 col-lg-3">
+    <div class="card">
+      <div class="card-body">
+        <div class="subheader mb-3">In Transit</div>
+        <div class="h1 mb-3 text-primary">{{ in_transit }}</div>
+        <div class="progress progress-sm">
+          <div class="progress-bar bg-primary"
+               style="width:{% if total %}{% widthratio in_transit total 100 %}{% else %}0{% endif %}%"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-sm-6 col-lg-3">
+    <div class="card">
+      <div class="card-body">
+        <div class="subheader mb-3">Cancelled / Returned</div>
+        <div class="h1 mb-3 text-danger">{{ cancelled|add:returned }}</div>
+        <div class="d-flex gap-2">
+          <span class="badge bg-red-lt">{{ cancelled }} Cancelled</span>
+          <span class="badge bg-yellow-lt">{{ returned }} Returned</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Charts Row -->
+<div class="row row-deck row-cards mb-4">
+  <div class="col-lg-8">
+    <div class="card">
+      <div class="card-header">
+        <h3 class="card-title">Shipments Over Time</h3>
+      </div>
+      <div class="card-body">
+        <div id="chart-shipments-daily"></div>
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-4">
+    <div class="card">
+      <div class="card-header">
+        <h3 class="card-title">Status Breakdown</h3>
+      </div>
+      <div class="card-body">
+        <div id="chart-shipments-donut"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Table -->
+<div class="row">
+  <div class="col-12">
+    <div class="card">
+      <div class="card-header">
+        <h3 class="card-title">Shipment List</h3>
+        <div class="card-options">
+          <small class="text-muted">{{ shipments.paginator.count }} record{{ shipments.paginator.count|pluralize }}</small>
+        </div>
+      </div>
+      {% if shipments.paginator.count > 0 %}
+      <div class="table-responsive">
+        <table class="table table-vcenter table-hover card-table text-nowrap">
+          <thead>
+            <tr>
+              <th>Shipment No</th>
+              <th>Order No</th>
+              <th>Status</th>
+              <th>Direction</th>
+              <th>Customs</th>
+              <th>Carrier</th>
+              <th>Expected Delivery</th>
+              <th>Created</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for s in shipments %}
+            <tr>
+              <td class="fw-medium">{{ s.shipment_number }}</td>
+              <td class="text-secondary">{{ s.order.order_number }}</td>
+              <td>
+                <span class="badge text-white
+                  {% if s.status == 'delivered' %}bg-success
+                  {% elif s.status == 'in_transit' %}bg-primary
+                  {% elif s.status == 'cancelled' %}bg-danger
+                  {% elif s.status == 'returned' %}bg-warning
+                  {% else %}bg-secondary{% endif %}">
+                  {{ s.get_status_display }}
+                </span>
+              </td>
+              <td class="text-secondary">{{ s.get_shipment_direction_display }}</td>
+              <td class="text-secondary">{{ s.get_customs_status_display }}</td>
+              <td class="text-secondary">{{ s.carrier_name|default:"—" }}</td>
+              <td class="text-secondary">{{ s.expected_delivery_date|date:"d M Y"|default:"—" }}</td>
+              <td class="text-secondary">{{ s.created_at|date:"d M Y" }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% include "mainDash/includes/report_pagination.html" with page_obj=shipments%}
+      {% else %}
+      <div class="text-center py-5 text-secondary">
+        <i class="bi bi-box-seam fs-2 d-block mb-2 opacity-50"></i>
+        <h4 class="mb-1">No shipments found</h4>
+        <small>Try adjusting the date range.</small>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<script>
+
+(function () {
+  var labels  = {{ chart_labels|safe }};
+  var series  = {{ chart_series|safe }};
+  var sLabels = {{ status_labels|safe }};
+  var sData   = {{ status_data|safe }};
+
+  // Line chart
+  new ApexCharts(document.getElementById('chart-shipments-daily'), {
+    chart: { type: 'area', height: 240, toolbar: { show: false }, animations: { enabled: true } },
+    series: [{ name: 'Shipments', data: series }],
+    xaxis: { categories: labels, labels: { rotate: -30, style: { fontSize: '11px' } } },
+    stroke: { curve: 'smooth', width: 2 },
+    fill:   { type: 'gradient', gradient: { opacityFrom: 0.4, opacityTo: 0.05 } },
+    colors: ['#206bc4'],
+    tooltip: { theme: 'light' },
+    grid:   { strokeDashArray: 4 },
+  }).render();
+
+  // Donut chart
+  new ApexCharts(document.getElementById('chart-shipments-donut'), {
+    chart: { type: 'donut', height: 240, toolbar: { show: false } },
+    series: sData,
+    labels: sLabels,
+    colors: ['#94a3b8', '#206bc4', '#2fb344', '#d63939', '#f59f00'],
+    legend: { position: 'bottom' },
+    tooltip: { theme: 'light' },
+  }).render();
+
+  // ✅ Direct — no clone, no DOMContentLoaded
+  var selectAll = document.getElementById('select-all');
+  var checkboxes = document.querySelectorAll('.table-selectable-check');
+
+  if (selectAll && checkboxes.length) {
+    selectAll.addEventListener('change', function () {
+      checkboxes.forEach(function (cb) {
+        cb.checked = selectAll.checked;
+      });
+    });
+
+    checkboxes.forEach(function (cb) {
+      cb.addEventListener('change', function () {
+        selectAll.checked = Array.from(checkboxes).every(function (c) {
+          return c.checked;
+        });
+      });
+    });
+  }
+
+})();
+
+</script>

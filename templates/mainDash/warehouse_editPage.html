@@ -1,0 +1,227 @@
+
+{% extends "mainDash/layouts/baseDash.html" %}
+{% load static %}
+
+{% block title %}Edit {{ warehouse.name }} — Warehouse{% endblock %}
+
+{% block content %}
+
+<div class="page-header d-print-none" aria-label="Page header">
+    <div class="container-xl">
+        <div class="row g-2 align-items-center">
+            <div class="col">
+                <h2 class="page-title">Edit Warehouse</h2>
+                <span class="text-muted fs-4">{{ warehouse.name }} — {{ warehouse.city }}, {{ warehouse.country }}</span>
+            </div>
+            <div class="col-auto ms-auto d-print-none">
+                <div class="btn-list">
+                    <a href="{% url 'warehouse_detail' warehouse.uuid %}"
+                       class="btn btn-secondary btn-sm d-none d-sm-inline-block">
+                        <i class="bi bi-arrow-left"></i> Back
+                    </a>
+                    <a href="{% url 'warehouse_detail' warehouse.uuid %}"
+                       class="btn btn-secondary d-sm-none btn-icon" aria-label="Back">
+                        <i class="bi bi-arrow-left"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="page-body">
+    <div class="container-xl">
+        <div class="row row-deck row-cards">
+
+            <div class="col-11 mt-3">
+                <form class="card" id="warehouse-edit-form"
+                      hx-post="{% url 'warehouse_edit' warehouse.uuid %}"
+                      hx-target="#toast-container"
+                      hx-swap="innerHTML">
+                    {% csrf_token %}
+
+                    <div class="card-header">
+                        <h3 class="card-title">Warehouse Details</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="row row-cards">
+
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label required">Warehouse Name</label>
+                                    <input type="text" name="name" class="form-control"
+                                           value="{{ warehouse.name }}"
+                                           placeholder="e.g. Purfleet Main Warehouse">
+                                    <div id="error-name"></div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-3">
+                                <div class="mb-3">
+                                    <label class="form-label required">City</label>
+                                    <input type="text" name="city" class="form-control"
+                                           value="{{ warehouse.city }}"
+                                           placeholder="e.g. Purfleet">
+                                    <div id="error-city"></div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-3">
+                                <div class="mb-3">
+                                    <label class="form-label required">Country</label>
+                                    <input type="text" name="country" class="form-control"
+                                           value="{{ warehouse.country }}">
+                                    <div id="error-country"></div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label required">Address</label>
+                                    <textarea name="address" rows="2" class="form-control"
+                                              placeholder="Full address...">{{ warehouse.address }}</textarea>
+                                    <div id="error-address"></div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-3">
+                                <div class="mb-3">
+                                    <label class="form-label required">Storage Capacity</label>
+                                    <div class="input-group">
+                                        <input type="number" name="capacity" class="form-control"
+                                               min="1" value="{{ warehouse.capacity }}"
+                                               placeholder="e.g. 500">
+                                        <span class="input-group-text">units</span>
+                                    </div>
+                                    <div id="error-capacity"></div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-3">
+                                <div class="mb-3">
+                                    <label class="form-label">Status</label>
+                                    <select name="is_active" class="form-select">
+                                        <option value="True" {% if warehouse.is_active %}selected{% endif %}>Active</option>
+                                        <option value="False" {% if not warehouse.is_active %}selected{% endif %}>Inactive</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="col-12">
+                                <div class="mb-0">
+                                    <label class="form-label">Notes</label>
+                                    <textarea name="notes" rows="3" class="form-control"
+                                              placeholder="Any additional details...">{{ warehouse.notes }}</textarea>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <div class="card-footer text-end">
+                        <a href="{% url 'warehouse_detail' warehouse.uuid %}"
+                           class="btn btn-secondary btn-sm me-2">Cancel</a>
+                        <button type="button"
+                                class="btn btn-primary btn-sm"
+                                data-bs-toggle="modal"
+                                data-bs-target="#confirm-warehouse-edit-modal">
+                            Save Changes
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+{# --- Confirmation Modal --- #}
+<div class="modal modal-blur fade" id="confirm-warehouse-edit-modal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-sm modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-body">
+                <div class="modal-title">Save changes to this warehouse?</div>
+                <div class="text-muted mt-1">Updates will be applied immediately.</div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-link link-secondary me-auto"
+                        data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="confirm-warehouse-edit-btn">
+                    <span id="confirm-edit-label">Yes, Save</span>
+                    <span id="confirm-edit-spinner"
+                          class="spinner-border spinner-border-sm ms-2"
+                          style="display:none;" role="status" aria-hidden="true"></span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.getElementById('confirm-warehouse-edit-btn').addEventListener('click', function () {
+    const btn     = this;
+    const label   = document.getElementById('confirm-edit-label');
+    const spinner = document.getElementById('confirm-edit-spinner');
+
+    btn.disabled          = true;
+    label.textContent     = 'Saving...';
+    spinner.style.display = 'inline-block';
+
+    const form     = document.getElementById('warehouse-edit-form');
+    const formData = new FormData(form);
+
+    fetch(form.getAttribute('hx-post'), {
+        method:  'POST',
+        body:    formData,
+        headers: { 'HX-Request': 'true' }
+    })
+    .then(res => res.text())
+    .then(html => {
+        const parser = new DOMParser();
+        const doc    = parser.parseFromString(html, 'text/html');
+
+        // Handle OOB field errors
+        doc.querySelectorAll('[hx-swap-oob]').forEach(function (oobEl) {
+            const target = document.getElementById(oobEl.id);
+            if (target) target.outerHTML = oobEl.outerHTML;
+        });
+
+        // Handle toast
+        const toast = doc.querySelector('.toast');
+        if (toast) {
+            const dismissBtn = document.querySelector('#confirm-warehouse-edit-modal [data-bs-dismiss="modal"]');
+            if (dismissBtn) dismissBtn.click();
+
+            document.getElementById('toast-container').innerHTML = toast.outerHTML;
+            const toastEl     = document.querySelector('#toast-container .toast');
+            const redirectUrl = toastEl.getAttribute('data-redirect-url');
+            tabler.Toast.getOrCreateInstance(toastEl).show();
+            if (redirectUrl) setTimeout(() => { window.location.href = redirectUrl; }, 1500);
+        } else {
+            btn.disabled          = false;
+            label.textContent     = 'Yes, Save';
+            spinner.style.display = 'none';
+        }
+    })
+    .catch(err => console.error('Submit error:', err))
+    .finally(() => {
+        btn.disabled          = false;
+        label.textContent     = 'Yes, Save';
+        spinner.style.display = 'none';
+    });
+});
+
+// Clear field errors on input
+document.querySelectorAll('#warehouse-edit-form input, #warehouse-edit-form select, #warehouse-edit-form textarea').forEach(function (el) {
+    el.addEventListener('input', function () {
+        const errorDiv = document.getElementById('error-' + el.name);
+        if (errorDiv) errorDiv.innerHTML = '';
+    });
+    el.addEventListener('change', function () {
+        const errorDiv = document.getElementById('error-' + el.name);
+        if (errorDiv) errorDiv.innerHTML = '';
+    });
+});
+</script>
+
+{% endblock %}

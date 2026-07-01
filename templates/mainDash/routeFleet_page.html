@@ -1,0 +1,69 @@
+{% extends "mainDash/layouts/baseDash.html" %}
+{% load static %}
+
+{% block title %}Fleet — Route Planning{% endblock %}
+
+{% block content %}
+
+<div class="page-header d-print-none">
+    <div class="container-xl">
+        <div class="row g-2 align-items-center">
+            <div class="col">
+                <h2 class="page-title">Route Planning</h2>
+                <div class="page-pretitle">Manage and track all fleet routes</div>
+            </div>
+            <div class="col-auto ms-auto d-print-none">
+                <a href="{% url 'route_create' %}" class="btn btn-primary btn-sm">
+                    <i class="bi bi-plus-lg me-1"></i> Add Route
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="page-body">
+    <div class="container-xl">
+
+        {# --- Filters --- #}
+        <div class="row mb-3">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body py-3">
+                        <div class="row g-2 align-items-center">
+                            <div class="col-auto text-secondary">
+                                Filters:
+                            </div>
+                            <div class="col ms-auto d-flex flex-wrap gap-2 justify-content-end">
+                                <select
+                                    id="route-status-filter"
+                                    name="status"
+                                    class="form-select"
+                                    style="max-width: 200px;"
+                                    hx-get="{% url 'route_list' %}"
+                                    hx-trigger="change"
+                                    hx-target="#route-table-container"
+                                    hx-swap="innerHTML"
+                                    hx-push-url="true"
+                                >
+                                    <option value="">All Status</option>
+                                    <option value="planned" {% if status_filter == 'planned' %}selected{% endif %}>Planned</option>
+                                    <option value="active" {% if status_filter == 'active' %}selected{% endif %}>Active</option>
+                                    <option value="completed" {% if status_filter == 'completed' %}selected{% endif %}>Completed</option>
+                                    <option value="cancelled" {% if status_filter == 'cancelled' %}selected{% endif %}>Cancelled</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {# --- Table --- #}
+        <div class="row" id="route-table-container">
+            {% include "mainDash/components/routeFleet_dataTable.html" %}
+        </div>
+
+    </div>
+</div>
+
+{% endblock %}

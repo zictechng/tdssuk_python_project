@@ -1,0 +1,142 @@
+{% load humanize %}
+
+<div class="col-12">
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">User Activity</h3>
+            <div class="card-options">
+                <small class="text-muted">
+                    {{ entries.paginator.count }} activit{{ entries.paginator.count|pluralize:"y,ies" }}
+                </small>
+            </div>
+        </div>
+
+        {% if entries.paginator.count > 0 %}
+        <div class="table-responsive">
+            <table class="table card-table table-vcenter text-nowrap">
+                <thead>
+                    <tr>
+                        <th class="w-1">
+                            <input class="form-check-input m-0 align-middle"
+                                   type="checkbox" id="select-all"
+                                   aria-label="Select all entries" />
+                        </th>
+                        <th>User</th>
+                        <th>Action</th>
+                        <th>Object</th>
+                        <th>Description</th>
+                        <th>Date & Time</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for entry in entries %}
+                    <tr id="row-{{ entry.pk }}">
+                        <td>
+                            <input class="form-check-input m-0 align-middle table-selectable-check"
+                                   type="checkbox" value="{{ entry.pk }}"
+                                   aria-label="Select entry" />
+                        </td>
+                        <td>
+                            {% if entry.user %}
+                            <div class="d-flex align-items-center gap-2">
+                                {% if entry.user.profile.profile_image %}
+                                <span class="avatar avatar-sm"
+                                      style="background-image: url('{{ entry.user.profile.profile_image.url }}')"></span>
+                                {% else %}
+                                <span class="avatar avatar-sm bg-blue-lt text-blue fw-bold">
+                                    {{ entry.user.first_name|slice:":1" }}{{ entry.user.last_name|slice:":1" }}
+                                </span>
+                                {% endif %}
+                                <div>
+                                    <p class="mb-0 fw-medium">{{ entry.user.get_full_name }}</p>
+                                    <small class="text-muted">{{ entry.user.email }}</small>
+                                </div>
+                            </div>
+                            {% else %}
+                            <span class="text-muted">—</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if entry.action == 'created' %}
+                            <span class="badge bg-green-lt">Created</span>
+                            {% elif entry.action == 'updated' %}
+                            <span class="badge bg-blue-lt">Updated</span>
+                            {% elif entry.action == 'deleted' %}
+                            <span class="badge bg-red-lt">Deleted</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <span class="fw-medium">{{ entry.object_repr }}</span><br>
+                            <small class="text-muted">{{ entry.model_name }}</small>
+                        </td>
+                        <td class="text-secondary">{{ entry.description|default:"—" }}</td>
+                        <td class="text-secondary">{{ entry.timestamp|date:"d/m/Y H:i" }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        {% include "mainDash/includes/report_pagination.html" with page_obj=entries hx_target="#user-activity-container" %}
+
+        {% comment %} <div class="card-footer d-flex align-items-center">
+            <p class="m-0 text-secondary">
+                Showing <strong>{{ entries.start_index }}–{{ entries.end_index }}</strong>
+                of <strong>{{ entries.paginator.count }}</strong>
+            </p>
+            <ul class="pagination m-0 ms-auto">
+                <li class="page-item {% if not entries.has_previous %}disabled{% endif %}">
+                    <a class="page-link"
+                       hx-get="{% url 'user_activity_list' %}?page={% if entries.has_previous %}{{ entries.previous_page_number }}{% else %}1{% endif %}&search={{ search }}&action={{ action_filter }}"
+                       hx-target="#user-activity-container"
+                       hx-swap="innerHTML"
+                       hx-push-url="true">←</a>
+                </li>
+                {% for num in entries.paginator.page_range %}
+                <li class="page-item {% if entries.number == num %}active{% endif %}">
+                    <a class="page-link"
+                       hx-get="{% url 'user_activity_list' %}?page={{ num }}&search={{ search }}&action={{ action_filter }}"
+                       hx-target="#user-activity-container"
+                       hx-swap="innerHTML"
+                       hx-push-url="true">{{ num }}</a>
+                </li>
+                {% endfor %}
+                <li class="page-item {% if not entries.has_next %}disabled{% endif %}">
+                    <a class="page-link"
+                       hx-get="{% url 'user_activity_list' %}?page={% if entries.has_next %}{{ entries.next_page_number }}{% else %}{{ entries.paginator.num_pages }}{% endif %}&search={{ search }}&action={{ action_filter }}"
+                       hx-target="#user-activity-container"
+                       hx-swap="innerHTML"
+                       hx-push-url="true">→</a>
+                </li>
+            </ul>
+        </div> {% endcomment %}
+
+        {% else %}
+        <div class="text-center py-5 text-secondary">
+            <i class="bi bi-activity fs-2 d-block mb-2 opacity-50"></i>
+            <h4 class="mb-1">No activity found</h4>
+            <small>Try adjusting your search or action filter.</small>
+        </div>
+        {% endif %}
+
+    </div>
+</div>
+
+<script>
+(function () {
+    function initSelectAll() {
+        var selectAll = document.getElementById('select-all');
+        if (!selectAll) return;
+        selectAll.addEventListener('change', function () {
+            document.querySelectorAll('.table-selectable-check').forEach(function (cb) {
+                cb.checked = selectAll.checked;
+            });
+        });
+    }
+    initSelectAll();
+    var container = document.getElementById('user-activity-container');
+    if (container) {
+        container.addEventListener('htmx:afterSwap', initSelectAll);
+    }
+})();
+</script>

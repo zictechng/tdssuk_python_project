@@ -1,0 +1,76 @@
+
+<!-- Table -->
+<div class="card">
+  <div class="card-header">
+    <h3 class="card-title">Activity Log</h3>
+    <div class="card-options">
+      <small class="text-muted">{{ logs.paginator.count }} event{{ logs.paginator.count|pluralize }}</small>
+    </div>
+  </div>
+
+  {% if logs.paginator.count > 0 %}
+  <div class="table-responsive">
+    <table class="table table-vcenter table-hover card-table text-nowrap">
+      <thead>
+        <tr>
+          <th>User</th><th>Action</th><th>Model</th>
+          <th>Record</th><th>Description</th><th>Date & Time</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for log in logs %}
+        <tr>
+          <td>
+            <div class="d-flex align-items-center gap-2">
+              <span class="avatar avatar-xs rounded-circle bg-blue-lt text-blue fw-bold">
+                {{ log.user.username|first|upper|default:"S" }}
+              </span>
+              <span class="fw-medium">
+                {{ log.user.get_full_name|default:log.user.username|default:"System" }}
+              </span>
+            </div>
+          </td>
+          <td>
+            <span class="badge text-white
+              {% if log.action == 'created' %}bg-success
+              {% elif log.action == 'updated' %}bg-primary
+              {% elif log.action == 'deleted' %}bg-danger
+              {% elif log.action == 'login' %}bg-teal
+              {% elif log.action == 'login_failed' %}bg-warning
+              {% else %}bg-secondary{% endif %}">
+              {{ log.action|title }}
+            </span>
+          </td>
+          <td class="text-secondary">{{ log.model_name }}</td>
+          <td class="text-secondary">{{ log.object_repr }}</td>
+          <td class="text-secondary" style="max-width:280px; white-space:normal;">
+            {{ log.description|default:"—"|truncatechars:80 }}
+          </td>
+          <td class="text-secondary">{{ log.timestamp|date:"d M Y, H:i" }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+    {% include "mainDash/includes/report_pagination.html" with page_obj=logs hx_target="#activity-container" %}
+  {% else %}
+  <div class="text-center py-5 text-secondary">
+    <i class="bi bi-clock-history fs-2 d-block mb-2 opacity-50"></i>
+    <h4 class="mb-1">No activity found</h4>
+    <small>Try adjusting your filters.</small>
+  </div>
+  {% endif %}
+</div>
+
+<script>
+(function () {
+  // Clear search
+  var input = document.getElementById('activity-search');
+  var clear = document.getElementById('activity-search-clear');
+  if (input) {
+    input.addEventListener('input', function () { clear.style.display = input.value ? 'block' : 'none'; });
+    clear.addEventListener('click', function () { input.value = ''; clear.style.display = 'none'; htmx.trigger(input, 'search'); });
+  }
+  
+})();
+</script>

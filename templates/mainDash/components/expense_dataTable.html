@@ -1,0 +1,137 @@
+
+{% load static %}
+<div class="col-12">
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">Expense Records</h3>
+            <div class="card-options">
+                <small class="text-muted">
+                    {{ expenses_page.paginator.count }} expense{{ expenses_page.paginator.count|pluralize }}
+                </small>
+            </div>
+        </div>
+
+        {% if expenses_page.paginator.count > 0 %}
+        <div class="table-responsive">
+            <table class="table card-table table-vcenter text-nowrap">
+                <thead>
+                    <tr>
+                        <th class="w-1"><input class="form-check-input m-0 align-middle" type="checkbox" id="select-all" aria-label="Select all expenses" /></th>
+                        <th>Description</th>
+                        <th>Category</th>
+                        <th>Warehouse</th>
+                        <th>Amount</th>
+                        <th>Currency</th>
+                        <th>Date</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for expense in expenses_page %}
+                    <tr id="expense-row-{{ expense.pk }}">
+                        <td><input class="form-check-input m-0 align-middle table-selectable-check" type="checkbox" value="{{ expense.pk }}" aria-label="Select expense" /></td>
+                        <td>
+                            <div><strong>{{ expense.description }}</strong></div>
+                            {% if expense.notes %}
+                            <div class="text-muted small">{{ expense.notes|truncatechars:40 }}</div>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <span class="badge bg-blue-lt">{{ expense.get_category_display }}</span>
+                        </td>
+                        <td class="text-secondary">{{ expense.warehouse.name|default:"—" }}</td>
+                        <td><strong>{{ expense.amount|floatformat:2 }}</strong></td>
+                        <td>
+                            <span class="badge bg-purple-lt">{{ expense.currency }}</span>
+                        </td>
+                        <td class="text-secondary">{{ expense.expense_date|date:"d/m/Y" }}</td>
+                        <td class="text-end">
+                            <button type="button"
+                                    class="btn btn-sm js-delete-expense btn-ghost-danger"
+                                    data-expense-id="{{ expense.pk }}">
+                                Delete
+                            </button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="card-footer d-flex align-items-center">
+            <p class="m-0 text-secondary">
+                Showing <strong>{{ expenses_page.start_index }}–{{ expenses_page.end_index }}</strong>
+                of <strong>{{ expenses_page.paginator.count }}</strong>
+            </p>
+            <ul class="pagination m-0 ms-auto">
+                <li class="page-item {% if not expenses_page.has_previous %}disabled{% endif %}">
+                    <a class="page-link" href="#"
+                       hx-get="{% url 'expense_list' %}?page={% if expenses_page.has_previous %}{{ expenses_page.previous_page_number }}{% else %}1{% endif %}&search={{ search_query }}&category={{ category_filter }}&currency={{ currency_filter }}"
+                       hx-target="#expense-table-container" hx-swap="innerHTML" hx-push-url="true">←</a>
+                </li>
+                {% for num in expenses_page.paginator.page_range %}
+                <li class="page-item {% if expenses_page.number == num %}active{% endif %}">
+                    <a class="page-link" href="#"
+                       hx-get="{% url 'expense_list' %}?page={{ num }}&search={{ search_query }}&category={{ category_filter }}&currency={{ currency_filter }}"
+                       hx-target="#expense-table-container" hx-swap="innerHTML" hx-push-url="true">{{ num }}</a>
+                </li>
+                {% endfor %}
+                <li class="page-item {% if not expenses_page.has_next %}disabled{% endif %}">
+                    <a class="page-link" href="#"
+                       hx-get="{% url 'expense_list' %}?page={% if expenses_page.has_next %}{{ expenses_page.next_page_number }}{% else %}{{ expenses_page.paginator.num_pages }}{% endif %}&search={{ search_query }}&category={{ category_filter }}&currency={{ currency_filter }}"
+                       hx-target="#expense-table-container" hx-swap="innerHTML" hx-push-url="true">→</a>
+                </li>
+            </ul>
+        </div>
+
+        {% else %}
+        <div class="text-center py-5 text-secondary">
+            <i class="bi bi-receipt-cutoff fs-2 d-block mb-2 opacity-50"></i>
+            <h4 class="mb-1">No expenses found</h4>
+            <small>Try adjusting your search or filters.</small>
+        </div>
+        {% endif %}
+
+    </div>
+</div>
+
+{% include "mainDash/includes/confirm_delete_modal.html" %}
+<script>
+document.querySelectorAll('.js-delete-expense').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+        var expenseId = btn.getAttribute('data-expense-id');
+        var deleteUrl = "{% url 'expense_delete' 0 %}".replace('/0/', '/' + expenseId + '/');
+
+        confirmDelete({
+            url: deleteUrl,
+            title: 'Delete this expense?',
+            message: 'This will permanently remove the expense record.',
+            csrfToken: '{{ csrf_token }}',
+            onSuccess: function () {
+                var row = document.getElementById('expense-row-' + expenseId);
+                if (row) row.remove();
+            },
+            onError: function (data) {
+                alert(data.error || 'Delete failed.');
+            },
+        });
+    });
+});
+
+(function () {
+    function initSelectAll() {
+        var selectAll = document.getElementById('select-all');
+        if (!selectAll) return;
+        selectAll.addEventListener('change', function () {
+            document.querySelectorAll('.table-selectable-check').forEach(function (cb) {
+                cb.checked = selectAll.checked;
+            });
+        });
+    }
+        initSelectAll();
+        var container = document.getElementById('users-table-container');
+        if (container) {
+            container.addEventListener('htmx:afterSwap', initSelectAll);
+        }
+})();
+</script>

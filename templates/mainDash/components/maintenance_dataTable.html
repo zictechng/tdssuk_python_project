@@ -1,0 +1,138 @@
+{% load static %}
+<div class="col-12">
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">Maintenance Records</h3>
+        </div>
+
+        {% if records_page.paginator.count > 0 %}
+        <div class="table-responsive">
+            <table class="table card-table table-vcenter text-nowrap">
+                <thead>
+                    <tr>
+                        <th class="w-1"><input class="form-check-input m-0 align-middle" type="checkbox" id="select-all" aria-label="Select all maintenance" /></th>
+                        <th>Vehicle</th>
+                        <th>Service Type</th>
+                        <th>Performed By</th>
+                        <th>Service Date</th>
+                        <th>Next Service</th>
+                        <th>Cost</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for record in records_page %}
+                    <tr id="maintenance-row-{{ record.pk }}">
+                        <td><input class="form-check-input m-0 align-middle table-selectable-check" type="checkbox" value="{{ record.pk }}" aria-label="Select maintenance" /></td>
+                        <td>
+                            <a href="{% url 'vehicle_detail' record.vehicle.uuid %}" class="text-reset">
+                                {{ record.vehicle.name }}
+                            </a>
+                        </td>
+                        <td>
+                            <div>{{ record.service_type }}</div>
+                            {% if record.description %}
+                            <div class="text-secondary small text-truncate" style="max-width: 200px;">{{ record.description }}</div>
+                            {% endif %}
+                        </td>
+                        <td class="text-secondary">{{ record.performed_by|default:"—" }}</td>
+                        <td class="text-secondary">{{ record.service_date|date:"M d, Y" }}</td>
+                        <td>
+                            {% if record.next_service_due %}
+                                <span class="badge bg-{% if record.next_service_due < today %}red{% else %}green{% endif %}-lt">
+                                    {{ record.next_service_due|date:"M d, Y" }}
+                                </span>
+                            {% else %}
+                                <span class="text-secondary">—</span>
+                            {% endif %}
+                        </td>
+                        <td>${{ record.cost }}</td>
+                        <td class="text-end">
+                            <button type="button" class="btn btn-sm js-delete-maintenance btn-ghost-danger"
+                                    data-record-id="{{ record.pk }}">
+                                Delete
+                            </button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="card-footer d-flex align-items-center">
+            <p class="m-0 text-secondary">
+                Showing <strong>{{ records_page.start_index }}–{{ records_page.end_index }}</strong>
+                of <strong>{{ records_page.paginator.count }}</strong>
+            </p>
+            <ul class="pagination m-0 ms-auto">
+                <li class="page-item {% if not records_page.has_previous %}disabled{% endif %}">
+                    <a class="page-link" href="#"
+                       hx-get="{% url 'maintenance_list' %}?page={% if records_page.has_previous %}{{ records_page.previous_page_number }}{% else %}1{% endif %}&search={{ search_query }}&vehicle={{ vehicle_filter }}"
+                       hx-target="#maintenance-table-container" hx-swap="innerHTML" hx-push-url="true">←</a>
+                </li>
+                {% for num in records_page.paginator.page_range %}
+                <li class="page-item {% if records_page.number == num %}active{% endif %}">
+                    <a class="page-link" href="#"
+                       hx-get="{% url 'maintenance_list' %}?page={{ num }}&search={{ search_query }}&vehicle={{ vehicle_filter }}"
+                       hx-target="#maintenance-table-container" hx-swap="innerHTML" hx-push-url="true">{{ num }}</a>
+                </li>
+                {% endfor %}
+                <li class="page-item {% if not records_page.has_next %}disabled{% endif %}">
+                    <a class="page-link" href="#"
+                       hx-get="{% url 'maintenance_list' %}?page={% if records_page.has_next %}{{ records_page.next_page_number }}{% else %}{{ records_page.paginator.num_pages }}{% endif %}&search={{ search_query }}&vehicle={{ vehicle_filter }}"
+                       hx-target="#maintenance-table-container" hx-swap="innerHTML" hx-push-url="true">→</a>
+                </li>
+            </ul>
+        </div>
+
+        {% else %}
+        <div class="text-center py-5 text-secondary">
+            <i class="bi bi-tools fs-2 d-block mb-2 opacity-50"></i>
+            <h4 class="mb-1">No maintenance records found</h4>
+            <small>Try adjusting your search or filters.</small>
+        </div>
+        {% endif %}
+
+    </div>
+</div>
+
+{% include "mainDash/includes/confirm_delete_modal.html" %}
+<script>
+    document.querySelectorAll('.js-delete-maintenance').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            var recordId = btn.getAttribute('data-record-id');
+            var deleteUrl = "{% url 'maintenance_delete' 0 %}".replace('/0/', '/' + recordId + '/');
+
+            confirmDelete({
+                url: deleteUrl,
+                title: 'Delete this record?',
+                message: 'This will permanently remove the maintenance record.',
+                csrfToken: '{{ csrf_token }}',
+                onSuccess: function () {
+                    var row = document.getElementById('maintenance-row-' + recordId);
+                    if (row) row.remove();
+                },
+                onError: function (data) {
+                    alert(data.error || 'Delete failed.');
+                },
+            });
+        });
+    });
+
+    (function () {
+    function initSelectAll() {
+        var selectAll = document.getElementById('select-all');
+        if (!selectAll) return;
+        selectAll.addEventListener('change', function () {
+            document.querySelectorAll('.table-selectable-check').forEach(function (cb) {
+                cb.checked = selectAll.checked;
+            });
+        });
+    }
+        initSelectAll();
+        var container = document.getElementById('users-table-container');
+        if (container) {
+            container.addEventListener('htmx:afterSwap', initSelectAll);
+        }
+})();
+</script>

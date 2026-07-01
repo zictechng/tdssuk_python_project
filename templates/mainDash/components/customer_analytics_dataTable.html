@@ -1,0 +1,112 @@
+
+{% load humanize %}
+{% include "mainDash/includes/filter_bar.html" %}
+
+<div class="row row-deck row-cards mb-4">
+  <div class="col-sm-6 col-lg-4">
+    <div class="card">
+      <div class="card-body">
+        <div class="subheader mb-3">Total Orders</div>
+        <div class="h1 mb-0">{{ total_orders }}</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-sm-6 col-lg-4">
+    <div class="card">
+      <div class="card-body">
+        <div class="subheader mb-3">Unique Customers</div>
+        <div class="h1 mb-0">{{ unique_customers }}</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-sm-6 col-lg-4">
+    <div class="card">
+      <div class="card-body">
+        <div class="subheader mb-3">Top Destination</div>
+        <div class="h1 mb-0">{{ dest_labels.0|default:"—" }}</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row row-deck row-cards mb-4">
+  <div class="col-lg-8">
+    <div class="card">
+      <div class="card-header"><h3 class="card-title">Orders per Month</h3></div>
+      <div class="card-body"><div id="chart-customer-monthly"></div></div>
+    </div>
+  </div>
+  <div class="col-lg-4">
+    <div class="card">
+      <div class="card-header"><h3 class="card-title">Top Destinations</h3></div>
+      <div class="card-body"><div id="chart-destinations"></div></div>
+    </div>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col-12">
+    <div class="card">
+      <div class="card-header"><h3 class="card-title">Top Customers</h3>
+        <div class="card-options">
+             <small class="text-muted">
+                {{ top_customers.paginator.count }} record{{ top_customers.paginator.count|pluralize }}
+            </small>
+             </div>
+     </div>
+      {% if top_customers.paginator.count > 0 %}
+      <div class="table-responsive">
+        <table class="table table-vcenter table-hover card-table text-nowrap">
+          <thead>
+            <tr>
+              <th>#</th><th>Customer</th><th>Email</th>
+              <th>Destination</th><th>Orders</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for c in top_customers %}
+            <tr>
+              <td class="text-secondary">{{ forloop.counter }}</td>
+              <td class="fw-medium">{{ c.customer_name }}</td>
+              <td class="text-secondary">{{ c.customer_email|default:"—" }}</td>
+              <td class="text-secondary">{{ c.receiver_country }}</td>
+              <td><span class="badge bg-blue-lt">{{ c.order_count }}</span></td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% include "mainDash/includes/report_pagination.html" with page_obj=top_customers%}
+      {% else %}
+      <div class="text-center py-5 text-secondary">
+        <i class="bi bi-people fs-2 d-block mb-2 opacity-50"></i>
+        <h4 class="mb-1">No customers found</h4>
+        <small>Try adjusting the date range.</small>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<script>
+new ApexCharts(document.getElementById('chart-customer-monthly'), {
+  chart:  { type: 'area', height: 240, toolbar: { show: false } },
+  series: [{ name: 'Orders', data: {{ chart_series|safe }} }],
+  xaxis:  { categories: {{ chart_labels|safe }} },
+  stroke: { curve: 'smooth', width: 2 },
+  fill:   { type: 'gradient', gradient: { opacityFrom: 0.4, opacityTo: 0.05 } },
+  colors: ['#206bc4'],
+  grid:   { strokeDashArray: 4 },
+  tooltip: { theme: 'light' },
+}).render();
+
+new ApexCharts(document.getElementById('chart-destinations'), {
+  chart:  { type: 'bar', height: 240, toolbar: { show: false } },
+  series: [{ name: 'Orders', data: {{ dest_data|safe }} }],
+  xaxis:  { categories: {{ dest_labels|safe }} },
+  colors: ['#f59f00'],
+  plotOptions: { bar: { horizontal: true, borderRadius: 3 } },
+  tooltip: { theme: 'light' },
+  grid:   { strokeDashArray: 4 },
+}).render();
+</script>

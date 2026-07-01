@@ -1,0 +1,99 @@
+
+{% extends "mainDash/layouts/baseDash.html" %}
+{% load static %}
+{% block title %}Promo Codes{% endblock %}
+{% block content %}
+
+<div class="page-header d-print-none">
+  <div class="container-xl">
+    <div class="row g-2 align-items-center">
+      <div class="col">
+        <h2 class="page-title">Promo Codes</h2>
+        <div class="page-pretitle">Manage discount and promotional codes</div>
+      </div>
+      <div class="col-auto ms-auto">
+        <a href="{% url 'promo_code_create' %}"
+           class="btn btn-primary btn-sm d-none d-sm-inline-block">
+          <i class="bi bi-plus me-1"></i> Create Promo Code
+        </a>
+        <a href="{% url 'promo_code_create' %}"
+           class="btn btn-primary d-sm-none btn-icon">
+          <i class="bi bi-plus"></i>
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="page-body">
+  <div class="container-xl">
+
+    <div class="card mb-3">
+      <div class="card-body py-3">
+        <div class="row g-2 align-items-center">
+          <div class="col-auto text-secondary">Filters:</div>
+          <div class="col ms-auto d-flex flex-wrap gap-2 justify-content-end">
+
+            <div class="position-relative" style="max-width:260px;">
+              <input type="text" id="promo-search" name="q"
+                     class="form-control pe-4"
+                     placeholder="Search promo code..."
+                     value="{{ q }}"
+                     hx-get="{% url 'promo_code_list' %}"
+                     hx-trigger="keyup changed delay:400ms, search"
+                     hx-target="#promo-container"
+                     hx-swap="innerHTML"
+                     hx-include="#promo-filter"
+                     hx-push-url="true" />
+              <button type="button" id="promo-search-clear"
+                      class="p-0 text-secondary"
+                      style="display:{% if q %}block{% else %}none{% endif %};
+                             position:absolute; right:8px; top:50%;
+                             transform:translateY(-50%);
+                             background:none; border:none; cursor:pointer;">
+                <i class="bi bi-x-lg" style="font-size:.75rem;"></i>
+              </button>
+            </div>
+
+            <select id="promo-filter" name="filter"
+                    class="form-select" style="max-width:160px;"
+                    hx-get="{% url 'promo_code_list' %}"
+                    hx-trigger="change"
+                    hx-target="#promo-container"
+                    hx-swap="innerHTML"
+                    hx-include="#promo-search"
+                    hx-push-url="true">
+              <option value=""       {% if not filter %}selected{% endif %}>All Codes</option>
+              <option value="used"   {% if filter == 'used' %}selected{% endif %}>Used</option>
+              <option value="unused" {% if filter == 'unused' %}selected{% endif %}>Unused</option>
+              <option value="expired"{% if filter == 'expired' %}selected{% endif %}>Expired</option>
+            </select>
+
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="promo-container">
+      {% include "mainDash/components/promo_code_dataTable.html" %}
+    </div>
+
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var input = document.getElementById('promo-search');
+  var clear = document.getElementById('promo-search-clear');
+  input.addEventListener('input', function () {
+    clear.style.display = input.value ? 'block' : 'none';
+  });
+  clear.addEventListener('click', function () {
+    input.value = '';
+    clear.style.display = 'none';
+    htmx.trigger(input, 'search');
+  });
+});
+</script>
+
+{% endblock %}

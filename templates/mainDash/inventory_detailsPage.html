@@ -1,0 +1,234 @@
+{% extends "mainDash/layouts/baseDash.html" %}
+{% load static %}
+
+{% block title %}{{ item.customer_name }} — Inventory Detail{% endblock %}
+
+{% block content %}
+
+<div class="page-header d-print-none">
+    <div class="container-xl">
+        <div class="row g-2 align-items-center">
+            <div class="col">
+                <div class="page-pretitle">
+                    <a href="{% url 'inventory_list' %}" class="text-secondary">
+                        <i class="bi bi-arrow-left me-1"></i> Back to Inventory
+                    </a>
+                </div>
+                <h2 class="page-title">{{ item.customer_name }}</h2>
+            </div>
+            <div class="col-auto ms-auto d-print-none">
+                <div class="btn-list">
+                    <a href="{% url 'inventory_edit' item.uuid %}" class="btn btn-secondary btn-sm">
+                        <i class="bi bi-pencil me-1"></i> Edit Item
+                    </a>
+                    <button type="button" class="btn btn-danger btn-sm js-delete-inventory"
+                            data-item-id="{{ item.pk }}">
+                        <i class="bi bi-trash me-1"></i> Delete
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="page-body">
+    <div class="container-xl">
+        <div class="row g-3">
+
+            {# --- Status Banner --- #}
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="row align-items-center">
+                            <div class="col-auto">
+                                <span class="avatar avatar-lg bg-blue-lt rounded">
+                                    <i class="bi bi-box-seam fs-2"></i>
+                                </span>
+                            </div>
+                            <div class="col">
+                                <div class="d-flex align-items-center gap-2 mb-1">
+                                    <h3 class="mb-0">{{ item.customer_name }}</h3>
+                                    <span class="badge bg-{% if item.status == 'in_stock' %}green{% elif item.status == 'dispatched' %}blue{% else %}yellow{% endif %}-lt">
+                                        {{ item.get_status_display }}
+                                    </span>
+                                    <span class="badge bg-purple-lt">{{ item.get_category_display }}</span>
+                                </div>
+                                <div class="text-secondary">
+                                    {{ item.description|truncatechars:80 }}
+                                </div>
+                            </div>
+                            <div class="col-auto text-secondary small">
+                                Added {{ item.created_at|date:"M d, Y" }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {# --- Left Column --- #}
+            <div class="col-md-6">
+
+                {# Item Info #}
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Item Information</h3>
+                    </div>
+                    <div class="card-body">
+                        <dl class="row mb-0">
+                            <dt class="col-5 text-secondary fw-normal">Customer Name</dt>
+                            <dd class="col-7">{{ item.customer_name }}</dd>
+
+                            <dt class="col-5 text-secondary fw-normal">Customer Phone</dt>
+                            <dd class="col-7">{{ item.customer_phone|default:"—" }}</dd>
+
+                            <dt class="col-5 text-secondary fw-normal">Tracking Number</dt>
+                            <dd class="col-7">
+                                {% if item.tracking_number %}
+                                <code>{{ item.tracking_number }}</code>
+                                {% else %}—{% endif %}
+                            </dd>
+
+                            <dt class="col-5 text-secondary fw-normal">Category</dt>
+                            <dd class="col-7">{{ item.get_category_display }}</dd>
+
+                            <dt class="col-5 text-secondary fw-normal">Quantity</dt>
+                            <dd class="col-7">{{ item.quantity }}</dd>
+
+                            <dt class="col-5 text-secondary fw-normal">Weight</dt>
+                            <dd class="col-7">{% if item.weight_kg %}{{ item.weight_kg }} kg{% else %}—{% endif %}</dd>
+
+                            <dt class="col-5 text-secondary fw-normal">Destination</dt>
+                            <dd class="col-7">{{ item.destination_country }}</dd>
+
+                            <dt class="col-5 text-secondary fw-normal">Status</dt>
+                            <dd class="col-7">
+                                <span class="badge bg-{% if item.status == 'in_stock' %}green{% elif item.status == 'dispatched' %}blue{% else %}yellow{% endif %}-lt">
+                                    {{ item.get_status_display }}
+                                </span>
+                            </dd>
+
+                            <dt class="col-5 text-secondary fw-normal">Received Date</dt>
+                            <dd class="col-7">{{ item.received_date|date:"M d, Y" }}</dd>
+
+                            <dt class="col-5 text-secondary fw-normal">Dispatched Date</dt>
+                            <dd class="col-7">{{ item.dispatched_date|date:"M d, Y"|default:"—" }}</dd>
+                        </dl>
+                    </div>
+                </div>
+
+                {% if item.notes %}
+                <div class="card mt-3">
+                    <div class="card-header">
+                        <h3 class="card-title">Notes</h3>
+                    </div>
+                    <div class="card-body">
+                        <p class="text-secondary mb-0">{{ item.notes }}</p>
+                    </div>
+                </div>
+                {% endif %}
+
+            </div>
+
+            {# --- Right Column --- #}
+            <div class="col-md-6">
+
+                {# Warehouse & Location #}
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Storage Information</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-flex align-items-center gap-3 mb-3">
+                            <span class="avatar bg-blue-lt rounded">
+                                <i class="bi bi-building"></i>
+                            </span>
+                            <div>
+                                <div class="fw-medium">{{ item.warehouse.name }}</div>
+                                <div class="text-secondary small">{{ item.warehouse.city }}, {{ item.warehouse.country }}</div>
+                            </div>
+                            <div class="ms-auto">
+                                <a href="{% url 'warehouse_detail' item.warehouse.uuid %}"
+                                   class="btn btn-sm btn-ghost-secondary">
+                                    View Warehouse
+                                </a>
+                            </div>
+                        </div>
+                        <dl class="row mb-0">
+                            <dt class="col-5 text-secondary fw-normal">Storage Location</dt>
+                            <dd class="col-7">{{ item.location|default:"—" }}</dd>
+                        </dl>
+                    </div>
+                </div>
+
+                {# Stock Movement History #}
+                <div class="card mt-3">
+                    <div class="card-header">
+                        <h3 class="card-title">Movement History</h3>
+                        <div class="card-options">
+                            <small class="text-muted">Last 10 records</small>
+                        </div>
+                    </div>
+                    {% if movements %}
+                    <div class="table-responsive">
+                        <table class="table card-table table-vcenter">
+                            <thead>
+                                <tr>
+                                    <th>Type</th>
+                                    <th>Qty</th>
+                                    <th>Reference</th>
+                                    <th>Date</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for movement in movements %}
+                                <tr>
+                                    <td>
+                                        <span class="badge bg-{% if movement.movement_type == 'inbound' %}green{% elif movement.movement_type == 'outbound' %}red{% else %}blue{% endif %}-lt">
+                                            {{ movement.get_movement_type_display }}
+                                        </span>
+                                    </td>
+                                    <td>{{ movement.quantity }}</td>
+                                    <td class="text-secondary">{{ movement.reference|default:"—" }}</td>
+                                    <td class="text-secondary">{{ movement.movement_date|date:"M d, Y" }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="card-body text-center text-secondary py-4">
+                        <i class="bi bi-arrow-left-right fs-2 d-block mb-2 opacity-50"></i>
+                        No movement records yet.
+                    </div>
+                    {% endif %}
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+</div>
+
+{% include "mainDash/includes/confirm_delete_modal.html" %}
+
+<script>
+    document.querySelector('.js-delete-inventory').addEventListener('click', function () {
+        var itemId = this.getAttribute('data-item-id');
+        var deleteUrl = "{% url 'inventory_delete' 0 %}".replace('/0/', '/' + itemId + '/');
+
+        confirmDelete({
+            url: deleteUrl,
+            title: 'Delete this item?',
+            message: 'This will permanently remove the item and all its movement history.',
+            csrfToken: '{{ csrf_token }}',
+            onSuccess: function () {
+                window.location.href = "{% url 'inventory_list' %}";
+            },
+            onError: function (data) {
+                alert(data.error || 'Delete failed.');
+            },
+        });
+    });
+</script>
+
+{% endblock %}

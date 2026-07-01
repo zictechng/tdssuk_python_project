@@ -1,0 +1,264 @@
+
+{% extends "mainDash/layouts/baseDash.html" %}
+{% load static %}
+{% block title %}My Profile{% endblock %}
+{% block content %}
+
+<div class="page-header d-print-none">
+  <div class="container-xl">
+    <div class="row g-2 align-items-center">
+      <div class="col">
+        <h2 class="page-title">My Profile</h2>
+        <div class="page-pretitle">Manage your account information and password</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="page-body">
+  <div class="container-xl">
+    <div class="row row-deck row-cards mt-3">
+
+      <!-- Avatar + Info Panel -->
+      <div class="col-lg-3">
+        <div class="card">
+          <div class="card-body text-center">
+            <div class="mb-3">
+              {% if request.user.profile.profile_image %}
+                <span class="avatar avatar-xl rounded-circle"
+                      style="background-image: url('{{ request.user.profile.profile_image.url }}');">
+                </span>
+                {% else %}
+                <span class="avatar avatar-xl rounded-circle text-white"
+                      style="font-size:2rem; background-color: var(--tblr-primary);">
+                  {{ request.user.first_name|slice:":1" }}{{ request.user.last_name|slice:":1" }}
+                </span>
+                {% endif %}
+            </div>
+            <h3 class="mb-1">{{ request.user.get_full_name|default:request.user.username }}</h3>
+            <p class="text-secondary mb-2">{{ request.user.email }}</p>
+            <span class="badge text-white
+              {% if request.user.is_superuser %}bg-danger
+              {% elif request.user.is_staff %}bg-warning
+              {% else %}bg-secondary{% endif %}">
+              {% if request.user.is_superuser %}Superuser
+              {% elif request.user.is_staff %}Staff
+              {% else %}User{% endif %}
+            </span>
+          </div>
+          <div class="list-group list-group-flush">
+            <div class="list-group-item">
+              <div class="row align-items-center">
+                <div class="col-auto text-secondary"><i class="bi bi-person"></i></div>
+                <div class="col">
+                  <small class="text-muted d-block">Username</small>
+                  <span class="fw-medium">{{ request.user.username }}</span>
+                </div>
+              </div>
+            </div>
+            <div class="list-group-item">
+              <div class="row align-items-center">
+                <div class="col-auto text-secondary"><i class="bi bi-calendar3"></i></div>
+                <div class="col">
+                  <small class="text-muted d-block">Member Since</small>
+                  <span class="fw-medium">{{ request.user.date_joined|date:"d M Y" }}</span>
+                </div>
+              </div>
+            </div>
+            <div class="list-group-item">
+              <div class="row align-items-center">
+                <div class="col-auto text-secondary"><i class="bi bi-clock"></i></div>
+                <div class="col">
+                  <small class="text-muted d-block">Last Login</small>
+                  <span class="fw-medium">{{ request.user.last_login|date:"d M Y, H:i"|default:"—" }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Column -->
+      <div class="col-lg-9 d-flex flex-column gap-3">
+
+        <!-- Profile Update Form -->
+        <form class="card" id="profile-form"
+              hx-post="{% url 'profile_update' %}"
+              hx-target="#toast-container"
+              hx-swap="innerHTML">
+          {% csrf_token %}
+          <div class="card-header">
+            <h3 class="card-title"><i class="bi bi-person-gear me-2"></i>Personal Information</h3>
+          </div>
+          <div class="card-body">
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label class="form-label required">First Name</label>
+                {{ profile_form.first_name }}
+                <div id="error-first_name"></div>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label required">Last Name</label>
+                {{ profile_form.last_name }}
+                <div id="error-last_name"></div>
+              </div>
+              <div class="col-md-8">
+                <label class="form-label required">Email Address</label>
+                {{ profile_form.email }}
+                <div id="error-email"></div>
+              </div>
+            </div>
+          </div>
+          <div class="card-footer text-end">
+            <button type="button"
+                    class="btn btn-primary btn-sm"
+                    data-bs-toggle="modal"
+                    data-bs-target="#confirm-profile-modal">
+              <i class="bi bi-save me-1"></i> Save Changes
+            </button>
+          </div>
+        </form>
+
+        <!-- Change Password Form -->
+        <form class="card" id="password-form"
+              hx-post="{% url 'change_password' %}"
+              hx-target="#toast-container"
+              hx-swap="innerHTML">
+          {% csrf_token %}
+          <div class="card-header">
+            <h3 class="card-title"><i class="bi bi-lock me-2"></i>Change Password</h3>
+          </div>
+          <div class="card-body">
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label class="form-label required">Current Password</label>
+                {{ password_form.current_password }}
+                <div id="error-pwd-current_password"></div>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label required">New Password</label>
+                {{ password_form.new_password }}
+                <div id="error-pwd-new_password"></div>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label required">Confirm New Password</label>
+                {{ password_form.confirm_password }}
+                <div id="error-pwd-confirm_password"></div>
+              </div>
+            </div>
+          </div>
+          <div class="card-footer text-end">
+            <button type="button"
+                    class="btn btn-danger btn-sm"
+                    data-bs-toggle="modal"
+                    data-bs-target="#confirm-password-modal">
+              <i class="bi bi-shield-lock me-1"></i> Change Password
+            </button>
+          </div>
+        </form>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Confirm Profile Modal -->
+<div class="modal modal-blur fade" id="confirm-profile-modal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-sm modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-body">
+        <div class="modal-title">Save profile changes?</div>
+        <div class="text-muted mt-1">Your personal information will be updated.</div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-link link-secondary me-auto"
+                data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-primary" id="confirm-profile-btn">
+          <span id="confirm-profile-label">Yes, Save</span>
+          <span id="confirm-profile-spinner" class="spinner-border spinner-border-sm ms-2"
+                style="display:none;"></span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Confirm Password Modal -->
+<div class="modal modal-blur fade" id="confirm-password-modal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-sm modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-body">
+        <div class="modal-title">Change your password?</div>
+        <div class="text-muted mt-1">You will remain logged in after the change.</div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-link link-secondary me-auto"
+                data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-danger" id="confirm-password-btn">
+          <span id="confirm-password-label">Yes, Change</span>
+          <span id="confirm-password-spinner" class="spinner-border spinner-border-sm ms-2"
+                style="display:none;"></span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+
+  function submitForm(formId, modalId, btnId, labelId, spinnerId, labelText) {
+    document.getElementById(btnId).addEventListener('click', function () {
+      var btn     = this;
+      var label   = document.getElementById(labelId);
+      var spinner = document.getElementById(spinnerId);
+
+      btn.disabled          = true;
+      label.textContent     = 'Saving...';
+      spinner.style.display = 'inline-block';
+
+      var form     = document.getElementById(formId);
+      var formData = new FormData(form);
+
+      fetch(form.getAttribute('hx-post'), {
+        method: 'POST', body: formData,
+        headers: { 'HX-Request': 'true' }
+      })
+      .then(function (res) { return res.text(); })
+      .then(function (html) {
+        var doc = new DOMParser().parseFromString(html, 'text/html');
+        doc.querySelectorAll('[hx-swap-oob]').forEach(function (oobEl) {
+          var target = document.getElementById(oobEl.id);
+          if (target) target.outerHTML = oobEl.outerHTML;
+        });
+        var toastEl = doc.querySelector('.toast');
+        if (toastEl) {
+          document.querySelector('#' + modalId + ' [data-bs-dismiss="modal"]').click();
+          document.getElementById('toast-container').innerHTML = toastEl.outerHTML;
+          tabler.Toast.getOrCreateInstance(document.querySelector('#toast-container .toast')).show();
+        }
+      })
+      .catch(function (err) { console.error(err); })
+      .finally(function () {
+        btn.disabled          = false;
+        label.textContent     = labelText;
+        spinner.style.display = 'none';
+      });
+    });
+  }
+
+  submitForm('profile-form',  'confirm-profile-modal',  'confirm-profile-btn',  'confirm-profile-label',  'confirm-profile-spinner',  'Yes, Save');
+  submitForm('password-form', 'confirm-password-modal', 'confirm-password-btn', 'confirm-password-label', 'confirm-password-spinner', 'Yes, Change');
+
+  document.querySelectorAll('#profile-form input, #password-form input').forEach(function (el) {
+    el.addEventListener('input', function () {
+      var err = document.getElementById('error-' + el.name) ||
+                document.getElementById('error-pwd-' + el.name);
+      if (err) err.innerHTML = '';
+    });
+  });
+
+});
+</script>
+
+{% endblock %}

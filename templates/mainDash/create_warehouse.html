@@ -1,0 +1,39 @@
+{% extends "mainDash/layouts/baseDash.html" %}
+{% load static %}
+
+{% block title %}
+    Add New Warehouse
+{% endblock %}
+
+{% block content %}
+
+<div class="page-header d-print-none" aria-label="Page header">
+    <div class="container-xl">
+        <div class="row g-2 align-items-center">
+            <div class="col">
+                <h2 class="page-title">Add New Warehouse</h2>
+                <span class="text-muted fs-4">Fill in the details to add a new warehouse</span>
+            </div>
+            <div class="col-auto ms-auto d-print-none">
+                <div class="btn-list">
+                    <a href="{% url 'warehouse_list' %}" class="btn btn-secondary btn-sm d-none d-sm-inline-block">
+                        <i class="bi bi-arrow-left"></i> Back
+                    </a>
+                    <a href="{% url 'warehouse_list' %}" class="btn btn-secondary d-sm-none btn-icon" aria-label="Back">
+                        <i class="bi bi-arrow-left"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="page-body">
+    <div class="container-xl">
+        <div class="row row-deck row-cards">
+            {% include "mainDash/components/createWarehouse_form.html" %}
+        </div>
+    </div>
+</div>
+
+{% endblock %}

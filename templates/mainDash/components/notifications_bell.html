@@ -1,0 +1,81 @@
+
+<a href="#"
+   class="nav-link px-0"
+   data-bs-toggle="dropdown"
+   tabindex="-1"
+   aria-label="Show notifications"
+   data-bs-auto-close="outside"
+   hx-get="{% url 'notifications_bell' %}"
+   hx-trigger="click"
+   hx-target="#notif-bell-wrapper"
+   hx-swap="outerHTML">
+  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+       fill="none" stroke="currentColor" stroke-width="2"
+       stroke-linecap="round" stroke-linejoin="round" class="icon icon-1">
+    <path d="M10 5a2 2 0 1 1 4 0a7 7 0 0 1 4 6v3a4 4 0 0 0 2 3h-16a4 4 0 0 0 2 -3v-3a7 7 0 0 1 4 -6" />
+    <path d="M9 17v1a3 3 0 0 0 6 0v-1" />
+  </svg>
+    {% if unread_count > 0 %}
+    <span class="badge bg-info text-white" id="notif-badge">
+        {% if unread_count > 30 %}30+{% else %}{{ unread_count }}{% endif %}
+    </span>
+    {% endif %}
+</a>
+
+<div class="dropdown-menu dropdown-menu-arrow dropdown-menu-end dropdown-menu-card">
+  <div class="card">
+    <div class="card-header d-flex align-items-center">
+      <h3 class="card-title">Notifications</h3>
+      {% if unread_count > 0 %}
+      <span class="badge bg-red ms-2 text-white">{{ unread_count }}</span>
+      {% endif %}
+      <div class="btn-close ms-auto" data-bs-dismiss="dropdown"></div>
+    </div>
+    <div class="list-group list-group-flush list-group-hoverable" style="max-height:320px; overflow-y:auto;">
+      {% for notif in notifications %}
+      <div class="list-group-item">
+        <div class="row align-items-center">
+          <div class="col-auto">
+            <span class="status-dot status-dot-animated
+              {% if notif.notif_type == 'shipment' %}bg-blue
+              {% elif notif.notif_type == 'ticket' %}bg-orange
+              {% elif notif.notif_type == 'order' %}bg-green
+              {% else %}bg-secondary{% endif %} d-block"></span>
+          </div>
+          <div class="col text-truncate">
+            <a href="{{ notif.url|default:'#' }}" class="text-body d-block fw-medium">
+              {{ notif.title }}
+            </a>
+            <div class="d-block text-secondary text-truncate mt-n1">
+              {{ notif.message }}
+            </div>
+          </div>
+          <div class="col-auto">
+            <small class="text-muted">{{ notif.created_at|timesince }} ago</small>
+          </div>
+        </div>
+      </div>
+      {% empty %}
+      <div class="list-group-item text-center text-muted py-3">
+        <i class="bi bi-bell-slash d-block mb-1"></i> No new notifications
+      </div>
+      {% endfor %}
+    </div>
+    <div class="card-footer">
+      <div class="row g-2">
+        <div class="col">
+          <a href="{% url 'notifications_list' %}" class="btn btn-sm w-100">
+            View All
+          </a>
+        </div>
+        {% if unread_count > 0 %}
+        <div class="col">
+          <a href="{% url 'notifications_mark_all_read' %}" class="btn btn-sm w-100">
+            Mark All Read
+          </a>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>

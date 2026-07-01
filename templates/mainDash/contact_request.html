@@ -1,0 +1,32 @@
+
+{% extends "mainDash/layouts/baseDash.html" %}
+    {% load static %}
+    
+        {% block title %}
+            Contact Request
+        {% endblock %}
+
+    {% block content %}
+
+        <div class="page-header d-print-none" aria-label="Page header">
+          <div class="container-xl">
+            <div class="row g-2 align-items-center">
+              <div class="col">
+                <!-- Page pre-title -->
+                <div class="page-pretitle">Contact Request</div>
+                <h2 class="page-title">TDSS UK</h2>
+              </div>
+             </div>
+          </div>
+      </div>
+
+    <div class="page-body">
+        <div class="container-xl">
+          <div class="row row-deck row-cards" id="contact-container">
+            {% include "mainDash/components/contact_request_dataTable.html" %}
+          </div>
+      </div>
+    
+    {% endblock %}
+  
+    

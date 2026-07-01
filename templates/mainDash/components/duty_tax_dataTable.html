@@ -1,0 +1,140 @@
+
+{% load humanize %}
+
+<div class="col-12">
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">Duty & Tax Records</h3>
+            <div class="card-options">
+                <small class="text-muted">
+                    {{ records_page.paginator.count }} record{{ records_page.paginator.count|pluralize }}
+                </small>
+            </div>
+        </div>
+
+        {% if records_page.paginator.count > 0 %}
+        <div class="table-responsive">
+            <table class="table card-table table-vcenter text-nowrap">
+                <thead>
+                    <tr>
+                        <th>Customer / Item</th>
+                        <th>HS Code</th>
+                        <th>Clearance Port</th>
+                        <th>Duty Amount</th>
+                        <th>Duty Rate</th>
+                        <th>Tax Amount</th>
+                        <th>Customs Agent</th>
+                        <th>Status</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for record in records_page %}
+                    <tr id="duty-tax-row-{{ record.pk }}">
+                        <td>
+                            <div class="fw-medium">{{ record.item.customer_name }}</div>
+                            <div class="text-muted small">{{ record.destination_country }}</div>
+                        </td>
+                        <td>
+                            {% if record.hs_code %}
+                            <code>{{ record.hs_code }}</code>
+                            {% else %}
+                            <span class="text-muted">—</span>
+                            {% endif %}
+                        </td>
+                        <td class="text-secondary">{{ record.clearance_port|default:"—" }}</td>
+                        <td>
+                            <strong>{{ record.duty_currency }} {{ record.duty_amount|floatformat:2|intcomma }}</strong>
+                        </td>
+                        <td class="text-secondary">
+                            {% if record.duty_rate %}{{ record.duty_rate }}%{% else %}—{% endif %}
+                        </td>
+                        <td class="text-secondary">
+                            {% if record.tax_amount %}
+                            {{ record.duty_currency }} {{ record.tax_amount|floatformat:2|intcomma }}
+                            {% else %}—{% endif %}
+                        </td>
+                        <td class="text-secondary">{{ record.customs_agent|default:"—" }}</td>
+                        <td>
+                            <span class="badge text-white bg-{% if record.status == 'reimbursed' %}green{% elif record.status == 'paid' %}blue{% elif record.status == 'processing' %}yellow text-white{% else %}secondary{% endif %}-lt">
+                                {{ record.get_status_display }}
+                            </span>
+                        </td>
+                        <td class="text-end">
+                            <button type="button"
+                                    class="btn btn-sm btn-ghost-danger js-delete-duty-tax"
+                                    data-record-id="{{ record.pk }}">
+                                Delete
+                            </button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="card-footer d-flex align-items-center">
+            <p class="m-0 text-secondary">
+                Showing <strong>{{ records_page.start_index }}–{{ records_page.end_index }}</strong>
+                of <strong>{{ records_page.paginator.count }}</strong>
+            </p>
+            <ul class="pagination m-0 ms-auto">
+                <li class="page-item {% if not records_page.has_previous %}disabled{% endif %}">
+                    <a class="page-link"
+                       hx-get="{% url 'duty_tax_list' %}?page={% if records_page.has_previous %}{{ records_page.previous_page_number }}{% else %}1{% endif %}&search={{ search_query }}&status={{ status_filter }}"
+                       hx-target="#duty-tax-table-container"
+                       hx-swap="innerHTML"
+                       hx-push-url="true">←</a>
+                </li>
+                {% for num in records_page.paginator.page_range %}
+                <li class="page-item {% if records_page.number == num %}active{% endif %}">
+                    <a class="page-link"
+                       hx-get="{% url 'duty_tax_list' %}?page={{ num }}&search={{ search_query }}&status={{ status_filter }}"
+                       hx-target="#duty-tax-table-container"
+                       hx-swap="innerHTML"
+                       hx-push-url="true">{{ num }}</a>
+                </li>
+                {% endfor %}
+                <li class="page-item {% if not records_page.has_next %}disabled{% endif %}">
+                    <a class="page-link"
+                       hx-get="{% url 'duty_tax_list' %}?page={% if records_page.has_next %}{{ records_page.next_page_number }}{% else %}{{ records_page.paginator.num_pages }}{% endif %}&search={{ search_query }}&status={{ status_filter }}"
+                       hx-target="#duty-tax-table-container"
+                       hx-swap="innerHTML"
+                       hx-push-url="true">→</a>
+                </li>
+            </ul>
+        </div>
+
+        {% else %}
+        <div class="text-center py-5 text-secondary">
+            <i class="bi bi-receipt fs-2 d-block mb-2 opacity-50"></i>
+            <h4 class="mb-1">No duty & tax records found</h4>
+            <small>Try adjusting your search or filters.</small>
+        </div>
+        {% endif %}
+
+    </div>
+</div>
+
+{% include "mainDash/includes/confirm_delete_modal.html" %}
+<script>
+document.querySelectorAll('.js-delete-duty-tax').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+        var recordId = btn.getAttribute('data-record-id');
+        var deleteUrl = "{% url 'duty_tax_delete' 0 %}".replace('/0/', '/' + recordId + '/');
+        confirmDelete({
+            url: deleteUrl,
+            title: 'Delete this duty & tax record?',
+            message: 'This will permanently remove the duty and tax record.',
+            csrfToken: '{{ csrf_token }}',
+            onSuccess: function () {
+                var row = document.getElementById('duty-tax-row-' + recordId);
+                if (row) row.remove();
+            },
+            onError: function (data) {
+                alert(data.error || 'Delete failed.');
+            },
+        });
+    });
+});
+</script>

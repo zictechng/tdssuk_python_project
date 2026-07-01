@@ -1,0 +1,172 @@
+        
+         {% load static %}
+        <div class="col-12 mt-5" id="orders-table-container">
+            
+            <div class="card">
+                <div class="card-header">
+                <h3 class="card-title">Recent completed orders details</h3>
+                </div>
+                <div class="card-body border-bottom py-3">
+                <div class="d-flex">
+                    
+                    <div class="ms-auto text-secondary">
+                    Search:
+                    <div class="ms-1 d-inline-block">
+                        <div class="col-md-auto col-sm-12">
+                            <form method="GET" class="d-flex gap-2">
+                                <div class="ms-auto d-flex flex-wrap btn-list">
+
+                                    <!-- SEARCH -->
+                                    {% include "mainDash/includes/search_input.html" with search_query=search_query placeholder="OrderId, Email, Phone, TrackId" target_id="orders-table-container" %}  
+
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    </div>
+                </div>
+                </div>
+                {% if orders_details_request.paginator.count > 0 %}
+                    <div class="table-responsive">
+                        <table class="table table-selectable card-table table-vcenter text-nowrap datatable">
+                            <thead>
+                            <tr>
+                                <th class="w-1"><input class="form-check-input m-0 align-middle" type="checkbox" id="select-all" aria-label="Select all order" /></th>
+                                
+                                <th>Sender Name</th>
+                                <th>Email</th>
+                                <th>Order Type</th>
+                                <th>Order Number</th>
+                                <th>From</th>
+                                <th>To</th>
+                                <th>Action By</th>
+                                <th>Date</th>
+                                <th></th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                                {% for order_requests in orders_details_request %}
+                            <tr>
+                                <td><input class="form-check-input m-0 align-middle table-selectable-check" type="checkbox" value="{{ order_requests.uuid }}"
+                                   aria-label="Select order" /></td>
+                                <td><span class="text-secondary">{{order_requests.customer_name}}</span></td>
+                                <td><a href="#" class="text-reset" tabindex="-1">{{order_requests.customer_email}}</a></td>
+                                <td>{{order_requests.order_type.name}}</td>
+                                <td>{{order_requests.order_number}}</td>
+                                <td>{{order_requests.order_origin_country}}</td>
+                                <td>{{order_requests.order_destination_country}}</td>
+                                <td>{{ order_requests.updated_by.first_name|default:"—" }}</td>
+                                <td>{{ order_requests.created_at|date:"d/m/Y"}}</td>
+                                <td class="text-end">
+                                    <a href="{%url 'viewOrderDetail' order_requests.uuid%}"
+                                    class="btn btn-sm btn-ghost-secondary">
+                                    View
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                     <div class="card-footer">
+                        <div class="row g-2 justify-content-center justify-content-sm-between">
+                            <div class="col-auto d-flex align-items-center">
+                                <p class="m-0 text-secondary">
+                                    Showing
+                                    <strong>{{ orders_details_request.start_index }} to {{ orders_details_request.end_index }}</strong>
+                                    of
+                                    <strong>{{ orders_details_request.paginator.count }}</strong>
+                                    entries
+                                </p>
+                            </div>
+
+                            <div class="col-auto">
+                                <ul class="pagination m-0 ms-auto">
+
+                                    <!-- Previous -->
+                                    <li class="page-item {% if not orders_details_request.has_previous %}disabled{% endif %}">
+                                        <a class="page-link"
+                                        href="?page={% if orders_details_request.has_previous %}{{ orders_details_request.previous_page_number }}{% endif %}{% if query_string %}&{{ query_string }}{% endif %}">
+                                            ←
+                                        </a>
+                                    </li>
+
+                                    <!-- First page -->
+                                    {% if 1 not in page_range %}
+                                        <li class="page-item">
+                                            <a class="page-link" href="?page=1{% if query_string %}&{{ query_string }}{% endif %}">1</a>
+                                        </li>
+                                        <li class="page-item disabled"><span class="page-link">…</span></li>
+                                    {% endif %}
+
+                                    <!-- Page window -->
+                                    {% for num in page_range %}
+                                        <li class="page-item {% if orders_details_request.number == num %}active{% endif %}">
+                                            <a class="page-link" href="?page={{ num }}{% if query_string %}&{{ query_string }}{% endif %}">
+                                                {{ num }}
+                                            </a>
+                                        </li>
+                                    {% endfor %}
+
+                                    <!-- Last page -->
+                                    {% if orders_details_request.paginator.num_pages not in page_range %}
+                                        <li class="page-item disabled"><span class="page-link">…</span></li>
+                                        <li class="page-item">
+                                            <a class="page-link"
+                                            href="?page={{ orders_details_request.paginator.num_pages }}{% if query_string %}&{{ query_string }}{% endif %}">
+                                                {{ orders_details_request.paginator.num_pages }}
+                                            </a>
+                                        </li>
+                                    {% endif %}
+
+                                    <!-- Next -->
+                                    <li class="page-item {% if not orders_details_request.has_next %}disabled{% endif %}">
+                                        <a class="page-link"
+                                        href="?page={% if orders_details_request.has_next %}{{ orders_details_request.next_page_number }}{% endif %}{% if query_string %}&{{ query_string }}{% endif %}">
+                                            →
+                                        </a>
+                                    </li>
+
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    {% else %}
+                    <div class="text-center py-5">
+                        <div class="text-secondary">
+                            <h4 class="mb-1">No completed / approved order request found</h4>
+                            <small>There is currently no data at the moment.</small>
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+            </div>
+        </div>
+<script>
+
+    function filterByStatus(status) {
+    document.querySelector('[name=status]').value = status;
+    document.querySelector('[name=search]').value = '';  // ✅ always clear search
+    document.querySelector('.js-search-clear').style.display = 'none'; // ✅ hide clear btn
+    document.querySelector('[name=search]').closest('form').submit();
+    }
+
+    (function () {
+    function initSelectAll() {
+        var selectAll = document.getElementById('select-all');
+        if (!selectAll) return;
+        selectAll.addEventListener('change', function () {
+            document.querySelectorAll('.table-selectable-check').forEach(function (cb) {
+                cb.checked = selectAll.checked;
+            });
+        });
+    }
+        initSelectAll();
+        var container = document.getElementById('users-table-container');
+        if (container) {
+            container.addEventListener('htmx:afterSwap', initSelectAll);
+        }
+})();
+</script>

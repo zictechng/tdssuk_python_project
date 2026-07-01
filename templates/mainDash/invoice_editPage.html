@@ -1,0 +1,307 @@
+
+
+{% extends "mainDash/layouts/baseDash.html" %}
+{% load static %}
+
+{% block title %}Edit — {{ invoice.invoice_number }}{% endblock %}
+
+{% block content %}
+
+<div class="page-header d-print-none">
+    <div class="container-xl">
+        <div class="row g-2 align-items-center">
+            <div class="col">
+                <div class="page-pretitle">
+                    <a href="{% url 'invoice_detail' invoice.uuid %}" class="text-secondary">
+                        <i class="bi bi-arrow-left me-1"></i> Back to {{ invoice.invoice_number }}
+                    </a>
+                </div>
+                <h2 class="page-title">Edit Invoice</h2>
+            </div>
+            <div class="col-auto ms-auto d-print-none">
+                <div class="btn-list">
+                    <a href="{% url 'invoice_detail' invoice.uuid %}" class="btn btn-secondary btn-sm d-none d-sm-inline-block">
+                        <i class="bi bi-arrow-left me-1"></i> Back
+                    </a>
+                    <a href="{% url 'invoice_detail' invoice.uuid %}" class="btn btn-secondary d-sm-none btn-icon">
+                        <i class="bi bi-arrow-left"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="page-body">
+    <div class="container-xl">
+        <div class="row row-deck row-cards">
+            <div class="col-12 mt-3">
+
+                <form class="card" id="invoice-edit-form"
+                      hx-post="{% url 'invoice_edit' invoice.uuid %}"
+                      hx-target="#toast-container"
+                      hx-swap="innerHTML">
+                    {% csrf_token %}
+
+                    <div class="card-header">
+                        <h3 class="card-title">Edit — {{ invoice.invoice_number }}</h3>
+                        <div class="card-options">
+                            <span class="badge bg-{% if invoice.status == 'paid' %}green{% elif invoice.status == 'partially_paid' %}yellow text-dark{% elif invoice.status == 'overdue' %}red{% elif invoice.status == 'sent' %}blue{% else %}secondary{% endif %}-lt">
+                                {{ invoice.get_status_display }}
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="card-body">
+                        <div class="row row-cards">
+
+                            {# Customer Info #}
+                            <div class="col-md-5">
+                                <div class="mb-3">
+                                    <label class="form-label required">Customer Name</label>
+                                    <input type="text" name="customer_name" class="form-control"
+                                           value="{{ form.customer_name.value|default:'' }}"
+                                           placeholder="Full name">
+                                    <div id="error-customer_name"></div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label class="form-label">Customer Email</label>
+                                    <input type="email" name="customer_email" class="form-control"
+                                           value="{{ form.customer_email.value|default:'' }}"
+                                           placeholder="customer@email.com">
+                                    <div id="error-customer_email"></div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="mb-3">
+                                    <label class="form-label">Customer Phone</label>
+                                    <input type="text" name="customer_phone" class="form-control"
+                                           value="{{ form.customer_phone.value|default:'' }}"
+                                           placeholder="Phone number">
+                                    <div id="error-customer_phone"></div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label class="form-label required">Destination Country</label>
+                                    <input type="text" name="destination_country" class="form-control"
+                                           value="{{ form.destination_country.value|default:'' }}"
+                                           placeholder="e.g. Nigeria">
+                                    <div id="error-destination_country"></div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label class="form-label required">Currency</label>
+                                    <select name="currency" class="form-select">
+                                        {% for value, label in form.fields.currency.choices %}
+                                        <option value="{{ value }}"
+                                            {% if form.currency.value == value %}selected{% endif %}>
+                                            {{ label }}
+                                        </option>
+                                        {% endfor %}
+                                    </select>
+                                    <div id="error-currency"></div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label class="form-label required">Status</label>
+                                    <select name="status" class="form-select">
+                                        {% for value, label in form.fields.status.choices %}
+                                        <option value="{{ value }}"
+                                            {% if form.status.value == value %}selected{% endif %}>
+                                            {{ label }}
+                                        </option>
+                                        {% endfor %}
+                                    </select>
+                                    <div id="error-status"></div>
+                                </div>
+                            </div>
+
+                            {# Dates #}
+                            <div class="col-md-3">
+                                <div class="mb-3">
+                                    <label class="form-label required">Issue Date</label>
+                                    <input name="issue_date" class="form-control datepicker"
+                                           placeholder="Issue date"
+                                           value="{{ form.issue_date.value|date:'Y-m-d'|default:'' }}">
+                                    <div id="error-issue_date"></div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="mb-3">
+                                    <label class="form-label required">Due Date</label>
+                                    <input name="due_date" class="form-control datepicker"
+                                           placeholder="Due date"
+                                           value="{{ form.due_date.value|date:'Y-m-d'|default:'' }}">
+                                    <div id="error-due_date"></div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-3">
+                                <div class="mb-3">
+                                    <label class="form-label">Discount</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">£</span>
+                                        <input type="number" name="discount" class="form-control"
+                                               min="0" step="0.01"
+                                               value="{{ form.discount.value|default:'0' }}"
+                                               placeholder="0.00">
+                                    </div>
+                                    <div id="error-discount"></div>
+                                </div>
+                            </div>
+
+                            <div class="col-12">
+                                <div class="mb-0">
+                                    <label class="form-label">Notes</label>
+                                    <textarea name="notes" rows="2" class="form-control"
+                                              placeholder="Any additional notes...">{{ form.notes.value|default:'' }}</textarea>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <div class="card-footer text-end">
+                        <a href="{% url 'invoice_detail' invoice.uuid %}"
+                           class="btn btn-secondary btn-sm me-2">Cancel</a>
+                        <button type="button"
+                                class="btn btn-primary btn-sm"
+                                data-bs-toggle="modal"
+                                data-bs-target="#confirm-invoice-edit-modal">
+                            Save Changes
+                        </button>
+                    </div>
+                </form>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+{# --- Confirm Modal --- #}
+<div class="modal modal-blur fade" id="confirm-invoice-edit-modal"
+     tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-sm modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-body">
+                <div class="modal-title">Save changes?</div>
+                <div class="text-muted mt-1">This will update the invoice record.</div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-link link-secondary me-auto"
+                        data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="confirm-invoice-edit-btn">
+                    <span id="confirm-invoice-edit-label">Yes, Save</span>
+                    <span id="confirm-invoice-edit-spinner"
+                          class="spinner-border spinner-border-sm ms-2"
+                          style="display:none;" role="status" aria-hidden="true"></span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+
+        function reinitDatepickers() {
+        var pickers = document.querySelectorAll('.datepicker');
+        pickers.forEach(function (el) {
+            if (el.litepicker) {
+                el.litepicker.destroy();
+                el.litepicker = null;
+            }
+            var minDate = el.dataset.minDate === 'today' ? new Date()
+                        : el.dataset.minDate ? new Date(el.dataset.minDate)
+                        : null;
+            var picker = new Litepicker({
+                element: el,
+                minDate: minDate,
+                format: 'YYYY-MM-DD',
+                buttonText: {
+                    previousMonth: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-1"><path d="M15 6l-6 6l6 6" /></svg>`,
+                    nextMonth: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-1"><path d="M9 6l6 6l-6 6" /></svg>`,
+                },
+                onSelect: function () {
+                    var errorDiv = document.getElementById('error-' + el.name);
+                    if (errorDiv) errorDiv.innerHTML = '';
+                },
+                });
+                el.litepicker = picker;
+            });
+        }
+
+    document.addEventListener('DOMContentLoaded', function () {
+
+        document.getElementById('confirm-invoice-edit-btn').addEventListener('click', function () {
+            var btn = this;
+            var label = document.getElementById('confirm-invoice-edit-label');
+            var spinner = document.getElementById('confirm-invoice-edit-spinner');
+
+            btn.disabled = true;
+            label.textContent = 'Saving...';
+            spinner.style.display = 'inline-block';
+
+            var form = document.getElementById('invoice-edit-form');
+            var formData = new FormData(form);
+
+            fetch(form.getAttribute('hx-post'), {
+                method: 'POST',
+                body: formData,
+                headers: { 'HX-Request': 'true' }
+            })
+            .then(function (res) { return res.text(); })
+            .then(function (html) {
+                var parser = new DOMParser();
+                var doc = parser.parseFromString(html, 'text/html');
+
+                doc.querySelectorAll('[hx-swap-oob]').forEach(function (oobEl) {
+                    var target = document.getElementById(oobEl.id);
+                    if (target) target.outerHTML = oobEl.outerHTML;
+                });
+
+                var toastEl = doc.querySelector('.toast');
+                if (toastEl) {
+                    var redirectUrl = toastEl.getAttribute('data-redirect-url');
+                    var dismissBtn = document.querySelector('#confirm-invoice-edit-modal [data-bs-dismiss="modal"]');
+                    if (dismissBtn) dismissBtn.click();
+
+                    document.getElementById('toast-container').innerHTML = toastEl.outerHTML;
+                    var liveToast = document.querySelector('#toast-container .toast');
+                    tabler.Toast.getOrCreateInstance(liveToast).show();
+
+                    if (redirectUrl) {
+                        setTimeout(function () { window.location.href = redirectUrl; }, 1500);
+                    }
+                }
+            })
+            .catch(function (err) { console.error('Submit error:', err); })
+            .finally(function () {
+                btn.disabled = false;
+                label.textContent = 'Yes, Save';
+                spinner.style.display = 'none';
+            });
+        });
+
+        document.querySelectorAll('#invoice-edit-form input, #invoice-edit-form select, #invoice-edit-form textarea')
+            .forEach(function (el) {
+                el.addEventListener('input', function () {
+                    var errorDiv = document.getElementById('error-' + el.name);
+                    if (errorDiv) errorDiv.innerHTML = '';
+                });
+                el.addEventListener('change', function () {
+                    var errorDiv = document.getElementById('error-' + el.name);
+                    if (errorDiv) errorDiv.innerHTML = '';
+                });
+            });
+    });
+
+    
+</script>
+
+{% endblock %}

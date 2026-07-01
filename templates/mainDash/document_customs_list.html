@@ -1,0 +1,143 @@
+
+{% extends "mainDash/layouts/baseDash.html" %}
+{% load static %}
+
+
+{% block title %}Documents — Customs Forms{% endblock %}
+
+
+{% block content %}
+
+
+<div class="page-header d-print-none" aria-label="Page header">
+    <div class="container-xl">
+        <div class="row g-2 align-items-center">
+            <div class="col">
+                <h2 class="page-title">Customs Forms</h2>
+                <div class="page-pretitle">Filtered view of all customs documentation</div>
+            </div>
+            <div class="col-auto ms-auto d-print-none">
+                <div class="btn-list">
+                    <a href="{% url 'customs_document_create' %}"
+                       class="btn btn-primary btn-sm d-none d-sm-inline-block">
+                        <i class="bi bi-plus-lg me-1"></i> New Customs Form
+                    </a>
+                    <a href="{% url 'customs_document_create' %}"
+                       class="btn btn-primary d-sm-none btn-icon">
+                        <i class="bi bi-plus-lg"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="page-body">
+    <div class="container-xl">
+
+
+        <div class="row mb-3">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body py-3">
+                        <div class="row g-2 align-items-center">
+                            <div class="col-auto text-secondary">Filters:</div>
+                            <div class="col ms-auto d-flex flex-wrap gap-2 justify-content-end">
+
+                                <div class="position-relative" style="max-width: 240px;">
+                                    <input type="text"
+                                           id="customs-search-input"
+                                           name="search"
+                                           class="form-control pe-4"
+                                           placeholder="Search reference, shipment..."
+                                           value="{{ search }}"
+                                           hx-get="{% url 'document_customs_list' %}"
+                                           hx-trigger="keyup changed delay:400ms, search"
+                                           hx-target="#customs-forms-table-container"
+                                           hx-swap="innerHTML"
+                                           hx-push-url="true"
+                                           hx-include="#customs-status-filter, #customs-type-filter" />
+                                    <button type="button"
+                                            id="customs-search-clear"
+                                            class="p-0 text-secondary"
+                                            style="display:{% if search %}block{% else %}none{% endif %};
+                                                   position:absolute; right:8px; top:50%;
+                                                   transform:translateY(-50%); line-height:1;
+                                                   background:none; border:none; cursor:pointer;"
+                                            aria-label="Clear search">
+                                        <i class="bi bi-x-lg" style="font-size:0.75rem;"></i>
+                                    </button>
+                                </div>
+
+                                <select id="customs-type-filter"
+                                        name="document_type"
+                                        class="form-select"
+                                        style="max-width: 200px;"
+                                        hx-get="{% url 'document_customs_list' %}"
+                                        hx-trigger="change"
+                                        hx-target="#customs-forms-table-container"
+                                        hx-swap="innerHTML"
+                                        hx-push-url="true"
+                                        hx-include="#customs-search-input, #customs-status-filter">
+                                    <option value="">All Types</option>
+                                    {% for value, label in doc_type_choices %}
+                                    <option value="{{ value }}"
+                                        {% if type_filter == value %}selected{% endif %}>
+                                        {{ label }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+
+                                <select id="customs-status-filter"
+                                        name="status"
+                                        class="form-select"
+                                        style="max-width: 180px;"
+                                        hx-get="{% url 'document_customs_list' %}"
+                                        hx-trigger="change"
+                                        hx-target="#customs-forms-table-container"
+                                        hx-swap="innerHTML"
+                                        hx-push-url="true"
+                                        hx-include="#customs-search-input, #customs-type-filter">
+                                    <option value="">All Statuses</option>
+                                    {% for value, label in status_choices %}
+                                    <option value="{{ value }}"
+                                        {% if status_filter == value %}selected{% endif %}>
+                                        {{ label }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="row" id="customs-forms-table-container">
+            {% include "mainDash/components/document_customs_dataTable.html" %}
+        </div>
+
+
+    </div>
+</div>
+
+
+<script>
+(function () {
+    var input    = document.getElementById('customs-search-input');
+    var clearBtn = document.getElementById('customs-search-clear');
+    function toggleClear() { clearBtn.style.display = input.value ? 'block' : 'none'; }
+    input.addEventListener('input', toggleClear);
+    clearBtn.addEventListener('click', function () {
+        input.value = '';
+        toggleClear();
+        htmx.trigger(input, 'search');
+    });
+})();
+</script>
+
+
+{% endblock %}

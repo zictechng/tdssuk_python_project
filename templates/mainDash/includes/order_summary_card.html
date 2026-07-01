@@ -1,0 +1,31 @@
+
+
+{% load humanize %}
+    <div class="card bg-light mt-3 mb-3">
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-4">
+                    <small class="text-muted d-block">Receiver</small>
+                    <strong>{{ order.receiver_name }}</strong><br>
+                    <span class="text-secondary">{{ order.receiver_phone }}</span>
+                </div>
+                <div class="col-md-4">
+                    <small class="text-muted d-block">Route</small>
+                    <strong>{{ order.order_origin_country }} → {{ order.order_destination_country }}</strong>
+                </div>
+                <div class="col-md-2">
+                    <small class="text-muted d-block">Weight</small>
+                    <strong>{{ order.weight }} kg</strong>
+                </div>
+                <div class="col-md-2">
+                    <small class="text-muted d-block">Quantity</small>
+                    <strong>{{ order.quantity }}</strong>
+                </div>
+            </div>
+            <div class="mt-2">
+                <a href="{% url 'viewOrderDetail' order.uuid %}" target="_blank" class="text-muted">
+                    <small>This information comes from the Order — edit it there if incorrect →</small>
+                </a>
+            </div>
+        </div>
+    </div>

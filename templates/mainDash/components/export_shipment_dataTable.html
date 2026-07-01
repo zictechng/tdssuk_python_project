@@ -1,0 +1,110 @@
+
+{% load humanize %}
+
+<div class="col-12">
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">Export Shipments</h3>
+            <div class="card-options">
+                <small class="text-muted">
+                    {{ shipments_page.paginator.count }} shipment{{ shipments_page.paginator.count|pluralize }}
+                </small>
+            </div>
+        </div>
+
+        {% if shipments_page.paginator.count > 0 %}
+        <div class="table-responsive">
+            <table class="table card-table table-vcenter text-nowrap">
+                <thead>
+                    <tr>
+                        <th>Shipment No.</th>
+                        <th>Order</th>
+                        <th>Customer</th>
+                        <th>Destination</th>
+                        <th>Carrier</th>
+                        <th>Status</th>
+                        <th>Customs Status</th>
+                        <th>Pickup Date</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for shipment in shipments_page %}
+                    <tr>
+                        <td>
+                            <a href="{% url 'viewShipmentDetail' shipment.uuid %}" class="text-reset fw-medium">
+                                {{ shipment.shipment_number }}
+                            </a>
+                        </td>
+                        <td class="text-secondary">{{ shipment.order.order_number }}</td>
+                        <td>
+                            <div>{{ shipment.order.customer_name }}</div>
+                            <div class="text-muted small">{{ shipment.order.customer_phone }}</div>
+                        </td>
+                        <td class="text-secondary">{{ shipment.order.receiver_country }}</td>
+                        <td class="text-secondary">{{ shipment.carrier_name|default:"—" }}</td>
+                        <td>
+                            <span class="badge bg-{% if shipment.status == 'delivered' %}green{% elif shipment.status == 'in_transit' %}blue{% elif shipment.status == 'cancelled' %}red{% elif shipment.status == 'returned' %}yellow text-dark{% else %}secondary{% endif %}-lt">
+                                {{ shipment.get_status_display }}
+                            </span>
+                        </td>
+                        <td>
+                            <span class="badge bg-{% if shipment.customs_status == 'cleared' %}green{% elif shipment.customs_status == 'in_progress' %}blue{% elif shipment.customs_status == 'held' or shipment.customs_status == 'rejected' %}red{% else %}secondary{% endif %}-lt">
+                                {{ shipment.get_customs_status_display }}
+                            </span>
+                        </td>
+                        <td class="text-secondary">
+                            {{ shipment.pickup_date|date:"d/m/Y"|default:"—" }}
+                        </td>
+                        <td class="text-end">
+                            <a href="{% url 'viewShipmentDetail' shipment.uuid %}"
+                               class="btn btn-sm btn-ghost-secondary">View</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="card-footer d-flex align-items-center">
+            <p class="m-0 text-secondary">
+                Showing <strong>{{ shipments_page.start_index }}–{{ shipments_page.end_index }}</strong>
+                of <strong>{{ shipments_page.paginator.count }}</strong>
+            </p>
+            <ul class="pagination m-0 ms-auto">
+                <li class="page-item {% if not shipments_page.has_previous %}disabled{% endif %}">
+                    <a class="page-link"
+                       hx-get="{% url 'export_shipment_list' %}?page={% if shipments_page.has_previous %}{{ shipments_page.previous_page_number }}{% else %}1{% endif %}&search={{ search_query }}&status={{ status_filter }}&customs_status={{ customs_status_filter }}"
+                       hx-target="#export-shipment-table-container"
+                       hx-swap="innerHTML"
+                       hx-push-url="true">←</a>
+                </li>
+                {% for num in shipments_page.paginator.page_range %}
+                <li class="page-item {% if shipments_page.number == num %}active{% endif %}">
+                    <a class="page-link"
+                       hx-get="{% url 'export_shipment_list' %}?page={{ num }}&search={{ search_query }}&status={{ status_filter }}&customs_status={{ customs_status_filter }}"
+                       hx-target="#export-shipment-table-container"
+                       hx-swap="innerHTML"
+                       hx-push-url="true">{{ num }}</a>
+                </li>
+                {% endfor %}
+                <li class="page-item {% if not shipments_page.has_next %}disabled{% endif %}">
+                    <a class="page-link"
+                       hx-get="{% url 'export_shipment_list' %}?page={% if shipments_page.has_next %}{{ shipments_page.next_page_number }}{% else %}{{ shipments_page.paginator.num_pages }}{% endif %}&search={{ search_query }}&status={{ status_filter }}&customs_status={{ customs_status_filter }}"
+                       hx-target="#export-shipment-table-container"
+                       hx-swap="innerHTML"
+                       hx-push-url="true">→</a>
+                </li>
+            </ul>
+        </div>
+
+        {% else %}
+        <div class="text-center py-5 text-secondary">
+            <i class="bi bi-box-seam fs-2 d-block mb-2 opacity-50"></i>
+            <h4 class="mb-1">No export shipments found</h4>
+            <small>Try adjusting your search or filters.</small>
+        </div>
+        {% endif %}
+
+    </div>
+</div>

@@ -1,0 +1,55 @@
+    
+    <!-- TOP MESSAGE (OOB) -->
+        <div id="top_alert"
+            hx-swap-oob="true"
+            class="alert alert-{{ alert_type }} alert-dismissible fade show"
+            role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+
+            {% if clear_input %}
+            <script>
+                document.querySelector('#quote-form').reset();
+            </script>
+            {% endif %}
+
+            {% if clear_input %}
+            <script>
+                document.querySelector('#form_id').reset();
+            </script>
+            {% endif %}
+            
+        <div class="toast align-items-center text-bg-{{ alert_type }} border-0"
+            role="alert"
+            aria-live="assertive"
+            aria-atomic="true"
+            data-bs-autohide="true"
+            data-bs-delay="3000"
+            data-redirect-url="{{ redirect_url|default:'' }}">
+
+                <div class="d-flex">
+                    <div class="toast-body">
+                        {{ message }}
+                    </div>
+
+                    <button type="button"
+                            class="btn-close btn-close-white me-2 m-auto"
+                            data-bs-dismiss="toast"
+                            aria-label="Close">
+                    </button>
+                </div>
+        </div>
+
+{# OOB swaps rendered after the toast — HTMX picks these up automatically #}
+{{ oob_content|safe }}
+
+
+
+
+        {% comment %} <div id="message-box" hx-swap-oob="true">
+            <div class="alert alert-success alert-dismissible fade show mb-0">
+                Status updated successfully
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        </div> {% endcomment %}

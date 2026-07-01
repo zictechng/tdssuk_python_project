@@ -1,0 +1,196 @@
+{% extends "mainDash/layouts/baseDash.html" %}
+{% load static %}
+
+{% block title %}Fleet — Add Fuel Record{% endblock %}
+
+{% block content %}
+
+<div class="page-header d-print-none">
+    <div class="container-xl">
+        <div class="row g-2 align-items-center">
+            <div class="col">
+                <div class="page-pretitle">
+                    <a href="{% url 'fuel_list' %}" class="text-secondary">
+                        <i class="bi bi-arrow-left me-1"></i> Back to Fuel Records
+                    </a>
+                </div>
+                <h2 class="page-title">Add Fuel Record</h2>
+            </div>
+
+            <div class="col-auto ms-auto d-print-none">
+                <div class="btn-list">
+                  <a href="{% url 'fuel_list' %}" class="btn btn-secondary btn-sm d-none d-sm-inline-block">
+                    <i class="bi bi-arrow-left"></i>
+                    Back
+                  </a>
+                 
+                  <a href="{% url 'fuel_list' %}"
+                    class="btn btn-secondary btn-6 d-sm-none btn-icon"
+                    aria-label="Create new report">
+                   <i class="bi bi-arrow-left"></i>
+                  </a>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<div class="page-body">
+    <div class="container-xl">
+        <div class="row justify-content-center">
+            <div class="col-12 mt-3">
+                <form class="card" id="fuel-form">
+                    {% csrf_token %}
+
+                    <div class="card-header">
+                        <h3 class="card-title">Fuel Details</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="row row-cards">
+
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label required">Vehicle</label>
+                                    <select name="vehicle" class="form-select" required>
+                                        <option value="">— Select Vehicle —</option>
+                                        {% for v in form.vehicle.field.queryset %}
+                                        <option value="{{ v.pk }}">{{ v.name }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label required">Fuel Date</label>
+                                    <input name="fuel_date" placeholder="Select a date" class="form-control datepicker" required>
+                                </div>
+                            </div>
+
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label class="form-label required">Liters</label>
+                                    <div class="input-group">
+                                        <input type="number" name="liters" class="form-control" min="0" step="0.01" placeholder="0.00" required>
+                                        <span class="input-group-text">L</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label class="form-label required">Cost</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">$</span>
+                                        <input type="number" name="cost" class="form-control" min="0" step="0.01" placeholder="0.00" required>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label class="form-label">Odometer Reading</label>
+                                    <div class="input-group">
+                                        <input type="number" name="odometer_reading" class="form-control" min="0" placeholder="Optional">
+                                        <span class="input-group-text">km</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="mb-0">
+                                    <label class="form-label">Station Name</label>
+                                    <input type="text" name="station_name" class="form-control" placeholder="e.g. Shell, Total, BP">
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <div class="card-footer text-end">
+                        <a href="{% url 'fuel_list' %}" class="btn btn-secondary btn-sm me-2">Cancel</a>
+                        <button type="button"
+                                class="btn btn-primary btn-sm"
+                                data-bs-toggle="modal"
+                                data-bs-target="#confirm-fuel-modal">
+                            Save Record
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+{# --- Confirmation Modal --- #}
+<div class="modal modal-blur fade" id="confirm-fuel-modal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-sm modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-body">
+                <div class="modal-title">Save this record?</div>
+                <div class="text-muted mt-1">The fuel record will be saved to your fleet.</div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-link link-secondary me-auto" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="confirm-fuel-btn">
+                    <span id="confirm-fuel-label">Yes, Save</span>
+                    <span id="confirm-fuel-spinner" class="spinner-border spinner-border-sm ms-2" style="display:none;" role="status" aria-hidden="true"></span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+  // --- Reinitialize Litepicker datepickers ---
+    function reinitDatepickers() {
+    var pickers = document.querySelectorAll('.datepicker');
+    
+    pickers.forEach(function (el) {
+        if (el.litepicker) {
+            el.litepicker.destroy();
+            el.litepicker = null;
+        }
+
+        var minDate = el.dataset.minDate === 'today' ? new Date()
+                    : el.dataset.minDate ? new Date(el.dataset.minDate)
+                    : null;
+
+        var picker = new Litepicker({
+            element: el,
+            minDate: minDate,
+            format: 'YYYY-MM-DD',
+            buttonText: {
+                previousMonth: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-1"><path d="M15 6l-6 6l6 6" /></svg>`,
+                nextMonth: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-1"><path d="M9 6l6 6l-6 6" /></svg>`,
+            },
+        });
+
+        el.litepicker = picker;
+        });
+    }
+
+    document.getElementById('confirm-fuel-btn').addEventListener('click', function () {
+        const btn = this;
+        const label = document.getElementById('confirm-fuel-label');
+        const spinner = document.getElementById('confirm-fuel-spinner');
+
+        btn.disabled = true;
+        label.textContent = 'Saving...';
+        spinner.style.display = 'inline-block';
+
+        htmx.ajax('POST', '{% url "fuel_create" %}', {
+            source: '#fuel-form',
+            target: '#toast-container',
+            swap: 'innerHTML',
+        }).then(function () {
+            btn.disabled = false;
+            label.textContent = 'Yes, Save';
+            spinner.style.display = 'none';
+            bootstrap.Modal.getInstance(document.getElementById('confirm-fuel-modal')).hide();
+        });
+    });
+</script>
+
+{% endblock %}

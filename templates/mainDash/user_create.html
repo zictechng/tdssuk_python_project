@@ -1,0 +1,273 @@
+{% extends "mainDash/layouts/baseDash.html" %}
+{% load static %}
+
+
+{% block title %}Create User{% endblock %}
+
+
+{% block content %}
+
+
+<div class="page-header d-print-none">
+    <div class="container-xl">
+        <div class="row g-2 align-items-center">
+            <div class="col">
+                <div class="page-pretitle">
+                    <a href="{% url 'user_list' %}" class="text-secondary">
+                        <i class="bi bi-arrow-left me-1"></i> Back to Users
+                    </a>
+                </div>
+                <h2 class="page-title">Create User</h2>
+            </div>
+            <div class="col-auto ms-auto d-print-none">
+                <div class="btn-list">
+                    <a href="{% url 'user_list' %}"
+                       class="btn btn-secondary btn-sm d-none d-sm-inline-block">
+                        <i class="bi bi-arrow-left me-1"></i> Back
+                    </a>
+                    <a href="{% url 'user_list' %}"
+                       class="btn btn-secondary d-sm-none btn-icon">
+                        <i class="bi bi-arrow-left"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="page-body">
+    <div class="container-xl">
+        <div class="row row-deck row-cards">
+            <div class="col-12 mt-3">
+
+                <form class="card" id="user-create-form"
+                      hx-post="{% url 'user_create' %}"
+                      hx-target="#toast-container"
+                      hx-swap="innerHTML"
+                      enctype="multipart/form-data">
+                    {% csrf_token %}
+
+                    <div class="card-header">
+                        <h3 class="card-title">New User Details</h3>
+                    </div>
+
+                    <div class="card-body">
+                        <div class="row row-cards">
+
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label required">First Name</label>
+                                    <input type="text" name="first_name" class="form-control"
+                                           placeholder="First name" />
+                                    <div id="error-first_name"></div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label required">Last Name</label>
+                                    <input type="text" name="last_name" class="form-control"
+                                           placeholder="Last name" />
+                                    <div id="error-last_name"></div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label required">Email Address</label>
+                                    <input type="email" name="email" class="form-control"
+                                           placeholder="email@example.com" />
+                                    <div id="error-email"></div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label required">Phone Number</label>
+                                    <input type="text" name="phone" class="form-control"
+                                           placeholder="+44 7700 000000" />
+                                    <div id="error-phone"></div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label required">Password</label>
+                                    <input type="password" name="password1" class="form-control"
+                                           placeholder="Min. 8 characters" />
+                                    <div id="error-password1"></div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label required">Confirm Password</label>
+                                    <input type="password" name="password2" class="form-control"
+                                           placeholder="Repeat password" />
+                                    <div id="error-password2"></div>
+                                </div>
+                            </div>
+
+                            <div class="col-12">
+                                <div class="mb-3">
+                                    <label class="form-label">Assign Roles</label>
+                                    <select name="groups" class="form-select" multiple
+                                            data-search="on" size="4">
+                                        {% for group in groups %}
+                                        <option value="{{ group.pk }}">{{ group.name }}</option>
+                                        {% empty %}
+                                        <option disabled>No roles available — create roles first</option>
+                                        {% endfor %}
+                                    </select>
+                                    <small class="text-muted">Hold Ctrl / Cmd to select multiple roles.</small>
+                                    <div id="error-groups"></div>
+                                </div>
+                            </div>
+
+                            <div class="col-12">
+                                <div class="mb-3">
+                                    <label class="form-label">Access Level</label>
+                                    <div class="d-flex gap-4">
+                                        <label class="form-check">
+                                            <input type="checkbox" name="is_staff"
+                                                   class="form-check-input" />
+                                            <span class="form-check-label">Staff (Admin access)</span>
+                                        </label>
+                                        <label class="form-check">
+                                            <input type="checkbox" name="is_superuser"
+                                                   class="form-check-input" />
+                                            <span class="form-check-label">Superuser (Full access)</span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <div class="card-footer text-end">
+                        <a href="{% url 'user_list' %}" class="btn btn-secondary btn-sm me-2">Cancel</a>
+                        <button type="button"
+                                class="btn btn-primary btn-sm"
+                                data-bs-toggle="modal"
+                                data-bs-target="#confirm-create-user-modal">
+                            Create User
+                        </button>
+                    </div>
+                </form>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="modal modal-blur fade" id="confirm-create-user-modal"
+     tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-sm modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-body">
+                <div class="modal-title">Create this user?</div>
+                <div class="text-muted mt-1">A new user account will be created with the details provided.</div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-link link-secondary me-auto"
+                        data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="confirm-create-user-btn">
+                    <span id="confirm-create-user-label">Yes, Create</span>
+                    <span id="confirm-create-user-spinner"
+                          class="spinner-border spinner-border-sm ms-2"
+                          style="display:none;" role="status" aria-hidden="true"></span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script>
+    function initTomSelects() {
+        document.querySelectorAll('select[data-search="on"]').forEach(function (el) {
+            if (!el.tomselect) new TomSelect(el, {
+                placeholder: el.querySelector('option[value=""]')?.textContent || 'Select...'
+            });
+        });
+    }
+
+    function syncTomSelectValues() {
+        document.querySelectorAll('select[data-search="on"]').forEach(function (el) {
+            if (el.tomselect) el.value = el.tomselect.getValue();
+        });
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+
+        initTomSelects();
+
+        document.getElementById('confirm-create-user-btn').addEventListener('click', function () {
+            var btn     = this;
+            var label   = document.getElementById('confirm-create-user-label');
+            var spinner = document.getElementById('confirm-create-user-spinner');
+
+            btn.disabled = true;
+            label.textContent = 'Creating...';
+            spinner.style.display = 'inline-block';
+
+            syncTomSelectValues();
+
+            var form     = document.getElementById('user-create-form');
+            var formData = new FormData(form);
+
+            fetch(form.getAttribute('hx-post'), {
+                method: 'POST',
+                body: formData,
+                headers: { 'HX-Request': 'true' }
+            })
+            .then(function (res) { return res.text(); })
+            .then(function (html) {
+                var parser = new DOMParser();
+                var doc    = parser.parseFromString(html, 'text/html');
+
+                doc.querySelectorAll('[hx-swap-oob]').forEach(function (oobEl) {
+                    var target = document.getElementById(oobEl.id);
+                    if (target) target.outerHTML = oobEl.outerHTML;
+                });
+
+                var toastEl = doc.querySelector('.toast');
+                if (toastEl) {
+                    var redirectUrl = toastEl.getAttribute('data-redirect-url');
+                    var dismissBtn  = document.querySelector('#confirm-create-user-modal [data-bs-dismiss="modal"]');
+                    if (dismissBtn) dismissBtn.click();
+                    document.getElementById('toast-container').innerHTML = toastEl.outerHTML;
+                    var liveToast = document.querySelector('#toast-container .toast');
+                    tabler.Toast.getOrCreateInstance(liveToast).show();
+                    if (redirectUrl) {
+                        setTimeout(function () { window.location.href = redirectUrl; }, 1500);
+                    }
+                }
+            })
+            .catch(function (err) { console.error('Submit error:', err); })
+            .finally(function () {
+                btn.disabled = false;
+                label.textContent = 'Yes, Create';
+                spinner.style.display = 'none';
+            });
+        });
+
+        document.querySelectorAll('#user-create-form input, #user-create-form select, #user-create-form textarea')
+            .forEach(function (el) {
+                var events = el.tagName === 'SELECT' || el.type === 'file' ? ['change'] : ['input', 'change'];
+                events.forEach(function (evt) {
+                    el.addEventListener(evt, function () {
+                        var errDiv = document.getElementById('error-' + el.name);
+                        if (errDiv) errDiv.innerHTML = '';
+                    });
+                });
+            });
+
+    });
+</script>
+
+
+{% endblock %}

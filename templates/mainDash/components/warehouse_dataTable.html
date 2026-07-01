@@ -1,0 +1,128 @@
+{% load static %}
+<div class="col-12 mt-2">
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">Warehouse Records</h3>
+        </div>
+
+        {% if warehouses_page.paginator.count > 0 %}
+        <div class="table-responsive">
+            <table class="table card-table table-vcenter text-nowrap">
+                <thead>
+                    <tr>
+                        <th class="w-1"><input class="form-check-input m-0 align-middle" type="checkbox" id="select-all" aria-label="Select all warehouse" /></th>
+                        <th>Name</th>
+                        <th>City</th>
+                        <th>Country</th>
+                        <th>Capacity</th>
+                        <th>Items In Stock</th>
+                        <th>Status</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for warehouse in warehouses_page %}
+                    <tr id="warehouse-row-{{ warehouse.pk }}">
+                        <td><input class="form-check-input m-0 align-middle table-selectable-check" type="checkbox" value="{{ warehouse.pk }}" /></td>
+                        <td><strong>{{ warehouse.name }}</strong></td>
+                        <td class="text-secondary">{{ warehouse.city }}</td>
+                        <td class="text-secondary">{{ warehouse.country }}</td>
+                        <td class="text-secondary">{{ warehouse.capacity }}</td>
+                        <td>
+                            <span class="badge bg-blue-lt">{{ warehouse.items.count }} items</span>
+                        </td>
+                        <td>
+                            <span class="badge bg-{% if warehouse.is_active %}green{% else %}red{% endif %}-lt">
+                                {% if warehouse.is_active %}Active{% else %}Inactive{% endif %}
+                            </span>
+                        </td>
+                        <td class="text-end">
+                            <a href="{% url 'warehouse_detail' warehouse.uuid %}" class="btn btn-sm btn-ghost-secondary">View</a>
+                            <button type="button" class="btn btn-sm btn-ghost-danger js-delete-warehouse"
+                                    data-warehouse-id="{{ warehouse.pk }}">
+                                Delete
+                            </button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="card-footer d-flex align-items-center">
+            <p class="m-0 text-secondary">
+                Showing <strong>{{ warehouses_page.start_index }}–{{ warehouses_page.end_index }}</strong>
+                of <strong>{{ warehouses_page.paginator.count }}</strong>
+            </p>
+            <ul class="pagination m-0 ms-auto">
+                <li class="page-item {% if not warehouses_page.has_previous %}disabled{% endif %}">
+                    <a class="page-link" href="#"
+                       hx-get="{% url 'warehouse_list' %}?page={% if warehouses_page.has_previous %}{{ warehouses_page.previous_page_number }}{% else %}1{% endif %}&search={{ search_query }}&status={{ status_filter }}"
+                       hx-target="#warehouse-table-container" hx-swap="innerHTML" hx-push-url="true">←</a>
+                </li>
+                {% for num in warehouses_page.paginator.page_range %}
+                <li class="page-item {% if warehouses_page.number == num %}active{% endif %}">
+                    <a class="page-link" href="#"
+                       hx-get="{% url 'warehouse_list' %}?page={{ num }}&search={{ search_query }}&status={{ status_filter }}"
+                       hx-target="#warehouse-table-container" hx-swap="innerHTML" hx-push-url="true">{{ num }}</a>
+                </li>
+                {% endfor %}
+                <li class="page-item {% if not warehouses_page.has_next %}disabled{% endif %}">
+                    <a class="page-link" href="#"
+                       hx-get="{% url 'warehouse_list' %}?page={% if warehouses_page.has_next %}{{ warehouses_page.next_page_number }}{% else %}{{ warehouses_page.paginator.num_pages }}{% endif %}&search={{ search_query }}&status={{ status_filter }}"
+                       hx-target="#warehouse-table-container" hx-swap="innerHTML" hx-push-url="true">→</a>
+                </li>
+            </ul>
+        </div>
+
+        {% else %}
+        <div class="text-center py-5 text-secondary">
+            <i class="bi bi-building fs-2 d-block mb-2 opacity-50"></i>
+            <h4 class="mb-1">No warehouses found</h4>
+            <small>Try adjusting your search or filters.</small>
+        </div>
+        {% endif %}
+
+    </div>
+</div>
+
+{% include "mainDash/includes/confirm_delete_modal.html" %}
+<script>
+    document.querySelectorAll('.js-delete-warehouse').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            var warehouseId = btn.getAttribute('data-warehouse-id');
+            var deleteUrl = "{% url 'warehouse_delete' 0 %}".replace('/0/', '/' + warehouseId + '/');
+
+            confirmDelete({
+                url: deleteUrl,
+                title: 'Delete this warehouse?',
+                message: 'This will permanently remove the warehouse and all its records.',
+                csrfToken: '{{ csrf_token }}',
+                onSuccess: function () {
+                    var row = document.getElementById('warehouse-row-' + warehouseId);
+                    if (row) row.remove();
+                },
+                onError: function (data) {
+                    alert(data.error || 'Delete failed.');
+                },
+            });
+        });
+    });
+
+    (function () {
+    function initSelectAll() {
+        var selectAll = document.getElementById('select-all');
+        if (!selectAll) return;
+        selectAll.addEventListener('change', function () {
+            document.querySelectorAll('.table-selectable-check').forEach(function (cb) {
+                cb.checked = selectAll.checked;
+            });
+        });
+    }
+        initSelectAll();
+        var container = document.getElementById('users-table-container');
+        if (container) {
+            container.addEventListener('htmx:afterSwap', initSelectAll);
+        }
+})();
+</script>

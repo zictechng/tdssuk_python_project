@@ -1,0 +1,315 @@
+
+{% extends "mainDash/layouts/baseDash.html" %}
+{% load static %}
+
+
+{% block title %}Document — Edit {{ doc.title }}{% endblock %}
+
+
+{% block content %}
+
+
+<div class="page-header d-print-none" aria-label="Page header">
+    <div class="container-xl">
+        <div class="row g-2 align-items-center">
+            <div class="col">
+                <h2 class="page-title">Edit Document</h2>
+                <div class="page-pretitle">
+                    <a href="{% url 'uploaded_document_detail' doc.uuid %}" class="text-secondary">
+                        <i class="bi bi-arrow-left me-1"></i> Back to {{ doc.title }}
+                    </a>
+                </div>
+            </div>
+            <div class="col-auto ms-auto d-print-none">
+                <div class="btn-list">
+                    <a href="{% url 'uploaded_document_detail' doc.uuid %}"
+                       class="btn btn-secondary btn-sm d-none d-sm-inline-block">
+                        <i class="bi bi-arrow-left me-1"></i> Back
+                    </a>
+                    <a href="{% url 'uploaded_document_detail' doc.uuid %}"
+                       class="btn btn-secondary d-sm-none btn-icon">
+                        <i class="bi bi-arrow-left"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="page-body">
+    <div class="container-xl">
+        <div class="row row-deck row-cards">
+            <div class="col-12 mt-3">
+                
+                <form class="card" id="edit-doc-form"
+                      hx-post="{% url 'uploaded_document_edit' doc.uuid %}"
+                      hx-target="#toast-container"
+                      hx-swap="innerHTML"
+                      hx-encoding="multipart/form-data">
+                    {% csrf_token %}
+
+                    <div class="card-header">
+                        <h3 class="card-title">Edit Document Details</h3>
+                    </div>
+
+                    <div class="card-body">
+                        <div class="row row-cards">
+
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label required">Document Type</label>
+                                    <select name="document_type" class="form-select" data-search="on">
+                                        <option value="">— Select type —</option>
+                                        {% for value, label in form.fields.document_type.choices %}
+                                            {% if value %}
+                                            <option value="{{ value }}"
+                                                {% if form.initial.document_type == value or doc.document_type == value %}selected{% endif %}>
+                                                {{ label }}
+                                            </option>
+                                            {% endif %}
+                                        {% endfor %}
+                                    </select>
+                                    <div id="error-document_type"></div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label required">Title</label>
+                                    <input type="text"
+                                           name="title"
+                                           class="form-control"
+                                           value="{{ doc.title }}"
+                                           placeholder="Document title">
+                                    <div id="error-title"></div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Replace File</label>
+                                    <input type="file" name="file" class="form-control">
+                                    <small class="text-muted">
+                                        Current: <strong>{{ doc.filename }}</strong> —
+                                        leave blank to keep existing file. Max 20MB.
+                                    </small>
+                                    <div id="error-file"></div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label required">Status</label>
+                                    <select name="status" class="form-select" data-search="on">
+                                        {% for value, label in form.fields.status.choices %}
+                                        <option value="{{ value }}"
+                                            {% if doc.status == value %}selected{% endif %}>
+                                            {{ label }}
+                                        </option>
+                                        {% endfor %}
+                                    </select>
+                                    <div id="error-status"></div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label class="form-label">Linked Order</label>
+                                    <select name="order" class="form-select" data-search="on">
+                                        <option value="">— Select order (optional) —</option>
+                                        {% for obj in form.fields.order.queryset %}
+                                        <option value="{{ obj.pk }}"
+                                            {% if doc.order_id == obj.pk %}selected{% endif %}>
+                                            {{ obj.order_number }}
+                                        </option>
+                                        {% endfor %}
+                                    </select>
+                                    <div id="error-order"></div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label class="form-label">Linked Shipment</label>
+                                    <select name="shipment" class="form-select" data-search="on">
+                                        <option value="">— Select shipment (optional) —</option>
+                                        {% for obj in form.fields.shipment.queryset %}
+                                        <option value="{{ obj.pk }}"
+                                            {% if doc.shipment_id == obj.pk %}selected{% endif %}>
+                                            {{ obj.tracking_number }}
+                                        </option>
+                                        {% endfor %}
+                                    </select>
+                                    <div id="error-shipment"></div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label class="form-label">Linked Invoice</label>
+                                    <select name="invoice" class="form-select" data-search="on">
+                                        <option value="">— Select invoice (optional) —</option>
+                                        {% for obj in form.fields.invoice.queryset %}
+                                        <option value="{{ obj.pk }}"
+                                            {% if doc.invoice_id == obj.pk %}selected{% endif %}>
+                                            {{ obj.invoice_number }}
+                                        </option>
+                                        {% endfor %}
+                                    </select>
+                                    <div id="error-invoice"></div>
+                                </div>
+                            </div>
+
+                            <div class="col-12">
+                                <div class="mb-0">
+                                    <label class="form-label">Notes</label>
+                                    <textarea name="notes"
+                                              rows="3"
+                                              class="form-control"
+                                              placeholder="Optional notes...">{{ doc.notes }}</textarea>
+                                    <div id="error-notes"></div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <div class="card-footer text-end">
+                        <a href="{% url 'uploaded_document_detail' doc.uuid %}"
+                           class="btn btn-secondary btn-sm me-2">Cancel</a>
+                        <button type="button"
+                                class="btn btn-primary btn-sm"
+                                data-bs-toggle="modal"
+                                data-bs-target="#confirm-edit-modal">
+                            <i class="bi bi-save me-1"></i> Save Changes
+                        </button>
+                    </div>
+
+                </form>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+
+{# --- Confirm Modal --- #}
+<div class="modal modal-blur fade" id="confirm-edit-modal"
+     tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-sm modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-body">
+                <div class="modal-title">Save changes?</div>
+                <div class="text-muted mt-1">
+                    The document details will be updated in the system.
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button"
+                        class="btn btn-link link-secondary me-auto"
+                        data-bs-dismiss="modal">Cancel</button>
+                <button type="button"
+                        class="btn btn-primary"
+                        id="confirm-edit-btn">
+                    <span id="confirm-edit-label">Yes, Save</span>
+                    <span id="confirm-edit-spinner"
+                          class="spinner-border spinner-border-sm ms-2"
+                          style="display:none;" role="status" aria-hidden="true"></span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script>
+window.addEventListener('load', function () {
+
+    // 1. TomSelect
+    function initTomSelects() {
+        document.querySelectorAll('select[data-search="on"]').forEach(function (el) {
+            if (!el.tomselect) new TomSelect(el, {
+                placeholder: el.querySelector('option[value=""]')?.textContent || 'Select...'
+            });
+        });
+    }
+
+    function syncTomSelectValues() {
+        document.querySelectorAll('select[data-search="on"]').forEach(function (el) {
+            if (el.tomselect) el.value = el.tomselect.getValue();
+        });
+    }
+
+    initTomSelects();
+
+    // 2. Confirm submit
+    document.getElementById('confirm-edit-btn').addEventListener('click', function () {
+        var btn     = this;
+        var label   = document.getElementById('confirm-edit-label');
+        var spinner = document.getElementById('confirm-edit-spinner');
+
+        btn.disabled          = true;
+        label.textContent     = 'Saving...';
+        spinner.style.display = 'inline-block';
+
+        syncTomSelectValues();
+
+        var form     = document.getElementById('edit-doc-form');
+        var formData = new FormData(form);
+
+        fetch(form.getAttribute('hx-post'), {
+            method: 'POST',
+            body: formData,
+            headers: { 'HX-Request': 'true' }
+        })
+        .then(function (res) { return res.text(); })
+        .then(function (html) {
+            var parser = new DOMParser();
+            var doc    = parser.parseFromString(html, 'text/html');
+
+            doc.querySelectorAll('[hx-swap-oob]').forEach(function (oobEl) {
+                var target = document.getElementById(oobEl.id);
+                if (target) target.outerHTML = oobEl.outerHTML;
+            });
+
+            var toastEl = doc.querySelector('.toast');
+            if (toastEl) {
+                var dismissBtn = document.querySelector('#confirm-edit-modal [data-bs-dismiss="modal"]');
+                if (dismissBtn) dismissBtn.click();
+
+                document.getElementById('toast-container').innerHTML = toastEl.outerHTML;
+                var liveToast = document.querySelector('#toast-container .toast');
+                tabler.Toast.getOrCreateInstance(liveToast).show();
+
+                var redirectUrl = toastEl.getAttribute('data-redirect-url');
+                if (redirectUrl) {
+                    setTimeout(function () { window.location.href = redirectUrl; }, 1500);
+                }
+            }
+        })
+        .catch(function (err) { console.error('Submit error:', err); })
+        .finally(function () {
+            btn.disabled          = false;
+            label.textContent     = 'Yes, Save';
+            spinner.style.display = 'none';
+        });
+    });
+
+    // 3. Clear field errors on change
+    document.querySelectorAll('#edit-doc-form input, #edit-doc-form select, #edit-doc-form textarea')
+        .forEach(function (el) {
+            var events = el.tagName === 'SELECT' ? ['change'] : ['input', 'change'];
+            events.forEach(function (evt) {
+                el.addEventListener(evt, function () {
+                    var errorDiv = document.getElementById('error-' + el.name);
+                    if (errorDiv) errorDiv.innerHTML = '';
+                });
+            });
+        });
+
+});
+</script>
+
+
+{% endblock %}

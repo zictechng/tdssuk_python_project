@@ -1,0 +1,43 @@
+
+
+<div class="row mb-3">
+  <div class="col-12">
+    <div class="card">
+      <div class="card-body py-3">
+        <div class="row g-2 align-items-center">
+          <div class="col-auto text-secondary fw-medium">Date Range:</div>
+          <div class="col ms-auto d-flex flex-wrap gap-2 justify-content-end">
+
+            <input type="text"
+                   name="date_from"
+                   id="report-date-from"
+                   class="form-control datepicker"
+                   style="max-width:160px;"
+                   value="{{ date_from }}"
+                   placeholder="From (YYYY-MM-DD)" />
+
+            <input type="text"
+                   name="date_to"
+                   id="report-date-to"
+                   class="form-control datepicker"
+                   style="max-width:160px;"
+                   value="{{ date_to }}"
+                   placeholder="To (YYYY-MM-DD)" />
+
+            <button type="button"
+                    id="report-filter-btn"
+                    class="btn btn-primary btn-sm">
+              <i class="bi bi-funnel me-1"></i> Apply
+            </button>
+
+            <a href="{{ request.path }}?date_from={{ date_from }}&date_to={{ date_to }}&export=csv"
+               class="btn btn-secondary btn-sm">
+              <i class="bi bi-download me-1"></i> Export CSV
+            </a>
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

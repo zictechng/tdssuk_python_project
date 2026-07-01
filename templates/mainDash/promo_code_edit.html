@@ -1,0 +1,263 @@
+
+{% extends "mainDash/layouts/baseDash.html" %}
+{% load static %}
+{% block title %}Edit {{ promo.code }}{% endblock %}
+{% block content %}
+
+<div class="page-header d-print-none">
+  <div class="container-xl">
+    <div class="row g-2 align-items-center">
+      <div class="col">
+        <div class="page-pretitle">
+          <a href="{% url 'promo_code_list' %}" class="text-secondary">
+            <i class="bi bi-arrow-left me-1"></i> Back to Promo Codes
+          </a>
+        </div>
+        <h2 class="page-title">
+          Edit <span class="font-monospace">{{ promo.code }}</span>
+        </h2>
+      </div>
+      <div class="col-auto ms-auto">
+        <a href="{% url 'promo_code_list' %}"
+           class="btn btn-secondary btn-sm d-none d-sm-inline-block">
+          <i class="bi bi-arrow-left me-1"></i> Back
+        </a>
+        <a href="{% url 'promo_code_list' %}"
+            class="btn btn-secondary d-sm-none btn-icon">
+            <i class="bi bi-arrow-left"></i>
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="page-body">
+  <div class="container-xl">
+    <div class="row row-cards mt-3">
+
+      <div class="col-lg-8">
+        <form class="card" id="promo-edit-form"
+              hx-post="{% url 'promo_code_edit' token %}"
+              hx-target="#toast-container"
+              hx-swap="innerHTML">
+          {% csrf_token %}
+          <div class="card-header">
+            <h3 class="card-title">
+              <i class="bi bi-tag me-2 text-muted"></i> Edit Promo Code
+            </h3>
+            <div class="card-options">
+              <span class="badge text-white
+                {% if promo.is_expired %}bg-danger
+                {% elif promo.status == 'active' %}bg-success
+                {% else %}bg-secondary{% endif %}">
+                {% if promo.is_expired %}Expired{% else %}{{ promo.get_status_display }}{% endif %}
+              </span>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="row g-3">
+
+              <div class="col-md-6">
+                <label class="form-label required">Promo Code</label>
+                {{ form.code }}
+                <div id="error-code"></div>
+              </div>
+
+              <div class="col-md-6">
+                <label class="form-label required">Status</label>
+                {{ form.status }}
+                <div id="error-status"></div>
+              </div>
+
+              <div class="col-md-6">
+                <label class="form-label required">Discount Type</label>
+                {{ form.discount_type }}
+                <div id="error-discount_type"></div>
+              </div>
+
+              <div class="col-md-6">
+                <label class="form-label required">Discount Value</label>
+                <div class="input-group">
+                  {{ form.discount_value }}
+                  <span class="input-group-text" id="discount-suffix">
+                    {% if promo.discount_type == 'percentage' %}%{% else %}£{% endif %}
+                  </span>
+                </div>
+                <div id="error-discount_value"></div>
+              </div>
+
+              <div class="col-md-6">
+                <label class="form-label">Minimum Order Value</label>
+                <div class="input-group">
+                  <span class="input-group-text">£</span>
+                  {{ form.min_order_value }}
+                </div>
+                <div id="error-min_order_value"></div>
+              </div>
+
+              <div class="col-md-6">
+                <label class="form-label">Max Uses</label>
+                {{ form.max_uses }}
+                <small class="text-muted d-block mt-1">
+                  Currently used <strong>{{ promo.used_count }}</strong> times.
+                </small>
+                <div id="error-max_uses"></div>
+              </div>
+
+              <div class="col-md-6">
+                <label class="form-label required">Valid From</label>
+                {{ form.valid_from }}
+                <div id="error-valid_from"></div>
+              </div>
+
+              <div class="col-md-6">
+                <label class="form-label">Valid Until</label>
+                {{ form.valid_until }}
+                <div id="error-valid_until"></div>
+              </div>
+
+            </div>
+          </div>
+          <div class="card-footer text-end">
+            <a href="{% url 'promo_code_list' %}" class="btn btn-secondary btn-sm me-2">Cancel</a>
+            <button type="button"
+                    class="btn btn-primary btn-sm"
+                    data-bs-toggle="modal"
+                    data-bs-target="#confirm-edit-modal">
+              <i class="bi bi-save me-1"></i> Save Changes
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Right — Stats -->
+      <div class="col-lg-4">
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title">
+              <i class="bi bi-bar-chart me-2 text-muted"></i> Usage Stats
+            </h3>
+          </div>
+          <div class="list-group list-group-flush">
+            <div class="list-group-item">
+              <div class="row align-items-center">
+                <div class="col text-secondary">Total Used</div>
+                <div class="col-auto fw-medium">{{ promo.used_count }}</div>
+              </div>
+            </div>
+            <div class="list-group-item">
+              <div class="row align-items-center">
+                <div class="col text-secondary">Remaining</div>
+                <div class="col-auto fw-medium">{{ promo.remaining_uses }}</div>
+              </div>
+            </div>
+            <div class="list-group-item">
+              <div class="row align-items-center">
+                <div class="col text-secondary">Created By</div>
+                <div class="col-auto fw-medium">
+                  {{ promo.created_by.get_full_name|default:promo.created_by.username|default:"—" }}
+                </div>
+              </div>
+            </div>
+            <div class="list-group-item">
+              <div class="row align-items-center">
+                <div class="col text-secondary">Created At</div>
+                <div class="col-auto text-secondary">
+                  {{ promo.created_at|date:"d M Y" }}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- Confirm Edit Modal -->
+<div class="modal modal-blur fade" id="confirm-edit-modal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-sm modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-body">
+        <div class="modal-title">Save changes to {{ promo.code }}?</div>
+        <div class="text-muted mt-1">Changes apply immediately.</div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-link link-secondary me-auto"
+                data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-primary" id="confirm-edit-btn">
+          <span id="confirm-edit-label">Yes, Save</span>
+          <span id="confirm-edit-spinner" class="spinner-border spinner-border-sm ms-2"
+                style="display:none;"></span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+
+  var typeSelect = document.querySelector('[name="discount_type"]');
+  var suffix     = document.getElementById('discount-suffix');
+  function updateSuffix() {
+    suffix.textContent = typeSelect.value === 'percentage' ? '%' : '£';
+  }
+  typeSelect.addEventListener('change', updateSuffix);
+
+  document.getElementById('confirm-edit-btn').addEventListener('click', function () {
+    var btn     = this;
+    var label   = document.getElementById('confirm-edit-label');
+    var spinner = document.getElementById('confirm-edit-spinner');
+
+    btn.disabled          = true;
+    label.textContent     = 'Saving...';
+    spinner.style.display = 'inline-block';
+
+    var form     = document.getElementById('promo-edit-form');
+    var formData = new FormData(form);
+
+    fetch(form.getAttribute('hx-post'), {
+      method: 'POST', body: formData,
+      headers: { 'HX-Request': 'true' }
+    })
+    .then(function (res) { return res.text(); })
+    .then(function (html) {
+      var doc = new DOMParser().parseFromString(html, 'text/html');
+      doc.querySelectorAll('[hx-swap-oob]').forEach(function (oobEl) {
+        var target = document.getElementById(oobEl.id);
+        if (target) target.outerHTML = oobEl.outerHTML;
+      });
+      var toastEl = doc.querySelector('.toast');
+      if (toastEl) {
+        var redirectUrl = toastEl.getAttribute('data-redirect-url');
+        document.querySelector('#confirm-edit-modal [data-bs-dismiss="modal"]').click();
+        document.getElementById('toast-container').innerHTML = toastEl.outerHTML;
+        tabler.Toast.getOrCreateInstance(document.querySelector('#toast-container .toast')).show();
+        if (redirectUrl) setTimeout(function () { window.location.href = redirectUrl; }, 1500);
+      }
+    })
+    .catch(function (err) { console.error(err); })
+    .finally(function () {
+      btn.disabled          = false;
+      label.textContent     = 'Yes, Save';
+      spinner.style.display = 'none';
+    });
+  });
+
+  document.querySelectorAll('#promo-edit-form input, #promo-edit-form select').forEach(function (el) {
+    el.addEventListener('input', function () {
+      var err = document.getElementById('error-' + el.name);
+      if (err) err.innerHTML = '';
+    });
+    el.addEventListener('change', function () {
+      var err = document.getElementById('error-' + el.name);
+      if (err) err.innerHTML = '';
+    });
+  });
+
+});
+</script>
+
+{% endblock %}

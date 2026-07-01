@@ -1,0 +1,27 @@
+
+{% extends "mainDash/layouts/baseDash.html" %}
+{% load static %}
+{% block title %}Shipment Reports{% endblock %}
+{% block content %}
+
+<div class="page-header d-print-none">
+  <div class="container-xl">
+    <div class="row g-2 align-items-center">
+      <div class="col">
+        <h2 class="page-title">Shipment Reports</h2>
+        <div class="page-pretitle">Shipment volume, status breakdown and trends</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="page-body">
+  <div class="container-xl">
+    <div id="report-container">
+      {% include "mainDash/components/shipment_reports_dataTable.html" %}
+    </div>
+  </div>
+</div>
+
+{% include "mainDash/includes/report_scripts.html" %}
+{% endblock %}

@@ -1,0 +1,339 @@
+        
+         {% comment %} {% load static %}
+        <div class="col-12 mt-5">
+            
+            <div class="card">
+                <div class="card-header">
+                <h3 class="card-title">Recent contact message</h3>
+                </div>
+                <div class="card-body border-bottom py-3">
+                <div class="d-flex">
+                    <div class="text-secondary">
+                    Show
+                    <div class="mx-2 d-inline-block">
+                        <input type="text" class="form-control form-control-sm" value="8" size="3" aria-label="Invoices count" />
+                    </div>
+                    entries
+                    </div>
+                    <div class="ms-auto text-secondary">
+                    Search:
+                    <div class="ms-2 d-inline-block">
+                       <div class="col-md-auto col-sm-12">
+                            <form method="GET" class="d-flex gap-2">
+                            <div class="ms-auto d-flex flex-wrap btn-list">
+
+                                <!-- SEARCH -->
+                                <div class="input-group input-group-flat w-auto">
+                                    {% if search_query %}
+                                    <a href="{% url 'contact_page' %}" class="input-group-text text-danger">
+                                    <i class="bi bi-x"></i>
+                                    </a>
+                                {% endif %}
+                                <input
+                                    id="advanced-table-search"
+                                    type="text"
+                                    name="search"
+                                    value="{{ search_query }}"
+                                    class="form-control"
+                                    placeholder="Search email, phone or status"
+                                    autocomplete="off">
+                                    <span class="input-group-text">
+                                        <button type="submit" class="input-group-text p-0">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                                                viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                                                class="icon icon-1">
+                                            <path d="M10 10m-7 0a7 7 0 1 0 14 0a7 7 0 1 0 -14 0"></path>
+                                            <path d="M21 21l-6 -6"></path>
+                                            </svg>
+                                        </button>
+                                    </span>
+                                </div>
+
+                                <!-- STATUS DROPDOWN -->
+                                <div class="dropdown">
+                                <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                    {% if status_filter %}
+                                    {{ status_filter|title }}
+                                    {% else %}
+                                    All Quote
+                                    {% endif %}
+                                </button>
+
+                                <ul class="dropdown-menu">
+                                    <li>
+                                    <a class="dropdown-item" href="?{% if search_query %}search={{ search_query }}{% endif %}">
+                                        All
+                                    </a>
+                                    </li>
+
+                                    <li>
+                                    <a class="dropdown-item"
+                                        href="?status=completed{% if search_query %}&search={{ search_query }}{% endif %}">
+                                        Completed
+                                    </a>
+                                    </li>
+                                    <li>
+                                    <a class="dropdown-item"
+                                        href="?status=close{% if search_query %}&search={{ search_query }}{% endif %}">
+                                        Close
+                                    </a>
+                                    </li>
+
+                                    <li>
+                                    <a class="dropdown-item"
+                                        href="?status=pending{% if search_query %}&search={{ search_query }}{% endif %}">
+                                        Pending
+                                    </a>
+                                    </li>
+
+                                    <li>
+                                    <a class="dropdown-item"
+                                        href="?status=read{% if search_query %}&search={{ search_query }}{% endif %}">
+                                        Read
+                                    </a>
+                                    </li>
+
+                                    <li>
+                                    <a class="dropdown-item"
+                                        href="?status=replied{% if search_query %}&search={{ search_query }}{% endif %}">
+                                        Replied
+                                    </a>
+                                    </li>
+                                    
+                                </ul>
+
+                                </div>
+
+                            </div>
+                            </form>
+                        </div>
+                    </div>
+                    </div>
+                </div>
+                </div>
+                {% if contacts.paginator.count > 0 %}
+                    <div class="table-responsive">
+                        <table class="table table-selectable card-table table-vcenter text-nowrap datatable">
+                            <thead>
+                            <tr>
+                                <th class="w-1"><input class="form-check-input m-0 align-middle" type="checkbox" aria-label="Select all invoices" style="cursor:pointer" /></th>
+                                
+                                <th>Sender Name</th>
+                                <th>Email</th>
+                                <th>Phone Number</th>
+                                <th>SUbject</th>
+                                <th>Message</th>
+                                <th>Status</th>
+                                <th>Date</th>
+                                
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {% for contact in contacts %}
+                            <tr>
+                                <td><input class="form-check-input m-0 align-middle table-selectable-check" type="checkbox" aria-label="Select invoice" /></td>
+                                <td><span class="text-secondary">{{contact.sender_name}}</span></td>
+                                <td><a href="#" class="text-reset" tabindex="-1">{{contact.sender_email}}</a></td>
+                                <td> {{contact.sender_phone}}</td>
+                                <td>{{contact.sender_subject}}</td>
+                                <td>
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#message-{{ contact.id }}" aria-expanded="false">
+                                        
+                                        <a class="btn btn-outline btn-secondary btn-sm"> View Message</a>
+                                        <div class="accordion-button-toggle">
+                                            <!-- Download SVG icon from http://tabler.io/icons/icon/chevron-down -->
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-1">
+                                            <path d="M6 9l6 6l6 -6"></path>
+                                            </svg>
+                                        </div>
+                                    </button>
+                                </td>
+
+                                <td>
+                                    <span class="badge bg-{{ contact.status_badge }} me-1"></span>
+                                    {{ contact.get_status_display }}
+                                </td>
+
+                                <td>{{ contact.created_at|date:"d/m/Y" }}</td>
+                                
+                            </tr>
+                            <tr class="accordion-collapse collapse" id="message-{{ contact.id }}">
+                                <td colspan="9" class="p-0 border-0">
+                                    <div class="card m-3 shadow-sm">
+                                        <div class="card-header">
+                                            <h4 class="card-title mb-0">
+                                                Message from {{ contact.sender_name }}
+                                            </h4>
+                                        </div>
+
+                                        <div class="card bg-body-secondary">
+                                            <div class="card-body ">
+                                                <div class="text-secondary text-uppercase mb-2">
+                                                    Full Message
+                                                </div>
+
+                                                <div style="white-space: normal; overflow-wrap: break-word; word-break: break-word; line-height: 1.5;">
+                                                    {{ contact.sender_message }}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                           
+                            </tbody>
+                        </table>
+                    </div>
+
+                     {% include "mainDash/includes/report_pagination.html" with page_obj=contacts hx_target="#contact-container" %}
+                   
+                    {% else %}
+                    <div class="text-center py-5">
+                        <div class="text-secondary">
+                            <h4 class="mb-1">No contact message found</h4>
+                            <small>There is currently no data to display at the moment.</small>
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+            </div>
+        </div> {% endcomment %}
+
+
+
+        {% load static %}
+        <div class="col-12 mt-3">
+            <div class="card">
+
+                <div class="card-header">
+                <h3 class="card-title">Contact Messages</h3>
+                <div class="card-options">
+                    <small class="text-muted">Auto-converted to support tickets</small>
+                </div>
+                </div>
+          
+
+                <!-- Filters -->
+                <div class="card-body border-bottom py-3">
+                <form method="GET" class="d-flex flex-wrap gap-2 align-items-center justify-content-end">
+
+                    <div class="input-group input-group-flat" style="max-width:280px;">
+                    {% if search_query %}
+                    <a href="{% url 'contact_page' %}" class="input-group-text text-danger">
+                        <i class="bi bi-x"></i>
+                    </a>
+                    {% endif %}
+                    <input type="text" name="search"
+                            value="{{ search_query }}"
+                            class="form-control"
+                            placeholder="Search name, email, subject..."
+                            autocomplete="off">
+                    <span class="input-group-text">
+                        <button type="submit" class="p-0" style="background:none; border:none;">
+                        <i class="bi bi-search"></i>
+                        </button>
+                    </span>
+                    </div>
+
+                    <select name="status" class="form-select w-auto" onchange="this.form.submit()">
+                    <option value="">All Statuses</option>
+                    <option value="pending"   {% if status_filter == 'pending' %}selected{% endif %}>Pending</option>
+                    <option value="read"      {% if status_filter == 'read' %}selected{% endif %}>Read</option>
+                    <option value="replied"   {% if status_filter == 'replied' %}selected{% endif %}>Replied</option>
+                    <option value="completed" {% if status_filter == 'completed' %}selected{% endif %}>Completed</option>
+                    <option value="close"     {% if status_filter == 'close' %}selected{% endif %}>Closed</option>
+                    </select>
+
+                </form>
+                </div>
+
+                {% if contacts.paginator.count > 0 %}
+                <div class="table-responsive">
+                <table class="table table-vcenter table-hover card-table text-nowrap">
+                    <thead>
+                    <tr>
+                        <th>Sender</th>
+                        <th>Email</th>
+                        <th>Phone</th>
+                        <th>Subject</th>
+                        <th>Status</th>
+                        <th>Ticket</th>
+                        <th>Date</th>
+                        <th></th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for contact in contacts %}
+                    <tr>
+                        <td class="fw-medium">{{ contact.sender_name }}</td>
+                        <td class="text-secondary">{{ contact.sender_email }}</td>
+                        <td class="text-secondary">{{ contact.sender_phone|default:"—" }}</td>
+                        <td>{{ contact.sender_subject|truncatechars:40 }}</td>
+                        <td>
+                        <span class="badge bg-{{ contact.status_badge }} text-white">
+                            {{ contact.get_status_display }}
+                        </span>
+                        </td>
+                        <td>
+                        {% if contact.ticket and contact.ticket.pk %}
+                            <a href="{% url 'ticket_detail' contact.ticket.token %}"
+                                class="badge bg-blue-lt text-blue text-decoration-none">
+                                <i class="bi bi-ticket me-1"></i>
+                                {{ contact.ticket.ticket_number }}
+                            </a>
+                            {% else %}
+                            <span class="text-muted">—</span>
+                            {% endif %}
+                        </td>
+                        <td class="text-secondary">{{ contact.created_at|date:"d M Y" }}</td>
+                        <td>
+                        <button class="btn btn-sm btn-ghost-secondary"
+                                type="button"
+                                data-bs-toggle="collapse"
+                                data-bs-target="#message-{{ contact.id }}">
+                            <i class="bi bi-eye me-1"></i> Message
+                        </button>
+                        {% if contact.ticket and contact.ticket.pk %}
+                        <a href="{% url 'ticket_detail' contact.ticket.token %}"
+                            class="btn btn-sm btn-ghost-primary">
+                            <i class="bi bi-reply me-1"></i> Reply
+                        </a>
+                        {% endif %}
+                        </td>
+                    </tr>
+
+                    <!-- Expandable message row -->
+                    <tr class="collapse" id="message-{{ contact.id }}">
+                        <td colspan="8" class="bg-light">
+                        <div class="px-3 py-2">
+                            <div class="d-flex align-items-center gap-2 mb-2">
+                            <i class="bi bi-chat-left-text text-secondary"></i>
+                            <strong>Message from {{ contact.sender_name }}</strong>
+                            </div>
+                            <p class="mb-0 text-secondary"
+                            style="white-space:normal; overflow-wrap:break-word; line-height:1.6;">
+                            {{ contact.sender_message }}
+                            </p>
+                        </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+                </div>
+
+                <!-- Pagination -->
+                {% include "mainDash/includes/report_pagination.html" with page_obj=contacts hx_target="#contact-container" %}
+
+                {% else %}
+                <div class="text-center py-5 text-secondary">
+                <i class="bi bi-envelope-slash fs-2 d-block mb-2 opacity-50"></i>
+                <h5 class="mb-1">No contact messages found</h5>
+                <small>There is currently no data to display.</small>
+                </div>
+                {% endif %}
+
+            </div>
+        </div>

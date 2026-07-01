@@ -1,0 +1,23 @@
+
+<div class="modal modal-blur fade" id="confirm-action-modal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-sm modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-body">
+                <div class="modal-title" id="confirm-action-title">Are you sure?</div>
+                <div class="text-muted mt-1" id="confirm-action-message">This action cannot be undone.</div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-link link-secondary me-auto"
+                        data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="confirm-action-btn">
+                    <span id="confirm-action-label">Confirm</span>
+                    <span id="confirm-action-spinner"
+                          class="spinner-border spinner-border-sm ms-2"
+                          style="display:none;" role="status" aria-hidden="true"></span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+<button type="button" id="open-confirm-action-trigger" class="d-none"
+        data-bs-toggle="modal" data-bs-target="#confirm-action-modal"></button>

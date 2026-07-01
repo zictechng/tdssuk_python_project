@@ -1,0 +1,242 @@
+{% extends "mainDash/layouts/baseDash.html" %}
+{% load static %}
+
+{% block title %}{{ route.route_name }} — Route Detail{% endblock %}
+
+{% block content %}
+
+<div class="page-header d-print-none">
+    <div class="container-xl">
+        <div class="row g-2 align-items-center">
+            <div class="col">
+                <div class="page-pretitle">
+                    <a href="{% url 'route_list' %}" class="text-secondary">
+                        <i class="bi bi-arrow-left me-1"></i> Back to Routes
+                    </a>
+                </div>
+                <h2 class="page-title">{{ route.route_name }}</h2>
+            </div>
+            <div class="col-auto ms-auto d-print-none">
+                <div class="btn-list">
+                    <button type="button" class="btn btn-danger btn-sm js-delete-route"
+                            data-route-id="{{ route.pk }}">
+                        <i class="bi bi-trash me-1"></i> Delete Route
+                    </button>
+                    <a href="{% url 'route_list' %}" class="btn btn-secondary btn-sm d-none d-sm-inline-block">
+                    <i class="bi bi-arrow-left"></i>
+                    Back
+                  </a>
+                 
+                  <a href="{% url 'route_list' %}"
+                    class="btn btn-secondary btn-6 d-sm-none btn-icon"
+                    aria-label="Create new report">
+                   <i class="bi bi-arrow-left"></i>
+                  </a>
+                </div>
+                
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="page-body">
+    <div class="container-xl">
+        <div class="row g-3">
+
+            {# --- Status Banner --- #}
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="row align-items-center">
+                            <div class="col-auto">
+                                <span class="avatar avatar-lg bg-blue-lt rounded">
+                                    <i class="bi bi-signpost-split fs-2"></i>
+                                </span>
+                            </div>
+                            <div class="col">
+                                <div class="d-flex align-items-center gap-2 mb-1">
+                                    <h3 class="mb-0">{{ route.route_name }}</h3>
+                                    <span class="badge bg-{% if route.status == 'planned' %}blue{% elif route.status == 'active' %}green{% elif route.status == 'completed' %}secondary{% else %}red{% endif %}-lt">
+                                        {{ route.get_status_display }}
+                                    </span>
+                                </div>
+                                <div class="text-secondary">
+                                    <i class="bi bi-geo-alt me-1"></i>{{ route.start_location }}
+                                    <i class="bi bi-arrow-right mx-2"></i>
+                                    {{ route.end_location }}
+                                </div>
+                            </div>
+                            <div class="col-auto text-secondary small">
+                                Created {{ route.created_at|date:"M d, Y" }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {# --- Left Column --- #}
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Route Information</h3>
+                    </div>
+                    <div class="card-body">
+                        <dl class="row mb-0">
+                            <dt class="col-5 text-secondary fw-normal">Route Name</dt>
+                            <dd class="col-7">{{ route.route_name }}</dd>
+
+                            <dt class="col-5 text-secondary fw-normal">Start Location</dt>
+                            <dd class="col-7">{{ route.start_location }}</dd>
+
+                            <dt class="col-5 text-secondary fw-normal">End Location</dt>
+                            <dd class="col-7">{{ route.end_location }}</dd>
+
+                            <dt class="col-5 text-secondary fw-normal">Planned Date</dt>
+                            <dd class="col-7">{{ route.planned_date|date:"M d, Y" }}</dd>
+
+                            <dt class="col-5 text-secondary fw-normal">Status</dt>
+                            <dd class="col-7">
+                                <span class="badge bg-{% if route.status == 'planned' %}blue{% elif route.status == 'active' %}green{% elif route.status == 'completed' %}secondary{% else %}red{% endif %}-lt">
+                                    {{ route.get_status_display }}
+                                </span>
+                            </dd>
+
+                            <dt class="col-5 text-secondary fw-normal">Last Updated</dt>
+                            <dd class="col-7">{{ route.updated_at|date:"M d, Y" }}</dd>
+                        </dl>
+                    </div>
+                </div>
+
+                {% if route.notes %}
+                <div class="card mt-3">
+                    <div class="card-header">
+                        <h3 class="card-title">Notes</h3>
+                    </div>
+                    <div class="card-body">
+                        <p class="text-secondary mb-0">{{ route.notes }}</p>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+
+            {# --- Right Column --- #}
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Assigned Vehicle</h3>
+                    </div>
+                    <div class="card-body">
+                        {% if route.vehicle %}
+                        <div class="d-flex align-items-center gap-3">
+                            <span class="avatar bg-blue-lt rounded">
+                                <i class="bi bi-truck"></i>
+                            </span>
+                            <div>
+                                <div class="fw-medium">{{ route.vehicle.name }}</div>
+                                <div class="text-secondary small">
+                                    {{ route.vehicle.vehicle_type|default:"No type specified" }}
+                                    &middot;
+                                    <span class="badge bg-{% if route.vehicle.status == 'available' %}green{% elif route.vehicle.status == 'on_route' %}cyan{% elif route.vehicle.status == 'maintenance' %}yellow text-dark{% else %}red{% endif %}-lt">
+                                        {{ route.vehicle.get_status_display }}
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="ms-auto">
+                                <a href="{% url 'vehicle_detail' route.vehicle.uuid %}" class="btn btn-sm btn-ghost-secondary">
+                                    View Vehicle
+                                </a>
+                            </div>
+                        </div>
+                        {% else %}
+                        <div class="text-center py-4 text-secondary">
+                            <i class="bi bi-truck fs-2 d-block mb-2 opacity-50"></i>
+                            No vehicle assigned to this route.
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                {# --- Quick Status Update --- #}
+                <div class="card mt-3">
+                    <div class="card-header">
+                        <h3 class="card-title">Update Status</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-flex flex-wrap gap-2">
+                            <button type="button"
+                                    class="btn btn-sm btn-outline-blue js-update-status"
+                                    data-status="planned"
+                                    {% if route.status == 'planned' %}disabled{% endif %}>
+                                Planned
+                            </button>
+                            <button type="button"
+                                    class="btn btn-sm btn-outline-green js-update-status"
+                                    data-status="active"
+                                    {% if route.status == 'active' %}disabled{% endif %}>
+                                Active
+                            </button>
+                            <button type="button"
+                                    class="btn btn-sm btn-outline-secondary js-update-status"
+                                    data-status="completed"
+                                    {% if route.status == 'completed' %}disabled{% endif %}>
+                                Completed
+                            </button>
+                            <button type="button"
+                                    class="btn btn-sm btn-outline-danger js-update-status"
+                                    data-status="cancelled"
+                                    {% if route.status == 'cancelled' %}disabled{% endif %}>
+                                Cancelled
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+</div>
+
+{% include "mainDash/includes/confirm_delete_modal.html" %}
+
+<script>
+    // Delete route
+    document.querySelector('.js-delete-route').addEventListener('click', function () {
+        var routeId = this.getAttribute('data-route-id');
+        var deleteUrl = "{% url 'route_delete' 0 %}".replace('/0/', '/' + routeId + '/');
+
+        confirmDelete({
+            url: deleteUrl,
+            title: 'Delete this route?',
+            message: 'This will permanently remove the route.',
+            csrfToken: '{{ csrf_token }}',
+            onSuccess: function () {
+                window.location.href = "{% url 'route_list' %}";
+            },
+            onError: function (data) {
+                alert(data.error || 'Delete failed.');
+            },
+        });
+    });
+
+    // Quick status update
+    document.querySelectorAll('.js-update-status').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            const status = this.getAttribute('data-status');
+
+            htmx.ajax('POST', '{% url "route_detail" route.uuid %}', {
+                target: '#toast-container',
+                swap: 'innerHTML',
+                values: {
+                    csrfmiddlewaretoken: '{{ csrf_token }}',
+                    status: status,
+                    _status_update: '1',
+                }
+            }).then(function () {
+                window.location.reload();
+            });
+        });
+    });
+</script>
+
+{% endblock %}

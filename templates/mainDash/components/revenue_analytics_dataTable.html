@@ -1,0 +1,146 @@
+
+{% load humanize %}
+{% include "mainDash/includes/filter_bar.html" %}
+
+<!-- Stats -->
+<div class="row row-deck row-cards mb-4">
+  <div class="col-sm-6 col-lg-3">
+    <div class="card">
+      <div class="card-body">
+        <div class="subheader mb-3">Total Invoiced</div>
+        <div class="h1 mb-0">£{{ total_invoiced|floatformat:2|intcomma }}</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-sm-6 col-lg-3">
+    <div class="card">
+      <div class="card-body">
+        <div class="subheader mb-3">Total Received</div>
+        <div class="h1 mb-0 text-success">£{{ total_paid|floatformat:2|intcomma }}</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-sm-6 col-lg-3">
+    <div class="card">
+      <div class="card-body">
+        <div class="subheader mb-3">Outstanding</div>
+        <div class="h1 mb-0 text-danger">£{{ outstanding|floatformat:2|intcomma }}</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-sm-6 col-lg-3">
+    <div class="card">
+      <div class="card-body">
+        <div class="subheader mb-3">Invoices</div>
+        <div class="h1 mb-3">{{ total_invoices }}</div>
+        <div class="d-flex gap-2">
+          <span class="badge bg-green-lt">{{ paid_count }} Paid</span>
+          <span class="badge bg-red-lt">{{ overdue_count }} Overdue</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Charts -->
+<div class="row row-deck row-cards mb-4">
+  <div class="col-lg-8">
+    <div class="card">
+      <div class="card-header"><h3 class="card-title">Monthly Revenue</h3></div>
+      <div class="card-body"><div id="chart-revenue-monthly"></div></div>
+    </div>
+  </div>
+  <div class="col-lg-4">
+    <div class="card">
+      <div class="card-header"><h3 class="card-title">By Currency</h3></div>
+      <div class="card-body">
+        {% for c in currency_data %}
+        <div class="d-flex align-items-center mb-3">
+          <div class="me-3 fw-bold" style="min-width:40px;">{{ c.currency }}</div>
+          <div class="flex-fill">
+            <div class="progress progress-sm">
+              <div class="progress-bar bg-primary"
+                   style="width:{% if total_invoiced %}{% widthratio c.total total_invoiced 100 %}{% else %}0{% endif %}%"></div>
+            </div>
+          </div>
+          <div class="ms-3 text-muted small">{{ c.total|floatformat:0|intcomma }}</div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Table -->
+<div class="row">
+  <div class="col-12">
+    <div class="card">
+      <div class="card-header">
+        <h3 class="card-title">Invoice List</h3>
+        <div class="card-options">
+            <small class="text-muted">{{ invoices.paginator.count }} record{{ invoices.paginator.count|pluralize }}</small>
+        </div>
+      </div>
+      {% if invoices.paginator.count > 0 %}
+      <div class="table-responsive">
+        <table class="table table-vcenter table-hover card-table text-nowrap">
+          <thead>
+            <tr>
+              <th>Invoice No</th><th>Customer</th><th>Status</th>
+              <th>Currency</th><th>Total</th><th>Paid</th>
+              <th>Balance</th><th>Due Date</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for inv in invoices %}
+            <tr>
+              <td class="fw-medium">{{ inv.invoice_number }}</td>
+              <td>{{ inv.customer_name }}</td>
+              <td>
+                <span class="badge text-white
+                  {% if inv.status == 'paid' %}bg-success
+                  {% elif inv.status == 'overdue' %}bg-danger
+                  {% elif inv.status == 'partially_paid' %}bg-warning
+                  {% elif inv.status == 'sent' %}bg-primary
+                  {% else %}bg-secondary{% endif %}">
+                  {{ inv.get_status_display }}
+                </span>
+              </td>
+              <td class="text-secondary">{{ inv.currency }}</td>
+              <td class="fw-medium">{{ inv.total_amount|floatformat:2|intcomma }}</td>
+              <td class="text-success">{{ inv.amount_paid|floatformat:2|intcomma }}</td>
+              <td class="{% if inv.balance_due > 0 %}text-danger{% else %}text-success{% endif %}">
+                {{ inv.balance_due|floatformat:2|intcomma }}
+              </td>
+              <td class="text-secondary">{{ inv.due_date|date:"d M Y" }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% include "mainDash/includes/report_pagination.html" with page_obj=invoices%}
+      {% else %}
+      <div class="text-center py-5 text-secondary">
+        <i class="bi bi-receipt fs-2 d-block mb-2 opacity-50"></i>
+        <h4 class="mb-1">No invoices found</h4>
+        <small>Try adjusting the date range.</small>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<script>
+new ApexCharts(document.getElementById('chart-revenue-monthly'), {
+  chart:  { type: 'bar', height: 260, toolbar: { show: false } },
+  series: [
+    { name: 'Invoiced', data: {{ chart_invoiced|safe }} },
+    { name: 'Received', data: {{ chart_paid|safe }} },
+  ],
+  xaxis:  { categories: {{ chart_labels|safe }} },
+  colors: ['#206bc4', '#2fb344'],
+  plotOptions: { bar: { borderRadius: 3, columnWidth: '55%' } },
+  tooltip: { theme: 'light' },
+  grid:    { strokeDashArray: 4 },
+}).render();
+</script>

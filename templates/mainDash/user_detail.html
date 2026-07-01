@@ -1,0 +1,407 @@
+{% extends "mainDash/layouts/baseDash.html" %}
+{% load static humanize %}
+
+
+{% block title %}{{ profile_user.get_full_name }} — User Detail{% endblock %}
+
+
+{% block content %}
+
+
+<div class="page-header d-print-none">
+    <div class="container-xl">
+        <div class="row g-2 align-items-center">
+            <div class="col">
+                <div class="page-pretitle">
+                    <a href="{% url 'user_list' %}" class="text-secondary">
+                        Users — All Users
+                    </a>
+                </div>
+                <h2 class="page-title">{{ profile_user.get_full_name }}</h2>
+            </div>
+            <div class="col-auto ms-auto d-print-none">
+                <div class="btn-list">
+                    <a href="{% url 'user_list' %}"
+                       class="btn btn-secondary btn-sm d-none d-sm-inline-block">
+                        <i class="bi bi-arrow-left me-1"></i> Back
+                    </a>
+                    <a href="{% url 'user_edit' profile.uuid %}"
+                       class="btn btn-warning btn-sm d-none d-sm-inline-block">
+                        <i class="bi bi-pencil me-1"></i> Edit User
+                    </a>
+                    <a href="{% url 'user_list' %}"
+                       class="btn btn-secondary d-sm-none btn-icon">
+                        <i class="bi bi-arrow-left"></i>
+                    </a>
+                    <a href="{% url 'user_edit' profile.uuid %}"
+                       class="btn btn-warning d-sm-none btn-icon">
+                        <i class="bi bi-pencil"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="page-body">
+    <div class="container-xl">
+        <div class="row g-3">
+
+
+            {# --- Overview Card --- #}
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="row align-items-center">
+                            <div class="col-auto">
+                                {% if profile.profile_image %}
+                                <span class="avatar avatar-lg rounded"
+                                      style="background-image: url('{{ profile.profile_image.url }}');
+                                             width:60px; height:60px;"></span>
+                                {% else %}
+                                <span class="avatar avatar-lg bg-blue-lt text-blue fw-bold rounded"
+                                      style="width:60px; height:60px; font-size:1.4rem;">
+                                    {{ profile_user.first_name|slice:":1" }}{{ profile_user.last_name|slice:":1" }}
+                                </span>
+                                {% endif %}
+                            </div>
+                            <div class="col">
+                                <div class="d-flex align-items-center gap-2 mb-1">
+                                    <h3 class="mb-0">{{ profile_user.get_full_name }}</h3>
+                                    {% if profile_user.is_superuser %}
+                                    <span class="badge bg-red-lt">Superuser</span>
+                                    {% endif %}
+                                    {% if profile_user.is_staff %}
+                                    <span class="badge bg-orange-lt">Staff</span>
+                                    {% endif %}
+                                    <span id="status-badge-{{ profile_user.pk }}"
+                                          class="badge {% if profile_user.is_active %}bg-green-lt{% else %}bg-secondary-lt{% endif %}">
+                                        {% if profile_user.is_active %}Active{% else %}Inactive{% endif %}
+                                    </span>
+                                </div>
+                                <div class="text-secondary">
+                                    {{ profile_user.email }}
+                                    {% if profile.phone %} &middot; {{ profile.phone }}{% endif %}
+                                </div>
+                            </div>
+                            <div class="col-auto text-secondary small">
+                                Joined {{ profile_user.date_joined|date:"M d, Y" }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+            {# --- Left Column --- #}
+            <div class="col-md-6">
+
+
+                {# Account Info #}
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Account Information</h3>
+                        <div class="card-options">
+                            <button type="button"
+                                    class="btn btn-sm btn-ghost-secondary"
+                                    hx-post="{% url 'user_toggle_active' profile.uuid %}"
+                                    hx-target="#status-badge-{{ profile_user.pk }}"
+                                    hx-swap="outerHTML"
+                                    hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
+                                Toggle Active
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <dl class="row mb-0">
+                            <dt class="col-5 text-secondary fw-normal">Full Name</dt>
+                            <dd class="col-7">{{ profile_user.get_full_name }}</dd>
+
+                            <dt class="col-5 text-secondary fw-normal">Email</dt>
+                            <dd class="col-7">{{ profile_user.email }}</dd>
+
+                            <dt class="col-5 text-secondary fw-normal">Phone</dt>
+                            <dd class="col-7">{{ profile.phone|default:"—" }}</dd>
+
+                            <dt class="col-5 text-secondary fw-normal">Last Login</dt>
+                            <dd class="col-7">{{ profile_user.last_login|date:"d/m/Y H:i"|default:"Never" }}</dd>
+
+                            <dt class="col-5 text-secondary fw-normal">Date Joined</dt>
+                            <dd class="col-7">{{ profile_user.date_joined|date:"d/m/Y H:i" }}</dd>
+
+                            <dt class="col-5 text-secondary fw-normal">Staff Access</dt>
+                            <dd class="col-7">
+                                {% if profile_user.is_staff %}
+                                <span class="text-success">Yes</span>
+                                {% else %}
+                                <span class="text-muted">No</span>
+                                {% endif %}
+                            </dd>
+
+                            <dt class="col-5 text-secondary fw-normal">Superuser</dt>
+                            <dd class="col-7">
+                                {% if profile_user.is_superuser %}
+                                <span class="text-danger">Yes</span>
+                                {% else %}
+                                <span class="text-muted">No</span>
+                                {% endif %}
+                            </dd>
+                        </dl>
+                    </div>
+                </div>
+
+
+                {# Roles #}
+                <div class="card mt-3">
+                    <div class="card-header">
+                        <h3 class="card-title">Assigned Roles</h3>
+                        <div class="card-options">
+                            <a href="{% url 'user_edit' profile.uuid %}"
+                               class="btn btn-sm btn-ghost-secondary">Manage</a>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        {% for group in profile_user.groups.all %}
+                        <span class="badge bg-blue-lt text-blue me-1 mb-1 fs-6">{{ group.name }}</span>
+                        {% empty %}
+                        <p class="text-muted small mb-0">No roles assigned.</p>
+                        {% endfor %}
+                    </div>
+                </div>
+
+
+                {# Danger Zone #}
+                <div class="card mt-3 border-danger">
+                    <div class="card-header">
+                        <h3 class="card-title text-danger">Danger Zone</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-flex align-items-center justify-content-between">
+                            <div>
+                                <p class="fw-medium mb-0">Delete this user</p>
+                                <small class="text-muted">
+                                    User will be soft-deleted and can be restored later.
+                                </small>
+                            </div>
+                            <button type="button"
+                                    class="btn btn-danger btn-sm js-delete-user-detail"
+                                    data-delete-url="{% url 'user_delete' profile.uuid %}"
+                                    data-user-pk="{{ profile_user.pk }}"
+                                    data-user-name="{{ profile_user.get_full_name }}">
+                                <i class="bi bi-trash me-1"></i> Delete
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+
+            </div>
+
+
+            {# --- Right Column --- #}
+            <div class="col-md-6">
+
+
+                {# Reset Password #}
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Reset Password</h3>
+                    </div>
+                    <div class="card-body">
+                        <form id="reset-pw-form"
+                              hx-post="{% url 'user_reset_password' profile.uuid %}"
+                              hx-target="#toast-container"
+                              hx-swap="innerHTML"
+                              enctype="multipart/form-data">
+                            {% csrf_token %}
+                            <div class="row g-3">
+                                <div class="col-12">
+                                    <label class="form-label required">New Password</label>
+                                    <input type="password" name="password1" class="form-control"
+                                           placeholder="Min. 8 characters" />
+                                    <div id="error-password1"></div>
+                                </div>
+                                <div class="col-12">
+                                    <label class="form-label required">Confirm Password</label>
+                                    <input type="password" name="password2" class="form-control"
+                                           placeholder="Repeat password" />
+                                    <div id="error-password2"></div>
+                                </div>
+                                <div class="col-12 text-end">
+                                    <button type="button"
+                                            class="btn btn-warning btn-sm"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#confirm-reset-pw-modal">
+                                        <i class="bi bi-key me-1"></i> Update Password
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+
+                {# Permissions Summary #}
+                <div class="card mt-3">
+                    <div class="card-header">
+                        <h3 class="card-title">Permissions</h3>
+                        <div class="card-options">
+                            <a href="{% url 'user_edit' profile.uuid %}"
+                               class="btn btn-sm btn-ghost-secondary">Edit</a>
+                        </div>
+                    </div>
+                    {% if profile_user.groups.exists %}
+                    <div class="table-responsive">
+                        <table class="table card-table table-vcenter">
+                            <thead>
+                                <tr>
+                                    <th>Role</th>
+                                    <th>Permissions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for group in profile_user.groups.all %}
+                                <tr>
+                                    <td class="fw-medium">{{ group.name }}</td>
+                                    <td class="text-secondary small">
+                                        {{ group.permissions.count }} permission{{ group.permissions.count|pluralize }}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="card-body text-center text-secondary py-4">
+                        <i class="bi bi-shield-x fs-2 d-block mb-2 opacity-50"></i>
+                        No roles or permissions assigned.
+                    </div>
+                    {% endif %}
+                </div>
+
+
+            </div>
+
+
+        </div>
+    </div>
+</div>
+
+
+{# --- Confirm Reset Password Modal --- #}
+<div class="modal modal-blur fade" id="confirm-reset-pw-modal"
+     tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-sm modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-body">
+                <div class="modal-title">Reset password?</div>
+                <div class="text-muted mt-1">
+                    The password for <strong>{{ profile_user.get_full_name }}</strong> will be updated.
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-link link-secondary me-auto"
+                        data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-warning" id="confirm-reset-pw-btn">
+                    <span id="confirm-reset-pw-label">Yes, Reset</span>
+                    <span id="confirm-reset-pw-spinner"
+                          class="spinner-border spinner-border-sm ms-2"
+                          style="display:none;" role="status" aria-hidden="true"></span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% include "mainDash/includes/confirm_delete_modal.html" %}
+
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+
+        // --- Reset Password Modal Submit ---
+        document.getElementById('confirm-reset-pw-btn').addEventListener('click', function () {
+            var btn     = this;
+            var label   = document.getElementById('confirm-reset-pw-label');
+            var spinner = document.getElementById('confirm-reset-pw-spinner');
+
+            btn.disabled = true;
+            label.textContent = 'Resetting...';
+            spinner.style.display = 'inline-block';
+
+            var form     = document.getElementById('reset-pw-form');
+            var formData = new FormData(form);
+
+            fetch(form.getAttribute('hx-post'), {
+                method: 'POST',
+                body: formData,
+                headers: { 'HX-Request': 'true' }
+            })
+            .then(function (res) { return res.text(); })
+            .then(function (html) {
+                var parser = new DOMParser();
+                var doc    = parser.parseFromString(html, 'text/html');
+
+                doc.querySelectorAll('[hx-swap-oob]').forEach(function (oobEl) {
+                    var target = document.getElementById(oobEl.id);
+                    if (target) target.outerHTML = oobEl.outerHTML;
+                });
+
+                var toastEl = doc.querySelector('.toast');
+                if (toastEl) {
+                    var redirectUrl = toastEl.getAttribute('data-redirect-url');
+                    var dismissBtn  = document.querySelector('#confirm-reset-pw-modal [data-bs-dismiss="modal"]');
+                    if (dismissBtn) dismissBtn.click();
+                    document.getElementById('toast-container').innerHTML = toastEl.outerHTML;
+                    var liveToast = document.querySelector('#toast-container .toast');
+                    tabler.Toast.getOrCreateInstance(liveToast).show();
+                    if (redirectUrl) {
+                        setTimeout(function () { window.location.href = redirectUrl; }, 1500);
+                    }
+                }
+            })
+            .catch(function (err) { console.error('Submit error:', err); })
+            .finally(function () {
+                btn.disabled = false;
+                label.textContent = 'Yes, Reset';
+                spinner.style.display = 'none';
+            });
+        });
+
+        // --- Delete User ---
+        var deleteBtn = document.querySelector('.js-delete-user-detail');
+            if (deleteBtn) {
+                deleteBtn.addEventListener('click', function () {
+                    var deleteUrl = deleteBtn.getAttribute('data-delete-url');
+                    var userName  = deleteBtn.getAttribute('data-user-name');
+                    confirmDelete({
+                        url:       deleteUrl,
+                        title:     'Delete ' + userName + '?',
+                        message:   'This user will be deleted and can not be restored.',
+                        csrfToken: '{{ csrf_token }}',
+                        onSuccess: function (data) {
+                            setTimeout(function () {
+                                window.location.href = '/dashboard/users/';
+                            }, 1500);
+                        },
+                        onError: function (data) {
+                            alert(data.error || 'Delete failed.');
+                        },
+                    });
+                });
+            }
+
+        // --- Clear field errors on input ---
+        document.querySelectorAll('#reset-pw-form input').forEach(function (el) {
+            el.addEventListener('input', function () {
+                var errDiv = document.getElementById('error-' + el.name);
+                if (errDiv) errDiv.innerHTML = '';
+            });
+        });
+
+    });
+</script>
+
+
+{% endblock %}

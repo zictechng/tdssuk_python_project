@@ -1,0 +1,184 @@
+
+{% extends "mainDash/layouts/baseDash.html" %}
+{% load static %}
+
+{% block title %}Activity Logs{% endblock %}
+
+{% block content %}
+
+<div class="page-header d-print-none">
+  <div class="container-xl">
+    <div class="row g-2 align-items-center">
+      <div class="col">
+        <div class="page-pretitle">System Administration</div>
+        <h2 class="page-title">Activity Logs</h2>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="page-body">
+  <div class="container-xl">
+
+    <!-- Filters -->
+    <div class="card mb-3">
+      <div class="card-body py-3">
+        <div class="row g-2 align-items-center">
+          <div class="col-auto text-secondary">Filters:</div>
+          <div class="col ms-auto d-flex flex-wrap gap-2 justify-content-end">
+
+            <div class="position-relative" style="max-width:240px;">
+              <input type="text" id="activity-search" name="q"
+                     class="form-control pe-4"
+                     placeholder="User, model, record..."
+                     value="{{ q }}"
+                     hx-get="{% url 'activity_logs' %}"
+                     hx-trigger="keyup changed delay:400ms, search"
+                     hx-target="#activity-container"
+                     hx-swap="innerHTML"
+                     hx-include="#activity-action-filter, #activity-user-filter, #activity-date-from, #activity-date-to"
+                     hx-push-url="true" />
+              <button type="button" id="activity-search-clear"
+                      class="p-0 text-secondary"
+                      style="display:{% if q %}block{% else %}none{% endif %};
+                             position:absolute; right:8px; top:50%;
+                             transform:translateY(-50%);
+                             background:none; border:none; cursor:pointer;">
+                <i class="bi bi-x-lg" style="font-size:.75rem;"></i>
+              </button>
+            </div>
+
+            <select id="activity-action-filter" name="action"
+                    class="form-select" style="max-width:150px;"
+                    hx-get="{% url 'activity_logs' %}"
+                    hx-trigger="change"
+                    hx-target="#activity-container"
+                    hx-swap="innerHTML"
+                    hx-include="#activity-search, #activity-user-filter, #activity-date-from, #activity-date-to"
+                    hx-push-url="true">
+              <option value="">All Actions</option>
+              {% for a in action_choices %}
+              <option value="{{ a }}" {% if action == a %}selected{% endif %}>{{ a|title }}</option>
+              {% endfor %}
+            </select>
+
+            <select id="activity-user-filter" name="user_id"
+                    class="form-select" style="max-width:180px;"
+                    hx-get="{% url 'activity_logs' %}"
+                    hx-trigger="change"
+                    hx-target="#activity-container"
+                    hx-swap="innerHTML"
+                    hx-include="#activity-search, #activity-action-filter, #activity-date-from, #activity-date-to"
+                    hx-push-url="true">
+              <option value="">All Users</option>
+              {% for u in users %}
+              <option value="{{ u.id }}"
+                {% if user_id == u.id|stringformat:"s" %}selected{% endif %}>
+                {{ u.get_full_name|default:u.username }}
+              </option>
+              {% endfor %}
+            </select>
+
+            <!-- Date From -->
+            <!-- Date From -->
+            <div class="position-relative" style="max-width:150px;">
+            <input type="date"
+                    id="activity-date-from"
+                    name="date_from"
+                    class="form-control"
+                    value="{{ date_from }}"
+                    hx-get="{% url 'activity_logs' %}"
+                    hx-trigger="change"
+                    hx-target="#activity-container"
+                    hx-swap="innerHTML"
+                    hx-include="#activity-search, #activity-action-filter, #activity-user-filter, #activity-date-to"
+                    hx-push-url="true" />
+            <button type="button"
+                    id="clear-date-from"
+                    class="p-0 text-secondary"
+                    style="display:{% if date_from %}block{% else %}none{% endif %};
+                            position:absolute; right:34px; top:50%;
+                            transform:translateY(-50%);
+                            background:none; border:none; cursor:pointer; z-index:10;">
+                <i class="bi bi-x-lg" style="font-size:.75rem;"></i>
+            </button>
+            </div>
+
+            <!-- Date To -->
+            <div class="position-relative" style="max-width:150px;">
+            <input type="date"
+                    id="activity-date-to"
+                    name="date_to"
+                    class="form-control"
+                    value="{{ date_to }}"
+                    hx-get="{% url 'activity_logs' %}"
+                    hx-trigger="change"
+                    hx-target="#activity-container"
+                    hx-swap="innerHTML"
+                    hx-include="#activity-search, #activity-action-filter, #activity-user-filter, #activity-date-from"
+                    hx-push-url="true" />
+            <button type="button"
+                    id="clear-date-to"
+                    class="p-0 text-secondary"
+                    style="display:{% if date_to %}block{% else %}none{% endif %};
+                            position:absolute; right:34px; top:50%;
+                            transform:translateY(-50%);
+                            background:none; border:none; cursor:pointer; z-index:10;">
+                <i class="bi bi-x-lg" style="font-size:.75rem;"></i>
+            </button>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Table -->
+    <div id="activity-container">
+      {% include "mainDash/components/activity_logs_table.html" %}
+    </div>
+
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+
+  var input = document.getElementById('activity-search');
+  var clear = document.getElementById('activity-search-clear');
+  input.addEventListener('input', function () {
+    clear.style.display = input.value ? 'block' : 'none';
+  });
+  clear.addEventListener('click', function () {
+    input.value = '';
+    clear.style.display = 'none';
+    htmx.trigger(input, 'search');
+  });
+
+});
+
+var dateFrom  = document.getElementById('activity-date-from');
+var dateTo    = document.getElementById('activity-date-to');
+var clearFrom = document.getElementById('clear-date-from');
+var clearTo   = document.getElementById('clear-date-to');
+
+clearFrom.addEventListener('click', function () {
+    dateFrom.value = '';
+    this.style.display = 'none';
+    htmx.trigger(dateFrom, 'change');
+});
+clearTo.addEventListener('click', function () {
+    dateTo.value = '';
+    this.style.display = 'none';
+    htmx.trigger(dateTo, 'change');
+});
+
+dateFrom.addEventListener('change', function () {
+    clearFrom.style.display = this.value ? 'block' : 'none';
+});
+dateTo.addEventListener('change', function () {
+    clearTo.style.display = this.value ? 'block' : 'none';
+});
+</script>
+
+{% endblock %}

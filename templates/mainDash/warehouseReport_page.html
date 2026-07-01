@@ -1,0 +1,308 @@
+{% extends "mainDash/layouts/baseDash.html" %}
+{% load static %}
+
+{% block title %}Warehouse Reports{% endblock %}
+
+{% block content %}
+
+<div class="page-header d-print-none" aria-label="Page header">
+    <div class="container-xl">
+        <div class="row g-2 align-items-center">
+            <div class="col">
+                <h2 class="page-title">Warehouse Reports</h2>
+                <div class="page-pretitle">Inventory overview and movement analytics</div>
+            </div>
+            <div class="col-auto ms-auto d-print-none">
+                <div class="btn-list">
+                    {# Period filter — drives the summary fragment via HTMX #}
+                    <select id="period-select" class="form-select form-select-sm" style="width:auto;"
+                            hx-get="{% url 'warehouse_reports_summary' %}"
+                            hx-trigger="change"
+                            hx-target="#summary-fragment"
+                            hx-swap="innerHTML"
+                            name="period">
+                        <option value="today">Today</option>
+                        <option value="7">Last 7 days</option>
+                        <option value="30" selected>Last 30 days</option>
+                        <option value="90">Last 90 days</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="page-body">
+    <div class="container-xl">
+
+        {# ── Row 1: KPI stat cards ── #}
+        <div class="row row-deck row-cards mb-4">
+
+            <div class="col-sm-6 col-lg-3">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="subheader">Active Warehouses</div>
+                        </div>
+                        <div class="h1 mb-0">{{ total_warehouses }}</div>
+                        <div class="text-muted mt-1 small">Warehouses currently active</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-sm-6 col-lg-3">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="subheader">Total Items</div>
+                        </div>
+                        <div class="h1 mb-0">{{ total_items }}</div>
+                        <div class="text-muted mt-1 small">Across all warehouses</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-sm-6 col-lg-3">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="subheader">In Stock</div>
+                            <span class="badge bg-green-lt ms-auto">{{ in_stock_count }}</span>
+                        </div>
+                        <div class="h1 mb-0 text-green">{{ in_stock_count }}</div>
+                        <div class="text-muted mt-1 small">Items currently in stock</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-sm-6 col-lg-3">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="subheader">Total Weight (In Stock)</div>
+                        </div>
+                        <div class="h1 mb-0">{{ total_weight|floatformat:1 }} <small class="fs-4 text-muted">kg</small></div>
+                        <div class="text-muted mt-1 small">Weight of in-stock items</div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        {# ── Row 2: Status breakdown + Period summary ── #}
+        <div class="row row-deck row-cards mb-4">
+
+            {# Status breakdown #}
+            <div class="col-md-6 col-lg-4">
+                <div class="card h-100">
+                    <div class="card-header">
+                        <h3 class="card-title">Item Status Breakdown</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between mb-1">
+                                <span class="text-secondary">In Stock</span>
+                                <span class="fw-medium">{{ in_stock_count }}</span>
+                            </div>
+                            {% if total_items %}
+                            <div class="progress progress-sm">
+                                <div class="progress-bar bg-green"
+                                     style="width: {% widthratio in_stock_count total_items 100 %}%"
+                                     role="progressbar">
+                                </div>
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between mb-1">
+                                <span class="text-secondary">Dispatched</span>
+                                <span class="fw-medium">{{ dispatched_count }}</span>
+                            </div>
+                            {% if total_items %}
+                            <div class="progress progress-sm">
+                                <div class="progress-bar bg-blue"
+                                     style="width: {% widthratio dispatched_count total_items 100 %}%"
+                                     role="progressbar">
+                                </div>
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-0">
+                            <div class="d-flex justify-content-between mb-1">
+                                <span class="text-secondary">On Hold</span>
+                                <span class="fw-medium">{{ on_hold_count }}</span>
+                            </div>
+                            {% if total_items %}
+                            <div class="progress progress-sm">
+                                <div class="progress-bar bg-yellow"
+                                     style="width: {% widthratio on_hold_count total_items 100 %}%"
+                                     role="progressbar">
+                                </div>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                        <div class="row text-center">
+                            <div class="col border-end">
+                                <div class="fw-bold text-green">{{ in_stock_count }}</div>
+                                <div class="text-muted small">In Stock</div>
+                            </div>
+                            <div class="col border-end">
+                                <div class="fw-bold text-blue">{{ dispatched_count }}</div>
+                                <div class="text-muted small">Dispatched</div>
+                            </div>
+                            <div class="col">
+                                <div class="fw-bold text-yellow">{{ on_hold_count }}</div>
+                                <div class="text-muted small">On Hold</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {# Period-based summary (HTMX fragment) #}
+            <div class="col-md-6 col-lg-4">
+                <div class="card h-100">
+                    <div class="card-header">
+                        <h3 class="card-title">Movement Summary</h3>
+                        <div class="card-options">
+                            <small class="text-muted" id="period-label">Last 30 days</small>
+                        </div>
+                    </div>
+                    <div class="card-body" id="summary-fragment">
+                        {% include "mainDash/includes/warehouseSummary_fragment.html" %}
+                    </div>
+                </div>
+            </div>
+
+            {# Top destinations #}
+            <div class="col-md-12 col-lg-4">
+                <div class="card h-100">
+                    <div class="card-header">
+                        <h3 class="card-title">Top Destinations</h3>
+                        <div class="card-options">
+                            <small class="text-muted">In-stock items</small>
+                        </div>
+                    </div>
+                    {% if destinations %}
+                    <div class="list-group list-group-flush">
+                        {% for dest in destinations %}
+                        <div class="list-group-item">
+                            <div class="row align-items-center">
+                                <div class="col-auto">
+                                    <span class="avatar avatar-sm bg-blue-lt rounded">
+                                        <i class="bi bi-geo-alt" style="font-size:0.75rem;"></i>
+                                    </span>
+                                </div>
+                                <div class="col">
+                                    <div class="fw-medium">{{ dest.destination_country }}</div>
+                                </div>
+                                <div class="col-auto">
+                                    <span class="badge bg-blue-lt">{{ dest.count }} item{{ dest.count|pluralize }}</span>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="card-body text-center text-secondary py-4">
+                        <i class="bi bi-geo fs-2 d-block mb-2 opacity-50"></i>
+                        No destination data yet.
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+        </div>
+
+        {# ── Row 3: Per-warehouse breakdown ── #}
+        <div class="row row-deck row-cards">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Warehouse Breakdown</h3>
+                    </div>
+                    {% if warehouses %}
+                    <div class="table-responsive">
+                        <table class="table card-table table-vcenter">
+                            <thead>
+                                <tr>
+                                    <th>Warehouse</th>
+                                    <th>Location</th>
+                                    <th>Capacity</th>
+                                    <th>Items Stored</th>
+                                    <th>Utilisation</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for wh in warehouses %}
+                                <tr>
+                                    <td>
+                                        <div class="fw-medium">{{ wh.name }}</div>
+                                    </td>
+                                    <td class="text-secondary">{{ wh.city }}, {{ wh.country }}</td>
+                                    <td class="text-secondary">{{ wh.capacity }} units</td>
+                                    <td>{{ wh.item_count }}</td>
+                                    <td style="min-width:150px;">
+                                        {% if wh.capacity %}
+                                        {% widthratio wh.item_count wh.capacity 100 as util_pct %}
+                                        <div class="d-flex align-items-center gap-2">
+                                            <div class="progress progress-sm flex-grow-1">
+                                                <div class="progress-bar
+                                                    {% if util_pct|add:0 >= 90 %}bg-red
+                                                    {% elif util_pct|add:0 >= 70 %}bg-yellow
+                                                    {% else %}bg-green{% endif %}"
+                                                     style="width: {{ util_pct }}%"
+                                                     role="progressbar">
+                                                </div>
+                                            </div>
+                                            <span class="text-secondary small">{{ util_pct }}%</span>
+                                        </div>
+                                        {% else %}
+                                        <span class="text-muted small">—</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if wh.is_active %}
+                                        <span class="badge bg-green-lt">Active</span>
+                                        {% else %}
+                                        <span class="badge bg-red-lt">Inactive</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="card-body text-center text-secondary py-4">
+                        <i class="bi bi-building fs-2 d-block mb-2 opacity-50"></i>
+                        No warehouses found.
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+// Keep the period label in sync with the dropdown
+document.getElementById('period-select').addEventListener('change', function () {
+    var labels = {
+        'today': 'Today',
+        '7': 'Last 7 days',
+        '30': 'Last 30 days',
+        '90': 'Last 90 days',
+    };
+    var labelEl = document.getElementById('period-label');
+    if (labelEl) labelEl.textContent = labels[this.value] || '';
+});
+</script>
+
+{% endblock %}

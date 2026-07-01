@@ -1,0 +1,147 @@
+
+{% load humanize %}
+
+<div class="col-12">
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">Delivery Notes</h3>
+            <div class="card-options">
+                <small class="text-muted">
+                    {{ notes.paginator.count }} note{{ notes.paginator.count|pluralize }}
+                </small>
+            </div>
+        </div>
+
+        {% if notes.paginator.count > 0 %}
+        <div class="table-responsive">
+            <table class="table card-table table-vcenter text-nowrap">
+                <thead>
+                    <tr>
+                        <th>Title</th>
+                        <th>Shipment</th>
+                        <th>Order</th>
+                        <th>Status</th>
+                        <th>Uploaded By</th>
+                        <th>Date</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for note in notes %}
+                    <tr id="note-row-{{ note.pk }}">
+                        <td class="fw-medium">
+                            <i class="bi bi-file-earmark-text me-1 text-blue"></i>
+                            {{ note.title }}
+                        </td>
+                        <td>
+                            {% if note.shipment %}
+                                <a href="{% url 'shipment_detail' note.shipment.uuid %}" class="text-reset">
+                                    <i class="bi bi-box-seam me-1 text-blue"></i>
+                                    {{ note.shipment.tracking_number }}
+                                </a>
+                            {% else %}
+                                <span class="text-muted">—</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if note.order %}
+                                <a href="{% url 'viewOrderDetail' note.order.uuid %}" class="text-reset">
+                                    <i class="bi bi-bag me-1 text-green"></i>
+                                    {{ note.order.order_number }}
+                                </a>
+                            {% else %}
+                                <span class="text-muted">—</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <span class="badge bg-{% if note.status == 'approved' %}green{% elif note.status == 'rejected' %}red{% else %}yellow{% endif %}-lt">
+                                {{ note.get_status_display }}
+                            </span>
+                        </td>
+                        <td class="text-secondary">
+                            {{ note.uploaded_by.get_full_name|default:note.uploaded_by.username }}
+                        </td>
+                        <td class="text-secondary">{{ note.created_at|date:"d/m/Y H:i" }}</td>
+                        <td class="text-end">
+                            <a href="{% url 'uploaded_document_detail' note.uuid %}"
+                               class="btn btn-sm btn-ghost-secondary">View</a>
+                            <a href="{{ note.file.url }}" target="_blank"
+                               class="btn btn-sm btn-ghost-secondary">Download</a>
+                            <button type="button"
+                                    class="btn btn-sm btn-ghost-danger js-delete-note"
+                                    data-note-id="{{ note.pk }}">
+                                Delete
+                            </button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="card-footer d-flex align-items-center">
+            <p class="m-0 text-secondary">
+                Showing <strong>{{ notes.start_index }}–{{ notes.end_index }}</strong>
+                of <strong>{{ notes.paginator.count }}</strong>
+            </p>
+            <ul class="pagination m-0 ms-auto">
+                <li class="page-item {% if not notes.has_previous %}disabled{% endif %}">
+                    <a class="page-link"
+                       hx-get="{% url 'delivery_note_list' %}?page={% if notes.has_previous %}{{ notes.previous_page_number }}{% else %}1{% endif %}&search={{ search }}&status={{ status }}"
+                       hx-target="#notes-table-container"
+                       hx-swap="innerHTML"
+                       hx-push-url="true">←</a>
+                </li>
+                {% for num in notes.paginator.page_range %}
+                <li class="page-item {% if notes.number == num %}active{% endif %}">
+                    <a class="page-link"
+                       hx-get="{% url 'delivery_note_list' %}?page={{ num }}&search={{ search }}&status={{ status }}"
+                       hx-target="#notes-table-container"
+                       hx-swap="innerHTML"
+                       hx-push-url="true">{{ num }}</a>
+                </li>
+                {% endfor %}
+                <li class="page-item {% if not notes.has_next %}disabled{% endif %}">
+                    <a class="page-link"
+                       hx-get="{% url 'delivery_note_list' %}?page={% if notes.has_next %}{{ notes.next_page_number }}{% else %}{{ notes.paginator.num_pages }}{% endif %}&search={{ search }}&status={{ status }}"
+                       hx-target="#notes-table-container"
+                       hx-swap="innerHTML"
+                       hx-push-url="true">→</a>
+                </li>
+            </ul>
+        </div>
+
+        {% else %}
+        <div class="text-center py-5 text-secondary">
+            <i class="bi bi-file-earmark-text fs-2 d-block mb-2 opacity-50"></i>
+            <h4 class="mb-1">No delivery notes found</h4>
+            <small>Try adjusting your search or upload a new delivery note.</small>
+        </div>
+        {% endif %}
+
+    </div>
+</div>
+
+
+{% include "mainDash/includes/confirm_delete_modal.html" %}
+<script>
+document.querySelectorAll('.js-delete-note').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+        var noteId = btn.getAttribute('data-note-id');
+        var deleteUrl = "{% url 'uploaded_document_delete' '00000000-0000-0000-0000-000000000000' %}".replace('00000000-0000-0000-0000-000000000000', noteId);
+        confirmDelete({
+            url: deleteUrl,
+            title: 'Delete this delivery note?',
+            message: 'This will permanently remove the delivery note and its file.',
+            csrfToken: '{{ csrf_token }}',
+            onSuccess: function () {
+                var row = document.getElementById('note-row-' + noteId);
+                if (row) row.remove();
+            },
+            onError: function (data) {
+                alert(data.error || 'Delete failed.');
+            },
+        });
+    });
+});
+</script>

@@ -1,0 +1,96 @@
+
+<script>
+window.addEventListener('load', function () {
+
+    var orderSelect = document.getElementById('id_order');
+
+    function fetchOrderSummary(orderUuid) {
+        var target = document.getElementById('order-summary-target');
+        if (!orderUuid) { target.innerHTML = ''; return; }
+
+        fetch('/dashboard/shipments/order-summary/' + orderUuid + '/')
+            .then(function (res) { return res.text(); })
+            .then(function (html) { target.innerHTML = html; })
+            .catch(function (err) { console.error('Order summary fetch error:', err); });
+    }
+
+    // TomSelect needs the 'change' event bound through its own API,
+    // since it replaces the native <select> with its own UI.
+    function bindOrderSelectChange() {
+        if (orderSelect.tomselect) {
+            orderSelect.tomselect.on('change', function (value) {
+                var opt = orderSelect.tomselect.options[value];
+                fetchOrderSummary(opt ? opt.$el.attr ? opt.$el.attr('data-uuid') : null : null);
+            });
+        } else {
+            orderSelect.addEventListener('change', function () {
+                var opt = orderSelect.options[orderSelect.selectedIndex];
+                fetchOrderSummary(opt.getAttribute('data-uuid'));
+            });
+        }
+    }
+
+    // Re-run after TomSelect initializes (it's initialized globally elsewhere
+    // in your base template via the data-search="on" convention)
+    setTimeout(bindOrderSelectChange, 300);
+
+// --- Reinitialize Litepicker datepickers ---
+    function reinitDatepickers() {
+    var pickers = document.querySelectorAll('.datepicker');
+    
+    pickers.forEach(function (el) {
+        if (el.litepicker) {
+            el.litepicker.destroy();
+            el.litepicker = null;
+        }
+
+        var minDate = el.dataset.minDate === 'today' ? new Date()
+                    : el.dataset.minDate ? new Date(el.dataset.minDate)
+                    : null;
+
+        var picker = new Litepicker({
+            element: el,
+            minDate: minDate,
+            format: 'YYYY-MM-DD',
+            buttonText: {
+                previousMonth: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-1"><path d="M15 6l-6 6l6 6" /></svg>`,
+                nextMonth: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-1"><path d="M9 6l6 6l-6 6" /></svg>`,
+            },
+        });
+
+        el.litepicker = picker;
+        });
+    }
+
+    // --- Submit handler (same OOB/toast pattern as Order form) ---
+    document.getElementById('confirm-submit-shipment-btn').addEventListener('click', function () {
+        var form = document.getElementById('shipment-form');
+        var formData = new FormData(form);
+
+        fetch(form.getAttribute('hx-post'), {
+            method: 'POST', body: formData, headers: { 'HX-Request': 'true' }
+        })
+        .then(function (res) { return res.text(); })
+        .then(function (html) {
+            var parser = new DOMParser();
+            var doc = parser.parseFromString(html, 'text/html');
+
+            doc.querySelectorAll('[hx-swap-oob]').forEach(function (oobEl) {
+                var t = document.getElementById(oobEl.id);
+                if (t) t.outerHTML = oobEl.outerHTML;
+            });
+
+            var toast = doc.querySelector('.toast');
+            if (toast) {
+                document.getElementById('toast-container').innerHTML = toast.outerHTML;
+                var toastEl = document.querySelector('#toast-container .toast');
+                var redirectUrl = toastEl.getAttribute('data-redirect-url');
+                tabler.Toast.getOrCreateInstance(toastEl).show();
+                if (redirectUrl) setTimeout(function () { window.location.href = redirectUrl; }, 1500);
+            }
+        })
+        .catch(function (err) { console.error('Submit error:', err); });
+    });
+
+});
+</script>

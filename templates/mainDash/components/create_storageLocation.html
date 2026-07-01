@@ -1,0 +1,230 @@
+{% extends "mainDash/layouts/baseDash.html" %}
+{% load static %}
+
+{% block title %}Add Storage Location{% endblock %}
+
+{% block content %}
+
+<div class="page-header d-print-none" aria-label="Page header">
+    <div class="container-xl">
+        <div class="row g-2 align-items-center">
+            <div class="col">
+                <h2 class="page-title">Add Storage Location</h2>
+                <div class="page-pretitle">Define a zone or shelf within a warehouse</div>
+            </div>
+            <div class="col-auto ms-auto d-print-none">
+                <a href="{% url 'storage_location_list' %}"
+                   class="btn btn-secondary btn-sm d-none d-sm-inline-block">
+                    <i class="bi bi-arrow-left me-1"></i> Back
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="page-body">
+    <div class="container-xl">
+        <div class="row row-deck row-cards">
+            <div class="col-lg-7 col-xl-6 mt-3">
+
+                <form class="card" id="location-form"
+                      hx-post="{% url 'storage_location_create' %}"
+                      hx-target="#toast-container"
+                      hx-swap="innerHTML">
+                    {% csrf_token %}
+
+                    <div class="card-header">
+                        <h3 class="card-title">Location Details</h3>
+                    </div>
+
+                    <div class="card-body">
+                        <div class="row row-cards">
+
+                            {# Warehouse #}
+                            <div class="col-12">
+                                <div class="mb-3">
+                                    <label class="form-label required">Warehouse</label>
+                                    <select name="warehouse" class="form-select">
+                                        <option value="">Select warehouse</option>
+                                        {% for wh in form.fields.warehouse.queryset %}
+                                        <option value="{{ wh.pk }}"
+                                            {% if form.initial.warehouse == wh.pk or form.fields.warehouse.initial == wh.pk %}selected{% endif %}>
+                                            {{ wh.name }} — {{ wh.city }}
+                                        </option>
+                                        {% endfor %}
+                                    </select>
+                                    <div id="error-warehouse"></div>
+                                </div>
+                            </div>
+
+                            {# Zone + Shelf #}
+                            <div class="col-md-5">
+                                <div class="mb-3">
+                                    <label class="form-label required">Zone</label>
+                                    <input type="text" name="zone" class="form-control"
+                                           placeholder="e.g. Zone A"
+                                           value="{{ form.zone.value|default:'' }}">
+                                    <div id="error-zone"></div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label class="form-label">Shelf</label>
+                                    <input type="text" name="shelf" class="form-control"
+                                           placeholder="e.g. Shelf 3"
+                                           value="{{ form.shelf.value|default:'' }}">
+                                    <div id="error-shelf"></div>
+                                    <div class="form-hint">Optional — leave blank for zone-level only.</div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="mb-3">
+                                    <label class="form-label">Occupied?</label>
+                                    <div class="mt-2">
+                                        <label class="form-check form-switch">
+                                            <input class="form-check-input" type="checkbox"
+                                                   name="is_occupied"
+                                                   {% if form.is_occupied.value %}checked{% endif %}>
+                                            <span class="form-check-label">Mark as occupied</span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {# Description #}
+                            <div class="col-12">
+                                <div class="mb-0">
+                                    <label class="form-label">Description</label>
+                                    <textarea name="description" rows="2" class="form-control"
+                                        placeholder="e.g. Cold storage, oversized items..."></textarea>
+                                    <div id="error-description"></div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <div class="card-footer text-end">
+                        <a href="{% url 'storage_location_list' %}"
+                           class="btn btn-secondary btn-sm me-2">Cancel</a>
+                        <button type="button"
+                                class="btn btn-primary btn-sm"
+                                data-bs-toggle="modal"
+                                data-bs-target="#confirm-location-modal">
+                            Save Location
+                        </button>
+                    </div>
+                </form>
+
+            </div>
+
+            {# --- Tips card --- #}
+            <div class="col-lg-5 col-xl-6 mt-3">
+                <div class="card bg-blue-lt border-0">
+                    <div class="card-body">
+                        <h4 class="card-title text-blue">
+                            <i class="bi bi-info-circle me-2"></i>Location naming tips
+                        </h4>
+                        <ul class="text-secondary mb-0 ps-3">
+                            <li class="mb-1">Use <strong>Zone A / B / C</strong> for broad sections of a warehouse floor.</li>
+                            <li class="mb-1">Add a <strong>Shelf</strong> (e.g. Shelf 1, Row 4) to pinpoint exact storage.</li>
+                            <li class="mb-1">A location that has no shelf assigned acts as a <em>zone-level</em> placeholder.</li>
+                            <li>Mark a location as <strong>Occupied</strong> to flag it as currently full or reserved.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+{# --- Confirm modal --- #}
+<div class="modal modal-blur fade" id="confirm-location-modal"
+     tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-sm modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-body">
+                <div class="modal-title">Save this location?</div>
+                <div class="text-muted mt-1">The storage location will be added to the selected warehouse.</div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-link link-secondary me-auto"
+                        data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="confirm-location-btn">
+                    <span id="confirm-location-label">Yes, Save</span>
+                    <span id="confirm-location-spinner"
+                          class="spinner-border spinner-border-sm ms-2"
+                          style="display:none;" role="status" aria-hidden="true"></span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.getElementById('confirm-location-btn').addEventListener('click', function () {
+    var btn = this;
+    var label = document.getElementById('confirm-location-label');
+    var spinner = document.getElementById('confirm-location-spinner');
+
+    btn.disabled = true;
+    label.textContent = 'Saving...';
+    spinner.style.display = 'inline-block';
+
+    var form = document.getElementById('location-form');
+    var formData = new FormData(form);
+
+    fetch(form.getAttribute('hx-post'), {
+        method: 'POST',
+        body: formData,
+        headers: { 'HX-Request': 'true' }
+    })
+    .then(function (res) { return res.text(); })
+    .then(function (html) {
+        var parser = new DOMParser();
+        var doc = parser.parseFromString(html, 'text/html');
+
+        doc.querySelectorAll('[hx-swap-oob]').forEach(function (oobEl) {
+            var target = document.getElementById(oobEl.id);
+            if (target) target.outerHTML = oobEl.outerHTML;
+        });
+
+        var toast = doc.querySelector('.toast');
+        if (toast) {
+            var dismissBtn = document.querySelector('#confirm-location-modal [data-bs-dismiss="modal"]');
+            if (dismissBtn) dismissBtn.click();
+
+            document.getElementById('toast-container').innerHTML = toast.outerHTML;
+            var toastEl = document.querySelector('#toast-container .toast');
+            var redirectUrl = toastEl.getAttribute('data-redirect-url');
+            tabler.Toast.getOrCreateInstance(toastEl).show();
+            if (redirectUrl) setTimeout(function () { window.location.href = redirectUrl; }, 1500);
+        } else {
+            btn.disabled = false;
+            label.textContent = 'Yes, Save';
+            spinner.style.display = 'none';
+        }
+    })
+    .catch(function (err) { console.error('Submit error:', err); })
+    .finally(function () {
+        btn.disabled = false;
+        label.textContent = 'Yes, Save';
+        spinner.style.display = 'none';
+    });
+});
+
+document.querySelectorAll('#location-form input, #location-form select, #location-form textarea')
+    .forEach(function (el) {
+        el.addEventListener('input', function () {
+            var errorDiv = document.getElementById('error-' + el.name);
+            if (errorDiv) errorDiv.innerHTML = '';
+        });
+        el.addEventListener('change', function () {
+            var errorDiv = document.getElementById('error-' + el.name);
+            if (errorDiv) errorDiv.innerHTML = '';
+        });
+    });
+</script>
+
+{% endblock %}

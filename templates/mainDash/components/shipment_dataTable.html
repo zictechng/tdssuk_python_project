@@ -1,0 +1,153 @@
+
+    
+    {% load static %}
+        <div class="col-12 mt-5" id="shipments-table-container">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Recent shipment details</h3>
+                </div>
+                <div class="card-body border-bottom py-3">
+                    <div class="d-flex">
+                        
+                        <div class="ms-auto text-secondary">
+                            Search:
+                            <div class="ms-1 d-inline-block">
+                                <div class="col-md-auto col-sm-12">
+                                    <form method="GET" class="d-flex gap-2">
+                                        <div class="ms-auto d-flex flex-wrap btn-list">
+
+                                            {% include "mainDash/includes/search_input.html" with search_query=search_query placeholder="ShipmentId, OrderId, Email, Phone, TrackId" target_id="shipments-table-container" %}
+
+                                            <div class="dropdown">
+                                                <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                                    {% if status_filter %}{{ status_filter|title }}{% else %}All Shipments{% endif %}
+                                                </button>
+                                                <ul class="dropdown-menu">
+                                                    <li><button type="button" class="dropdown-item" onclick="filterShipmentsByStatus('')">All Shipments</button></li>
+                                                    <li><button type="button" class="dropdown-item" onclick="filterShipmentsByStatus('pending')">Pending</button></li>
+                                                    <li><button type="button" class="dropdown-item" onclick="filterShipmentsByStatus('in_transit')">In Transit</button></li>
+                                                    <li><button type="button" class="dropdown-item" onclick="filterShipmentsByStatus('delivered')">Delivered</button></li>
+                                                    <li><button type="button" class="dropdown-item" onclick="filterShipmentsByStatus('cancelled')">Cancelled</button></li>
+                                                    <li><button type="button" class="dropdown-item" onclick="filterShipmentsByStatus('returned')">Returned</button></li>
+                                                </ul>
+                                            </div>
+                                            <input type="hidden" name="status" value="{{ status_filter|default:'' }}">
+
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {% if shipments_details_request.paginator.count > 0 %}
+                <div class="table-responsive">
+                    <table class="table table-selectable card-table table-vcenter text-nowrap datatable">
+                        <thead>
+                            <tr>
+                                <th class="w-1"><input class="form-check-input m-0 align-middle" type="checkbox" id="select-all" aria-label="Select all shipments" /></th>
+                                <th>Shipment No.</th>
+                                <th>Order No.</th>
+                                <th>Receiver</th>
+                                <th>Carrier</th>
+                                <th>From</th>
+                                <th>To</th>
+                                <th>Status</th>
+                                <th>Date</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for shipment in shipments_details_request %}
+                            <tr>
+                                <td><input class="form-check-input m-0 align-middle table-selectable-check" type="checkbox" value="{{ shipment.uuid }}" aria-label="Select shipment" /></td>
+                                <td><span class="text-secondary">{{ shipment.shipment_number }}</span></td>
+                                <td>{{ shipment.order.order_number }}</td>
+                                <td>{{ shipment.order.receiver_name }}</td>
+                                <td>{{ shipment.carrier_name|default:"—" }}</td>
+                                <td>{{ shipment.order.order_origin_country }}</td>
+                                <td>{{ shipment.order.order_destination_country }}</td>
+                                <td>
+                                    <span class="badge bg-{% if shipment.status == 'pending' %}yellow text-dark{% elif shipment.status == 'in_transit' %}cyan text-white{% elif shipment.status == 'delivered' %}green text-white{% elif shipment.status == 'cancelled' %}red text-white{% elif shipment.status == 'returned' %}orange text-white{% else %}secondary{% endif %} fw-bold">
+                                        {{ shipment.get_status_display }}
+                                    </span>
+                                </td>
+                                <td>{{ shipment.created_at|date:"d/m/Y" }}</td>
+                                <td class="text-end">
+                                    <a href="{% url 'viewShipmentDetail' shipment.uuid %}"
+                                        class="btn btn-sm btn-ghost-secondary">
+                                        View
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="card-footer">
+                    <div class="row g-2 justify-content-center justify-content-sm-between">
+                        <div class="col-auto d-flex align-items-center">
+                            <p class="m-0 text-secondary">
+                                Showing
+                                <strong>{{ shipments_details_request.start_index }} to {{ shipments_details_request.end_index }}</strong>
+                                of
+                                <strong>{{ shipments_details_request.paginator.count }}</strong>
+                                entries
+                            </p>
+                        </div>
+                        <div class="col-auto">
+                            <ul class="pagination m-0 ms-auto">
+                                <li class="page-item {% if not shipments_details_request.has_previous %}disabled{% endif %}">
+                                    <a class="page-link" href="?page={% if shipments_details_request.has_previous %}{{ shipments_details_request.previous_page_number }}{% endif %}">←</a>
+                                </li>
+                                {% for num in shipments_details_request.paginator.page_range %}
+                                <li class="page-item {% if shipments_details_request.number == num %}active{% endif %}">
+                                    <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                                </li>
+                                {% endfor %}
+                                <li class="page-item {% if not shipments_details_request.has_next %}disabled{% endif %}">
+                                    <a class="page-link" href="?page={% if shipments_details_request.has_next %}{{ shipments_details_request.next_page_number }}{% endif %}">→</a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                {% else %}
+                <div class="text-center py-5">
+                    <div class="text-secondary">
+                        <h4 class="mb-1">No shipment found</h4>
+                        <small>There is currently no data at the moment.</small>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+<script>
+function filterShipmentsByStatus(status) {
+    document.querySelector('[name=status]').value = status;
+    document.querySelector('[name=search]').value = '';
+    document.querySelector('.js-search-clear').style.display = 'none';
+    document.querySelector('[name=search]').closest('form').submit();
+    }
+    (function () {
+    function initSelectAll() {
+        var selectAll = document.getElementById('select-all');
+        if (!selectAll) return;
+        selectAll.addEventListener('change', function () {
+            document.querySelectorAll('.table-selectable-check').forEach(function (cb) {
+                cb.checked = selectAll.checked;
+            });
+        });
+    }
+        initSelectAll();
+        var container = document.getElementById('users-table-container');
+        if (container) {
+            container.addEventListener('htmx:afterSwap', initSelectAll);
+        }
+})();
+
+</script>

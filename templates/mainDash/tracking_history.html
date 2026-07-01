@@ -1,0 +1,126 @@
+
+{% extends "mainDash/layouts/baseDash.html" %}
+{% load static %}
+
+{% block title %}Tracking History{% endblock %}
+
+{% block content %}
+
+<div class="page-header d-print-none">
+  <div class="container-xl">
+    <div class="row g-2 align-items-center">
+      <div class="col">
+        <h2 class="page-title">Tracking History</h2>
+        <div class="page-pretitle">Full audit log of all shipment tracking events</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="page-body">
+  <div class="container-xl">
+
+    <!-- Filters -->
+    <div class="row mb-3">
+      <div class="col-12">
+        <div class="card">
+          <div class="card-body py-3">
+            <div class="row g-2 align-items-center">
+              <div class="col-auto text-secondary">Filters:</div>
+              <div class="col ms-auto d-flex flex-wrap gap-2 justify-content-end">
+
+                <div class="position-relative" style="max-width:260px;">
+                  <input type="text"
+                         id="history-search-input"
+                         name="q"
+                         class="form-control pe-4"
+                         placeholder="SHP-, TRK-, ORD-, location, user..."
+                         value="{{ q }}"
+                         hx-get="{% url 'tracking_history' %}"
+                         hx-trigger="keyup changed delay:400ms, search"
+                         hx-target="#history-table-container"
+                         hx-swap="innerHTML"
+                         hx-include="#history-status-filter"
+                         hx-push-url="true" />
+                  <button type="button"
+                          id="history-search-clear"
+                          class="p-0 text-secondary"
+                          style="display:{% if q %}block{% else %}none{% endif %};
+                                 position:absolute; right:8px; top:50%;
+                                 transform:translateY(-50%); background:none;
+                                 border:none; cursor:pointer;"
+                          aria-label="Clear search">
+                    <i class="bi bi-x-lg" style="font-size:0.75rem;"></i>
+                  </button>
+                </div>
+
+                <select id="history-status-filter"
+                        name="status"
+                        class="form-select"
+                        style="max-width:180px;"
+                        hx-get="{% url 'tracking_history' %}"
+                        hx-trigger="change"
+                        hx-target="#history-table-container"
+                        hx-swap="innerHTML"
+                        hx-include="#history-search-input"
+                        hx-push-url="true">
+                  <option value="">All Statuses</option>
+                  {% for val, label in status_choices %}
+                  <option value="{{ val }}" {% if status == val %}selected{% endif %}>{{ label }}</option>
+                  {% endfor %}
+                </select>
+
+                <input type="date"
+                       name="date_from"
+                       class="form-control"
+                       style="max-width:160px;"
+                       value="{{ date_from }}"
+                       hx-get="{% url 'tracking_history' %}"
+                       hx-trigger="change"
+                       hx-target="#history-table-container"
+                       hx-swap="innerHTML"
+                       hx-include="#history-search-input, #history-status-filter"
+                       hx-push-url="true" />
+
+                <input type="date"
+                       name="date_to"
+                       class="form-control"
+                       style="max-width:160px;"
+                       value="{{ date_to }}"
+                       hx-get="{% url 'tracking_history' %}"
+                       hx-trigger="change"
+                       hx-target="#history-table-container"
+                       hx-swap="innerHTML"
+                       hx-include="#history-search-input, #history-status-filter"
+                       hx-push-url="true" />
+
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Table -->
+    <div class="row row-deck row-cards" id="history-table-container">
+      {% include "mainDash/components/history_dataTable.html" %}
+    </div>
+
+  </div>
+</div>
+
+<script>
+(function () {
+  var input    = document.getElementById('history-search-input');
+  var clearBtn = document.getElementById('history-search-clear');
+  function toggleClear() { clearBtn.style.display = input.value ? 'block' : 'none'; }
+  input.addEventListener('input', toggleClear);
+  clearBtn.addEventListener('click', function () {
+    input.value = '';
+    toggleClear();
+    htmx.trigger(input, 'search');
+  });
+})();
+</script>
+
+{% endblock %}
