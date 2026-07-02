@@ -8,7 +8,6 @@ dashboard/forms/__pycache__
 
 # Django
 db.sqlite3
-media/
 staticfiles/
 
 # Virtual env
