@@ -1,8 +1,11 @@
 
-<script>
-    window.addEventListener('load', function () {
 
-    // --- TomSelect helpers ---
+<script>
+window.addEventListener('load', function () {
+
+    // ----------------------------------------------------------------
+    // TomSelect helpers
+    // ----------------------------------------------------------------
     function destroyTomSelects() {
         document.querySelectorAll('select[data-search="on"]').forEach(function (el) {
             if (el.tomselect) el.tomselect.destroy();
@@ -11,281 +14,291 @@
 
     function initTomSelects() {
         document.querySelectorAll('select[data-search="on"]').forEach(function (el) {
-            if (!el.tomselect) new TomSelect(el, { placeholder: "Select country" });
+            if (!el.tomselect) {
+                new TomSelect(el, {
+                    placeholder: el.querySelector('option[value=""]')?.textContent || 'Select...',
+                    onInitialize: function () {
+                        // Clear TomSelect error when user picks a value
+                        this.on('change', function () {
+                            var wrapper = el.tomselect ? el.tomselect.wrapper : null;
+                            if (wrapper) wrapper.classList.remove('is-invalid');
+                            el.classList.remove('is-invalid');
+                            var feedback = el.closest('.mb-3') ? el.closest('.mb-3').querySelector('.invalid-feedback') : null;
+                            if (feedback) feedback.remove();
+                        });
+                    }
+                });
+            }
         });
     }
 
     function syncTomSelectValues() {
         document.querySelectorAll('select[data-search="on"]').forEach(function (el) {
-            if (el.tomselect) el.value = el.tomselect.getValue();
-        });
-    }
-
-    // --- Mark TomSelect wrappers with is-invalid + clear on change ---
-    function markTomSelectErrors() {
-        document.querySelectorAll('select.is-invalid').forEach(function (el) {
             if (el.tomselect) {
-                // ✅ Add is-invalid to the visible TomSelect wrapper div
-                el.tomselect.wrapper.classList.add('is-invalid');
-
-                // ✅ Clear error when user picks a value
-                el.tomselect.on('change', function () {
-                    el.tomselect.wrapper.classList.remove('is-invalid');
-                    el.classList.remove('is-invalid');
-                    var feedback = el.closest('.mb-3').querySelector('.invalid-feedback');
-                    if (feedback) feedback.remove();
-                });
+                var value = el.tomselect.getValue();
+                if (Array.isArray(value)) {
+                    Array.from(el.options).forEach(function (opt) {
+                        opt.selected = value.includes(opt.value);
+                    });
+                } else {
+                    // Force the underlying select to reflect TomSelect value
+                    Array.from(el.options).forEach(function (opt) {
+                        opt.selected = opt.value === value;
+                    });
+                }
             }
         });
     }
 
-    // --- Clear errors on regular inputs/textareas ---
+    function markTomSelectErrors() {
+        document.querySelectorAll('select.is-invalid').forEach(function (el) {
+            if (el.tomselect) {
+                el.tomselect.wrapper.classList.add('is-invalid');
+            }
+        });
+    }
+
     function bindInputErrors() {
         document.querySelectorAll('input.is-invalid, textarea.is-invalid').forEach(function (el) {
             el.addEventListener('input', function () {
                 el.classList.remove('is-invalid');
-                var feedback = el.closest('.mb-3').querySelector('.invalid-feedback');
+                var feedback = el.closest('.mb-3') ? el.closest('.mb-3').querySelector('.invalid-feedback') : null;
                 if (feedback) feedback.remove();
             }, { once: true });
         });
     }
 
-    // --- Handle toast display and redirect ---
-    function handleToastAndRedirect(toastEl) {
-        if (!toastEl) return;
-        var redirectUrl = toastEl.getAttribute('data-redirect-url');
-        tabler.Toast.getOrCreateInstance(toastEl).show();
-        if (redirectUrl) {
-            setTimeout(function () {
-                window.location.href = redirectUrl;
-            }, 1500);
-        }
-    }
-
-    // --- Reinitialize Litepicker datepickers ---
+    // ----------------------------------------------------------------
+    // Litepicker datepickers
+    // ----------------------------------------------------------------
     function reinitDatepickers() {
-    var pickers = document.querySelectorAll('.datepicker');
-    
-    pickers.forEach(function (el) {
-        if (el.litepicker) {
-            el.litepicker.destroy();
-            el.litepicker = null;
-        }
-
-        var minDate = el.dataset.minDate === 'today' ? new Date()
-                    : el.dataset.minDate ? new Date(el.dataset.minDate)
-                    : null;
-
-        var picker = new Litepicker({
-            element: el,
-            minDate: minDate,
-            format: 'YYYY-MM-DD',
-            buttonText: {
-                previousMonth: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-1"><path d="M15 6l-6 6l6 6" /></svg>`,
-                nextMonth: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-1"><path d="M9 6l6 6l-6 6" /></svg>`,
-            },
-        });
-
-        el.litepicker = picker;
+        document.querySelectorAll('.datepicker').forEach(function (el) {
+            if (el.litepicker) {
+                el.litepicker.destroy();
+                el.litepicker = null;
+            }
+            var minDate = el.dataset.minDate === 'today' ? new Date()
+                        : el.dataset.minDate ? new Date(el.dataset.minDate)
+                        : null;
+            var picker = new Litepicker({
+                element: el,
+                minDate: minDate,
+                format: 'YYYY-MM-DD',
+                buttonText: {
+                    previousMonth: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-1"><path d="M15 6l-6 6l6 6" /></svg>`,
+                    nextMonth: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-1"><path d="M9 6l6 6l-6 6" /></svg>`,
+                },
+                onSelect: function () {
+                    var errorDiv = document.getElementById('error-' + el.name);
+                    if (errorDiv) errorDiv.innerHTML = '';
+                },
+            });
+            el.litepicker = picker;
         });
     }
 
-    // --- Main submit handler ---
-    document.getElementById('confirm-submit-btn').addEventListener('click', function () {
-        // 1. Sync TomSelect values to hidden selects
-        syncTomSelectValues();
-
-        var form = document.getElementById('order-form');
-        var formData = new FormData(form);
-
-        // 2. Destroy TomSelects before DOM changes
-        destroyTomSelects();
-
-        // 3. POST the form
-        fetch(form.getAttribute('hx-post'), {
-            method: 'POST',
-            body: formData,
-            headers: { 'HX-Request': 'true' }
-        })
-        .then(function (res) { return res.text(); })
-        .then(function (html) {
-            var parser = new DOMParser();
-            var doc = parser.parseFromString(html, 'text/html');
-
-            // 4. Apply OOB swaps (accordion panels with errors)
-            doc.querySelectorAll('[hx-swap-oob]').forEach(function (oobEl) {
-                var target = document.getElementById(oobEl.id);
-                if (target) target.outerHTML = oobEl.outerHTML;
-            });
-
-            // 5. Inject and show toast
-            var toast = doc.querySelector('.toast');
-            if (toast) {
-                document.getElementById('toast-container').innerHTML = toast.outerHTML;
-                var toastEl = document.querySelector('#toast-container .toast');
-                handleToastAndRedirect(toastEl);
-            }
-
-            // 6. Reinitialize TomSelect on updated DOM
-            initTomSelects();
-
-            // 6b. 
-            reinitDatepickers();
-
-            // 7. Push is-invalid onto TomSelect visible wrappers
-            markTomSelectErrors();
-
-            // 8. Bind clear-on-input for text fields
-            bindInputErrors();
-
-            // 9. Open accordion panels that have errors
-            setTimeout(function () {
-                document.querySelectorAll('.accordion-collapse').forEach(function (panel) {
-                    var hasError = panel.querySelector('.is-invalid, .invalid-feedback');
-                    if (hasError) {
-                        panel.classList.add('show');
-                        // Also update the button aria state
-                        var panelId = panel.getAttribute('id');
-                        var btn = document.querySelector('[data-bs-target="#' + panelId + '"]');
-                        if (btn) {
-                            btn.classList.remove('collapsed');
-                            btn.setAttribute('aria-expanded', 'true');
-                        }
-                    }
-                });
-            }, 100); 
-        })
-        .catch(function (err) { console.error('Submit error:', err); });
-    });
-
-
-
     // ----------------------------------------------------------------
-    // Promo Code
+    // Cost summary
     // ----------------------------------------------------------------
-    var promoInput    = document.getElementById('promo-code-input');
-    var applyBtn      = document.getElementById('apply-promo-btn');
-    var clearBtn      = document.getElementById('clear-promo-btn');
-    var promoFeedback = document.getElementById('promo-feedback');
-
-    // Reads the CORRECT field name from the form
     function getShippingCost() {
-        var val = document.querySelector('[name="order_ship_cost"]').value;
-        return parseFloat(val) || 0;
+        var field = document.querySelector('[name="order_ship_cost"]');
+        return field ? parseFloat(field.value) || 0 : 0;
+    }
+
+    function getDiscount() {
+        var field = document.querySelector('[name="discount_amount"]');
+        return field ? parseFloat(field.value) || 0 : 0;
     }
 
     function updateSummary(discount) {
         var shipping = getShippingCost();
         var total    = Math.max(0, shipping - discount);
 
-        document.getElementById('summary-shipping').textContent = '£' + shipping.toFixed(2);
-        document.getElementById('summary-discount').textContent = '- £' + discount.toFixed(2);
-        document.getElementById('summary-total').textContent    = '£' + total.toFixed(2);
+        var summaryShipping = document.getElementById('summary-shipping');
+        var summaryDiscount = document.getElementById('summary-discount');
+        var summaryTotal    = document.getElementById('summary-total');
+        var orderAmtField   = document.querySelector('[name="order_amt"]');
 
-        // Also keep the order_amt field in sync so it posts correctly
-        var orderAmtField = document.querySelector('[name="order_amt"]');
-        if (orderAmtField) {
-            orderAmtField.value = total.toFixed(2);
-        }
+        if (summaryShipping) summaryShipping.textContent = '£' + shipping.toFixed(2);
+        if (summaryDiscount) summaryDiscount.textContent = '- £' + discount.toFixed(2);
+        if (summaryTotal)    summaryTotal.textContent    = '£' + total.toFixed(2);
+        if (orderAmtField)   orderAmtField.value         = total.toFixed(2);
     }
 
-    applyBtn.addEventListener('click', function () {
-        var code = promoInput.value.trim();
-        if (!code) {
-            promoFeedback.innerHTML = (
-                '<span class="text-danger small fw-medium" style="color:#d63939 !important;">'
-                + '<i class="bi bi-x-circle me-1"></i>Please enter a promo code.</span>'
+    // Live-update total when shipping cost changes
+    var shippingCostField = document.querySelector('[name="order_ship_cost"]');
+    if (shippingCostField) {
+        shippingCostField.addEventListener('input', function () {
+            updateSummary(getDiscount());
+        });
+    }
+
+    // ----------------------------------------------------------------
+    // Promo code
+    // ----------------------------------------------------------------
+    var applyBtn      = document.getElementById('apply-promo-btn');
+    var clearPromoBtn = document.getElementById('clear-promo-btn');
+
+    if (applyBtn) {
+        applyBtn.addEventListener('click', function () {
+            var promoInput    = document.getElementById('promo-code-input');
+            var promoFeedback = document.getElementById('promo-feedback');
+            var code          = promoInput ? promoInput.value.trim() : '';
+
+            if (!code) {
+                if (promoFeedback) {
+                    promoFeedback.innerHTML =
+                        '<span class="text-danger small fw-medium">' +
+                        '<i class="bi bi-x-circle me-1"></i>Please enter a promo code.</span>';
+                }
+                return;
+            }
+
+            var formData = new FormData();
+            formData.append('code', code);
+            formData.append('shipping_cost', getShippingCost());
+            formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+
+            fetch('{% url "validate_promo_code" %}', {
+                method:  'POST',
+                body:    formData,
+                headers: { 'HX-Request': 'true' },
+            })
+            .then(function (res) { return res.text(); })
+            .then(function (html) {
+                if (promoFeedback) promoFeedback.innerHTML = html;
+                if (clearPromoBtn) clearPromoBtn.style.display = 'inline-block';
+                updateSummary(getDiscount());
+            })
+            .catch(function (err) { console.error('Promo error:', err); });
+        });
+    }
+
+    if (clearPromoBtn) {
+        clearPromoBtn.addEventListener('click', function () {
+            var promoInput    = document.getElementById('promo-code-input');
+            var promoFeedback = document.getElementById('promo-feedback');
+            if (promoInput)    promoInput.value    = '';
+            if (promoFeedback) promoFeedback.innerHTML = '';
+            clearPromoBtn.style.display = 'none';
+            updateSummary(0);
+        });
+    }
+
+    // ----------------------------------------------------------------
+    // Accordion error opener
+    // ----------------------------------------------------------------
+    function openAccordionsWithErrors() {
+    setTimeout(function () {
+        document.querySelectorAll('.accordion-collapse').forEach(function (panel) {
+            var hasError = panel.querySelector(
+                '.invalid-feedback, .is-invalid, [id^="error-"]:not(:empty)'
             );
-            return;
-        }
-
-        var formData = new FormData();
-        formData.append('code', code);
-        formData.append('shipping_cost', getShippingCost());
-        formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
-
-        fetch('{% url "validate_promo_code" %}', {
-            method: 'POST',
-            body:   formData,
-            headers: { 'HX-Request': 'true' }
-        })
-        .then(function (res) { return res.text(); })
-        .then(function (html) {
-            promoFeedback.innerHTML = html;
-            clearBtn.style.display  = 'inline-block';
-
-            var discountInput = promoFeedback.querySelector('[name="discount_amount"]');
-            var discount      = discountInput ? parseFloat(discountInput.value) || 0 : 0;
-            updateSummary(discount);
-        })
-        .catch(function (err) { console.error('Promo error:', err); });
-    });
-
-    clearBtn.addEventListener('click', function () {
-        promoInput.value        = '';
-        promoFeedback.innerHTML = '';
-        clearBtn.style.display  = 'none';
-        updateSummary(0);
-    });
-
-    // Live-update summary whenever shipping cost changes
-    document.querySelector('[name="order_ship_cost"]').addEventListener('input', function () {
-        var discountInput = promoFeedback.querySelector('[name="discount_amount"]');
-        var discount      = discountInput ? parseFloat(discountInput.value) || 0 : 0;
-        updateSummary(discount);
-    });
+            if (hasError) {
+                panel.classList.add('show');
+                var trigger = document.querySelector(
+                    '[data-bs-target="#' + panel.getAttribute('id') + '"]'
+                );
+                if (trigger) {
+                    trigger.classList.remove('collapsed');
+                    trigger.setAttribute('aria-expanded', 'true');
+                    }
+                }
+            });
+        }, 150);
+    }
 
     // ----------------------------------------------------------------
-    // Confirm submit
+    // Single submit handler
     // ----------------------------------------------------------------
-    document.getElementById('confirm-submit-btn').addEventListener('click', function () {
-        var btn     = this;
-        var form    = document.getElementById('order-form');
-        var formData = new FormData(form);
+    var confirmBtn = document.getElementById('confirm-submit-btn');
+    if (confirmBtn) {
+        confirmBtn.addEventListener('click', function () {
+            var btn = this;
 
-        btn.disabled = true;
+            // 1. Sync all TomSelect values into their underlying selects
+            syncTomSelectValues();
 
-        fetch(form.getAttribute('hx-post'), {
-            method:  'POST',
-            body:    formData,
-            headers: { 'HX-Request': 'true' }
-        })
-        .then(function (res) { return res.text(); })
-        .then(function (html) {
-            var doc = new DOMParser().parseFromString(html, 'text/html');
-            var toastEl     = doc.querySelector('.toast');
-            var redirectUrl = toastEl ? toastEl.getAttribute('data-redirect-url') : null;
+            var form     = document.getElementById('order-form');
+            var formData = new FormData(form);
 
-            document.getElementById('toast-container').innerHTML = html;
-            var toastNode = document.querySelector('#toast-container .toast');
-            if (toastNode) {
-                tabler.Toast.getOrCreateInstance(toastNode).show();
-            }
-            if (redirectUrl) {
-                setTimeout(function () { window.location.href = redirectUrl; }, 1500);
-            }
-        })
-        .catch(function (err) { console.error('Submit error:', err); })
-        .finally(function () { btn.disabled = false; });
-    });
+            // 2. Disable button to prevent double submit
+            btn.disabled = true;
+
+            // 3. Destroy TomSelects before DOM may change
+            destroyTomSelects();
+
+            fetch(form.getAttribute('hx-post'), {
+                method:  'POST',
+                body:    formData,
+                headers: { 'HX-Request': 'true' },
+            })
+            .then(function (res) { return res.text(); })
+            .then(function (html) {
+                var parser = new DOMParser();
+                var doc    = parser.parseFromString(html, 'text/html');
+                
+
+                // 4. Apply OOB swaps — field errors inside accordion panels
+                doc.querySelectorAll('[hx-swap-oob]').forEach(function (oobEl) {
+                    var target = document.getElementById(oobEl.id);
+                    if (target) target.outerHTML = oobEl.outerHTML;
+                });
+
+                // 5. Show toast notification
+                var toastEl = doc.querySelector('.toast');
+                if (toastEl) {
+                    var redirectUrl = toastEl.getAttribute('data-redirect-url');
+                    var redirectUrl = toastEl ? toastEl.getAttribute('data-redirect-url') : null;
+                    document.getElementById('toast-container').innerHTML = toastEl.outerHTML;
+                    var liveToast = document.querySelector('#toast-container .toast');
+                    if (liveToast) tabler.Toast.getOrCreateInstance(liveToast).show();
+                    if (redirectUrl) {
+                        setTimeout(function () { window.location.href = redirectUrl; }, 1500);
+                    }
+                }
+
+                // 6. Reinitialize TomSelects and datepickers after DOM update
+                initTomSelects();
+                // 7. Mark TomSelect wrappers that have errors
+                markTomSelectErrors();
+
+                // 8. Bind clear-on-input for text/textarea fields
+                bindInputErrors();
+
+                // 9. Open accordion panels that contain errors
+                openAccordionsWithErrors();
+
+                // 10. Restore summary in case shipping cost field was repainted
+                updateSummary(getDiscount());
+            })
+            .catch(function (err) { console.error('Submit error:', err); })
+            .finally(function () {
+                btn.disabled = false;
+            });
+        });
+    }
 
     // ----------------------------------------------------------------
     // Clear field errors on input/change
     // ----------------------------------------------------------------
     document.querySelectorAll('#order-form input, #order-form select, #order-form textarea')
         .forEach(function (el) {
-            var events = (el.tagName === 'SELECT') ? ['change'] : ['input', 'change'];
+            var events = el.tagName === 'SELECT' ? ['change'] : ['input', 'change'];
             events.forEach(function (evt) {
                 el.addEventListener(evt, function () {
                     var err = document.getElementById('error-' + el.name);
                     if (err) err.innerHTML = '';
-                    var allErr = document.getElementById('error-__all__');
-                    if (allErr) allErr.innerHTML = '';
                 });
             });
         });
 
+    // ----------------------------------------------------------------
+    // Initialize on page load
+    // ----------------------------------------------------------------
+    initTomSelects();
+    reinitDatepickers();
+    updateSummary(getDiscount());
+
 });
-
-
 </script>

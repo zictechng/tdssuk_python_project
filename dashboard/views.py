@@ -1,5 +1,7 @@
 from __future__ import annotations
 from datetime import timedelta, date
+from decimal import Decimal
+import json
 import subprocess
 from django.db.models import Q, Count, Prefetch, Sum, Max,  Avg, Q, F, ExpressionWrapper, DurationField, FloatField
 from django.contrib.auth.models import User, Group, Permission
@@ -31,10 +33,11 @@ from django.contrib.auth import logout as auth_logout
 from dashboard.forms.form_details import AgentCommissionForm, ChangePasswordForm, CustomsDocumentForm, CustomsDutyForm, EmailConfigForm, ExchangeRateForm, ExpenseForm, FuelRecordForm, GeneralSettingsForm, InvoiceForm, InvoiceLineItemForm, MaintenanceRecordForm, OrderEditForm, OrderForm, PaymentForm, ProfileUpdateForm, PromoCodeForm, RoleForm, RouteForm, SecuritySettingsForm, ShipmentCreateForm, ShipmentStatusChangeForm, ShipmentTrackingEventForm, StockMovementForm, StorageLocationForm, SupportTicketForm, TicketReplyForm, TrackingSearchForm, UploadedDocumentForm, VehicleForm, WarehouseForm, WarehouseItemForm
 from dashboard.services import ShipmentTransitionError, transition_shipment_status
 from dashboard.utils.file_handler import decode_pk, delete_file, encode_pk
+from dashboard.utils.money import calculate_total, to_decimal
 from dashboard.utils.promo_utils import apply_promo_code
 from .forms.formLogin import LoginForm
 from mainWebsite.models import AgentCommission, BackupLog, Category, ContactMessage, CustomsDocument, CustomsDutyRecord, ExchangeRate, Expense, FuelRecord, Invoice, InvoiceLineItem, LoginHistory, Notification, Order, OrderImage, OrderType, Payment, PromoCode, QuoteRequest, Route, Shipment, ShipmentTrackingEvent, StockMovement, StorageLocation, SupportTicket, SystemSetting, UploadedDocument, UserActivity, UserProfile, Vehicle, VehicleMaintenanceRecord, Warehouse, WarehouseItem
-from mainWebsite.helpers import log_activity, notify, render_form_errors_oob, render_simple_form_errors_oob, send_shipment_status_email, send_ticket_reply_email, send_ticket_status_email, validation_error, success_message, error_message, toast_success, toast_error
+from mainWebsite.helpers import log_activity, notify, render_form_errors_oob, render_order_field_errors_oob, render_simple_form_errors_oob, send_shipment_status_email, send_ticket_reply_email, send_ticket_status_email, validation_error, success_message, error_message, toast_success, toast_error
 from django.core.paginator import Paginator
 from dashboard.helper.pagination import get_page_range
 
@@ -479,19 +482,20 @@ def createNew_order(request):
             order.status = Order.STATUS_NEW
 
             # --- Promo code ---
-            code_str         = request.POST.get('promo_code_input', '').strip()
-            discount_amount  = 0
+            code_str      = request.POST.get("promo_code_input", "").strip().upper()
+            shipping_cost = to_decimal(order.shipping_cost)   # e.g. Decimal('75.50')
+            discount      = Decimal("0.00")
 
             if code_str:
-                promo, discount, error = apply_promo_code(code_str, float(order.shipping_cost))
+                promo, discount, error = apply_promo_code(code_str, shipping_cost)
                 if not error:
                     order.promo_code      = promo
                     order.discount_amount = discount
-                    discount_amount       = discount
                     promo.used_count     += 1
-                    promo.save(update_fields=['used_count'])
+                    promo.save(update_fields=["used_count"])
 
-            order.total_amount = max(0, float(order.shipping_cost) - discount_amount)
+                order.shipping_cost = shipping_cost
+                order.total_amount  = calculate_total(shipping_cost, discount)
             order.save()
 
             log_activity(
@@ -510,16 +514,22 @@ def createNew_order(request):
             )
         
         # Build OOB field errors and attach to the toast response
-        oob_html = render_form_errors_oob(
-            request, form, countries, orders_type, orders_category
-        )
-       
+
+        # Build inline field errors as OOB swaps
+        oob_html = render_order_field_errors_oob(form)
         return toast_error(
             request,
-            "Invalid form data. Please check your inputs.",
+            "Please fix the errors highlighted in the form.",
             alert_type="danger",
             oob_content=oob_html,
         )
+
+        # return toast_error(
+        #     request,
+        #     f"DEBUG: {json.dumps(form.errors)}",
+        #     alert_type="danger",
+        #     oob_content=oob_html,
+        # )
 
     form = OrderForm()
 
@@ -558,11 +568,13 @@ def order_edit(request, uuid):
             if posted_status:
                 updated_order.status = posted_status
                 # --- Promo code ---
-                code_str = request.POST.get('promo_code_input', '').strip()
+                code_str      = request.POST.get('promo_code_input', '').strip().upper()
+                shipping_cost = to_decimal(updated_order.shipping_cost)
+                discount      = to_decimal(updated_order.discount_amount)
 
                 # If promo changed or newly applied
                 if code_str and (not updated_order.promo_code or updated_order.promo_code.code != code_str.upper()):
-                    promo, discount, error = apply_promo_code(code_str, float(updated_order.shipping_cost))
+                    promo, new_discount, error = apply_promo_code(code_str, shipping_cost)
                     if not error:
                         # Decrement old code if swapping
                         if updated_order.promo_code:
@@ -571,7 +583,8 @@ def order_edit(request, uuid):
                             old_promo.save(update_fields=['used_count'])
 
                         updated_order.promo_code      = promo
-                        updated_order.discount_amount = discount
+                        updated_order.discount_amount = new_discount
+                        discount                      = new_discount
                         promo.used_count     += 1
                         promo.save(update_fields=['used_count'])
 
@@ -583,7 +596,8 @@ def order_edit(request, uuid):
                     updated_order.promo_code      = None
                     updated_order.discount_amount = 0
 
-                updated_order.total_amount = max(0, float(updated_order.shipping_cost) - float(updated_order.discount_amount))
+                updated_order.shipping_cost = shipping_cost
+                updated_order.total_amount  = calculate_total(shipping_cost, discount)
                 updated_order.save()
 
                 log_activity(
@@ -601,9 +615,7 @@ def order_edit(request, uuid):
                 redirect_url=next_url
             )
  
-        oob_html = render_form_errors_oob(
-            request, form, countries, orders_type, orders_category
-        )
+        oob_html = render_order_field_errors_oob(form)
  
         return toast_error(
             request,

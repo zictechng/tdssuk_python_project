@@ -1,5 +1,6 @@
 
 from __future__ import annotations
+from decimal import Decimal
 from django import forms
 
 from django.contrib.auth.models import Group, Permission
@@ -14,59 +15,206 @@ from mainWebsite.models import (
 from django.contrib.auth import get_user_model
 User = get_user_model()
 
-# create order form goes here
+# # create order form goes here
+# class OrderForm(forms.ModelForm):
+#     class Meta:
+#         model = Order
+#         fields = "__all__"
+#         exclude = [
+#             "order_number", 
+#             "tracking_number", 
+#             "created_by", 
+#             "updated_by", 
+#             "origin", 
+#             "destination",
+#             "status",
+#             ]
+
+#     order_type = forms.ModelChoiceField(
+#     queryset=OrderType.objects.all(),
+#     required=True,                        
+#     error_messages={'required': 'Please select an order type.'}
+#     )
+#     category = forms.ModelChoiceField(
+#         queryset=Category.objects.all(),
+#         required=True,                        
+#         error_messages={'required': 'Please select a category.'}
+#     )
+
+#     order_origin_country = forms.CharField(
+#         required=True,
+#         error_messages={'required': 'Please select origin country.'}
+#     )
+#     order_destination_country = forms.CharField(
+#         required=True,
+#         error_messages={'required': 'Please select a destination country.'}
+#     )
+
+#     def __init__(self, *args, **kwargs):
+#         super().__init__(*args, **kwargs)
+#         if self.data:
+#             data = self.data.copy()
+#             mappings = {
+#             'order_category':   'category',
+#             'order_qty':        'quantity',
+#             'order_weight':     'weight',
+#             'order_ref_number': 'reference_number',
+#             'order_ship_cost':  'shipping_cost',
+#             'order_amt':        'total_amount',
+#             'order_note':       'notes',
+#          }
+#             for html_name, form_name in mappings.items():
+#                 if html_name in data:
+#                     data[form_name] = data[html_name]
+#             self.data = data
+
+# ─────────────────────────────────────────────────────────────────────────────
+# HTML field name  →  model field name  (only entries that differ)
+# Used by both OrderForm.__init__ (data remap) and render_order_field_errors_oob
+# (error div targeting).  Single source of truth — change once, works everywhere.
+# ─────────────────────────────────────────────────────────────────────────────
+ORDER_HTML_TO_MODEL: dict[str, str] = {
+    "order_category":   "category",
+    "order_qty":        "quantity",
+    "order_weight":     "weight",
+    "order_ref_number": "reference_number",
+    "order_ship_cost":  "shipping_cost",
+    "order_amt":        "total_amount",
+    "order_note":       "notes",
+}
+
+# Reverse map — model field name → HTML error-div id
+# Fields that are identical in both namespaces just map to themselves.
+ORDER_MODEL_TO_HTML: dict[str, str] = {
+    model: html for html, model in ORDER_HTML_TO_MODEL.items()
+}
+
+
 class OrderForm(forms.ModelForm):
-    class Meta:
-        model = Order
-        fields = "__all__"
-        exclude = [
-            "order_number", 
-            "tracking_number", 
-            "created_by", 
-            "updated_by", 
-            "origin", 
-            "destination",
-            "status",
-            ]
+    # ── Override fields that need different validation than the model default ─
 
     order_type = forms.ModelChoiceField(
-    queryset=OrderType.objects.all(),
-    required=True,                        
-    error_messages={'required': 'Please select an order type.'}
+        queryset=OrderType.objects.all(),
+        required=True,
+        empty_label="Select type",
+        error_messages={"required": "Please select an order type."},
     )
-    category = forms.ModelChoiceField(
+    category = forms.ModelChoiceField(      # posted as "order_category"
         queryset=Category.objects.all(),
-        required=True,                        
-        error_messages={'required': 'Please select a category.'}
+        required=True,
+        empty_label="Select category",
+        error_messages={"required": "Please select a category."},
     )
-
     order_origin_country = forms.CharField(
         required=True,
-        error_messages={'required': 'Please select origin country.'}
+        error_messages={"required": "Please select an origin country."},
     )
     order_destination_country = forms.CharField(
         required=True,
-        error_messages={'required': 'Please select a destination country.'}
+        error_messages={"required": "Please select a destination country."},
     )
+
+    # Never required from the client — always defaulted to 0 in clean().
+    discount_amount = forms.DecimalField(
+        required=False,
+        min_value=Decimal("0"),
+        max_digits=12,
+        decimal_places=2,
+    )
+
+    class Meta:
+        model = Order
+        # Explicit list — never use __all__ in production.
+        # Excludes server-generated fields: order_number, tracking_number,
+        # status, origin (FK), destination (FK), created_by, updated_by.
+        fields = [
+            # customer
+            "customer_name",
+            "customer_phone",
+            "customer_email",
+            # sender
+            "sender_name",
+            "sender_phone",
+            "sender_email",
+            "sender_city",
+            "sender_country",
+            "sender_address",
+            # receiver
+            "receiver_name",
+            "receiver_phone",
+            "receiver_email",
+            "receiver_city",
+            "receiver_country",
+            "receiver_address",
+            # order details
+            "order_type",
+            "category",           # posted as "order_category" — remapped in __init__
+            "quantity",           # posted as "order_qty"       — remapped in __init__
+            "weight",             # posted as "order_weight"    — remapped in __init__
+            "order_origin_country",
+            "order_destination_country",
+            "reference_number",   # posted as "order_ref_number"— remapped in __init__
+            "expected_delivery_date",
+            # payment
+            "shipping_cost",      # posted as "order_ship_cost" — remapped in __init__
+            "total_amount",       # posted as "order_amt"       — remapped in __init__
+            "discount_amount",
+            # misc
+            "notes",              # posted as "order_note"      — remapped in __init__
+        ]
+
+    # ── Data normalisation ────────────────────────────────────────────────────
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        if self.data:
-            data = self.data.copy()
-            mappings = {
-            'order_category':   'category',
-            'order_qty':        'quantity',
-            'order_weight':     'weight',
-            'order_ref_number': 'reference_number',
-            'order_ship_cost':  'shipping_cost',
-            'order_amt':        'total_amount',
-            'order_note':       'notes',
-         }
-            for html_name, form_name in mappings.items():
-                if html_name in data:
-                    data[form_name] = data[html_name]
-            self.data = data
 
+        if not self.data:
+            return
+
+        data = self.data.copy()
+
+        for html_name, model_name in ORDER_HTML_TO_MODEL.items():
+            # Only copy when the HTML key is present and the model key is absent,
+            # so we never silently overwrite a value the caller already set.
+            if html_name in data and model_name not in data:
+                data[model_name] = data[html_name]
+
+        self.data = data
+
+    # ── Field-level clean methods ─────────────────────────────────────────────
+
+    def clean_discount_amount(self) -> Decimal:
+        """Default to 0 when the client does not post a discount."""
+        value = self.cleaned_data.get("discount_amount")
+        return value if value is not None else Decimal("0.00")
+
+    def clean_quantity(self) -> int:
+        value = self.cleaned_data.get("quantity")
+        return value if value is not None else 1
+
+    def clean_weight(self) -> Decimal:
+        value = self.cleaned_data.get("weight")
+        return value if value is not None else Decimal("0.00")
+
+    def clean_shipping_cost(self) -> Decimal:
+        value = self.cleaned_data.get("shipping_cost")
+        return value if value is not None else Decimal("0.00")
+
+    def clean_total_amount(self) -> Decimal:
+        value = self.cleaned_data.get("total_amount")
+        return value if value is not None else Decimal("0.00")
+
+    # ── Cross-field validation ────────────────────────────────────────────────
+
+    def clean(self) -> dict:
+        cleaned = super().clean()
+
+        shipping  = cleaned.get("shipping_cost")  or Decimal("0.00")
+        discount  = cleaned.get("discount_amount") or Decimal("0.00")
+        expected  = max(Decimal("0.00"), shipping - discount)
+        cleaned["total_amount"] = expected
+
+        return cleaned
 
 # edit form goes here
 class OrderEditForm(forms.ModelForm):
@@ -188,12 +336,7 @@ class ShipmentCreateForm(forms.ModelForm):
         return order
     
 class ShipmentStatusChangeForm(forms.Form):
-    """
-    Used on the Shipment Detail page — only shows statuses that are a
-    valid next step from the shipment's current status (populated by
-    the view using Shipment.ALLOWED_TRANSITIONS).
-    """
-
+    
     status = forms.ChoiceField(choices=[])
     location = forms.CharField(max_length=255, required=False)
     description = forms.CharField(
@@ -660,7 +803,6 @@ class SecuritySettingsForm(forms.ModelForm):
         }
 
 
-
 # ── Profile ───────────────────────────────────────────────────
 class ProfileUpdateForm(forms.ModelForm):
     class Meta:
@@ -740,7 +882,6 @@ class TicketReplyForm(forms.ModelForm):
         widgets = {
             'message': forms.Textarea(attrs={'class': 'form-control', 'rows': 3, 'placeholder': 'Write your reply...'}),
         }
-
 
 
 # ── Promo code ────────────────────────────────────────────

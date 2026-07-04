@@ -31,6 +31,7 @@
                                             <label class="form-label">Customer Name</label>
                                             <input type="text" name="customer_name" class="form-control" placeholder="Customer Name"
                                             required>
+                                            <div id="error-customer_name"></div>
                                             </div>
                                             </div>
                                             <div class="col-sm-6 col-md-3">
@@ -38,6 +39,7 @@
                                             <label class="form-label">Customer Phone</label>
                                             <input type="text" name="customer_phone" class="form-control" placeholder="Customer Phone"
                                             required>
+                                            <div id="error-customer_phone"></div>
                                             </div>
                                             </div>
                                         <div class="col-sm-6 col-md-4">
@@ -138,12 +140,14 @@
                                         <div class="mb-3">
                                         <label class="form-label">Receiver Name</label>
                                         <input type="text" name="receiver_name" class="form-control" placeholder="Receiver Name">
+                                            <div id="error-receiver_name"></div>
                                         </div>
                                         </div>
                                         <div class="col-sm-6 col-md-3">
                                         <div class="mb-3">
                                         <label class="form-label">Receiver Phone</label>
                                         <input type="text" name="receiver_phone" class="form-control" placeholder="Receiver Phone">
+                                            <div id="error-receiver_phone"></div>
                                         </div>
                                         </div>
                                     <div class="col-sm-6 col-md-4">
@@ -156,6 +160,7 @@
                                         <div class="mb-3">
                                         <label class="form-label">Receiver City</label>
                                         <input type="text" name="receiver_city" class="form-control" placeholder="Receiver City">
+                                            <div id="error-receiver_city"></div>
                                         </div>
                                     </div>
                                     <div class="col-sm-6 col-md-6">
@@ -167,6 +172,7 @@
                                                 <option value="{{ name }}">{{ name }}</option>
                                             {% endfor %}
                                         </select>
+                                            <div id="error-receiver_country"></div>
                                         </div>
                                     </div>
                                     <div class="col-md-12">
@@ -204,6 +210,7 @@
                                                     <option value="{{ type.id }}">{{ type.name }}</option>
                                                 {% endfor %}
                                             </select>
+                                            <div id="error-order_type"></div>
                                         </div>
                                         </div>
                                         <div class="col-sm-6 col-md-3">
@@ -215,6 +222,7 @@
                                                     <option value="{{ category.id }}">{{ category.name }}</option>
                                                 {% endfor %}
                                             </select>
+                                            <div id="error-order_category"></div> 
                                         </div>
                                         </div>
                                     <div class="col-sm-6 col-md-3">
@@ -246,6 +254,7 @@
                                                 <option value="{{ name }}">{{ name }}</option>
                                             {% endfor %}
                                         </select>
+                                        <div id="error-order_origin_country"></div>
                                         </div>
                                     </div>
                                     <div class="col-sm-3 col-md-3">
@@ -257,6 +266,7 @@
                                                 <option value="{{ name }}">{{ name }}</option>
                                             {% endfor %}
                                         </select>
+                                            <div id="error-order_destination_country"></div>
                                         </div>
                                     </div>
                                     <div class="col-sm-3 col-md-3">
@@ -273,6 +283,7 @@
                                          min="0.01"
                                          step="0.01"
                                          required>
+                                         <div id="error-order_ship_cost"></div>
                                         </div>
                                     </div>
                                     <div class="col-sm-6 col-md-3">
@@ -282,6 +293,7 @@
                                          min="0.01"
                                          step="0.01"
                                          required>
+                                         <div id="error-order_amt"></div>
                                         </div>
                                     </div>
                                     

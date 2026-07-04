@@ -1,6 +1,9 @@
+from glob import escape
+
 from django.shortcuts import render
 from django.template.loader import render_to_string
 
+from dashboard.forms.form_details import ORDER_MODEL_TO_HTML
 from mainWebsite.models import Notification, UserActivity
 
 from django.core.mail import send_mail
@@ -274,3 +277,46 @@ def send_ticket_status_email(ticket):
         )
     except Exception:
         pass
+
+
+
+# utils/order_errors.py  (or wherever render_order_field_errors_oob lives)
+
+def render_order_field_errors_oob(form) -> str:
+    """
+    Produces htmx OOB swap fragments for every field-level validation error
+    on the order form.
+
+    Each fragment targets the matching  <div id="error-{html_name}">  in the
+    template.  The mapping from model field name → HTML div id is imported from
+    ORDER_MODEL_TO_HTML so there is exactly one place to maintain it.
+
+    Returns an empty string when the form has no errors.
+    """
+    if not form.errors:
+        return ""
+
+    fragments: list[str] = []
+
+    for model_field_name, errors in form.errors.items():
+        if model_field_name == "__all__":
+            continue
+
+        # Resolve the HTML div id.
+        # Fields whose names are identical in both namespaces fall through to
+        # the identity mapping (the model name IS the div suffix).
+        div_id = ORDER_MODEL_TO_HTML.get(model_field_name, model_field_name)
+
+        error_message = escape(errors[0])
+        fragments.append(
+            f'<div hx-swap-oob="true" id="error-{div_id}">'
+            f'<div class="invalid-feedback d-block">{error_message}</div>'
+            f'</div>'
+        )
+
+    return "".join(fragments)
+
+
+
+
+
