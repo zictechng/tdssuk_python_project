@@ -4,22 +4,7 @@ from mainWebsite.models import PromoCode
 
 
 def apply_promo_code(code_str, shipping_cost):
-    """
-    Validate and apply a promo code against a shipping cost.
-
-    Args:
-        code_str:      The raw promo code string from the user.
-        shipping_cost: The order shipping cost — must be Decimal or
-                       int/str-coercible to Decimal.
-
-    Returns:
-        (promo_instance, discount_amount, error_message)
-        Success: (PromoCode, Decimal, None)
-        Failure: (None,      Decimal('0'), 'reason string')
-    """
-    # Guarantee shipping_cost is Decimal regardless of what the caller passes.
-    # This makes the function safe whether called from a form (Decimal),
-    # a view (string from POST), or a test (int/float).
+    
     try:
         shipping_cost = Decimal(str(shipping_cost))
     except Exception:
@@ -49,10 +34,7 @@ def apply_promo_code(code_str, shipping_cost):
     discount_value = Decimal(str(promo.discount_value))
 
     if promo.discount_type == "percentage":
-        # THE FIX: divide by Decimal('100'), not the float/int literal 100.
-        # Decimal / int is safe in Python, but Decimal / Decimal is explicit
-        # and unambiguous — use it everywhere money is involved.
-        discount = (discount_value / Decimal("100")) * shipping_cost
+       discount = (discount_value / Decimal("100")) * shipping_cost
     else:
         # Flat discount — never exceed the shipping cost itself.
         discount = min(discount_value, shipping_cost)

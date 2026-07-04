@@ -148,19 +148,19 @@ class OrderForm(forms.ModelForm):
             "receiver_address",
             # order details
             "order_type",
-            "category",           # posted as "order_category" — remapped in __init__
-            "quantity",           # posted as "order_qty"       — remapped in __init__
-            "weight",             # posted as "order_weight"    — remapped in __init__
+            "category",           
+            "quantity",           
+            "weight",             
             "order_origin_country",
             "order_destination_country",
-            "reference_number",   # posted as "order_ref_number"— remapped in __init__
+            "reference_number",   
             "expected_delivery_date",
             # payment
-            "shipping_cost",      # posted as "order_ship_cost" — remapped in __init__
-            "total_amount",       # posted as "order_amt"       — remapped in __init__
+            "shipping_cost",      
+            "total_amount",       
             "discount_amount",
             # misc
-            "notes",              # posted as "order_note"      — remapped in __init__
+            "notes",              
         ]
 
     # ── Data normalisation ────────────────────────────────────────────────────
